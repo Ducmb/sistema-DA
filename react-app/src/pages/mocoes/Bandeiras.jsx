@@ -111,7 +111,7 @@ function BandForm({ itens, initial, onClose, onSaved }) {
       onSaved(f.id ? 'Registro atualizado' : 'Solicitação registrada');
     } catch (x) { setErr(x.message); }
   };
-  const remove = async () => { try { await api.delete('/mocoes/bandeiras/' + f.id); onSaved('Registro excluído'); } catch (x) { setErr(x.message); setConfirm(false); } };
+  const remove = async () => { try { await api.del('/mocoes/bandeiras/' + f.id); onSaved('Registro excluído'); } catch (x) { setErr(x.message); setConfirm(false); } };
   const section = (t) => <p style={{ fontSize: 12, fontWeight: 700, color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: 0.4, paddingBottom: 8, marginBottom: 12, borderBottom: '1px solid var(--primary)' }}>{t}</p>;
   return (
     <>

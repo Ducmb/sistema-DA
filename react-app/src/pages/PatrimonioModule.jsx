@@ -175,7 +175,7 @@ function Termos({ onEdit, onChange }) {
   useEffect(() => { if (!mes && st.data) setMes(st.data.ym); }, [st.data, mes, setMes]);
   const toggle = async (r) => {
     try {
-      if (r.emitido) await api.delete(`/patrimonio/termos/${r.id}/${st.data.ym}`); else await api.put(`/patrimonio/termos/${r.id}/${st.data.ym}`);
+      if (r.emitido) await api.del(`/patrimonio/termos/${r.id}/${st.data.ym}`); else await api.put(`/patrimonio/termos/${r.id}/${st.data.ym}`);
       toast(r.emitido ? 'Emissão desfeita — ' + r.nome : 'Termo emitido — ' + r.nome); st.reload(); onChange();
     } catch (e) { toast(e.message, 'error'); }
   };

@@ -4,7 +4,7 @@
  *      npm run seed -- --reset (apaga dados e recria — CUIDADO)
  */
 if (require.main === module) require('dotenv').config({ quiet: true });
-const SEEDS = ['core', 'pessoal', 'compras', 'almoxarifado', 'patrimonio', 'protocolo', 'mocoes'].map((n) => require('./seeds/' + n));
+const SEEDS = ['core', 'pessoal', 'compras', 'almoxarifado', 'patrimonio', 'protocolo', 'mocoes', 'legislacoes'].map((n) => require('./seeds/' + n));
 
 async function run(pool, { reset = false, log = console.log } = {}) {
   const client = await pool.connect();
