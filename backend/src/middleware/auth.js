@@ -1,104 +1,71 @@
 const jwt = require('jsonwebtoken');
-const pool = require('../db/connection');
+const db = require('../db');
+const config = require('../services/config');
+const audit = require('../services/audit');
+const { userAccess, MODULE_LABEL, primaryRole } = require('../services/access');
+
+const TOUCH_MS = 15000;
 
 /**
- * Verify JWT token and attach user to request
+ * Valida o JWT, a sessão no servidor (revogação e inatividade) e carrega perfis/módulos.
+ * 401 com code: 'expirada' quando a sessão caiu por inatividade.
  */
-const authenticateToken = (req, res, next) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
-
-  if (!token) {
-    return res.status(401).json({ error: 'Access token required' });
-  }
-
-  jwt.verify(token, process.env.JWT_SECRET, { algorithms: ['HS256'] }, async (err, user) => {
-    if (err) {
-      return res.status(401).json({ error: 'Invalid or expired token' });
-    }
+async function authenticate(req, res, next) {
+  try {
+    const h = req.headers.authorization || '';
+    const token = h.startsWith('Bearer ') ? h.slice(7) : '';
+    if (!token) return res.status(401).json({ error: 'Faça login para continuar.', code: 'login' });
+    let payload;
     try {
-      // token_version permite revogar todas as sessões (troca/redefinição de senha)
-      const r = await pool.query('SELECT token_version, status FROM users WHERE id = $1', [user.id]);
-      if (!r.rows.length || r.rows[0].status !== 'active' || (r.rows[0].token_version || 0) !== (user.tv || 0)) {
-        return res.status(401).json({ error: 'Session revoked' });
-      }
-      req.user = user;
-      next();
+      payload = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ['HS256'] });
     } catch (e) {
-      res.status(500).json({ error: 'Authentication failed' });
+      return res.status(401).json({ error: 'Sessão expirada. Entre novamente.', code: 'expirada' });
     }
-  });
-};
-
-/**
- * Check if user has required role
- */
-const authorizeRole = (...allowedRoles) => {
-  return (req, res, next) => {
-    if (!req.user) {
-      return res.status(401).json({ error: 'User not authenticated' });
+    const { rows } = await db.query(
+      `SELECT s.id AS sid, s.last_seen_at, s.revoked_at, u.id, u.username, u.name, u.email, u.status, u.token_version,
+              u.registration, u.position, u.hierarchy, u.department, u.preferences
+         FROM sessions s JOIN users u ON u.id = s.user_id
+        WHERE s.id = $1 AND u.id = $2`, [payload.sid, payload.sub]);
+    const r = rows[0];
+    if (!r || r.revoked_at || r.status !== 'active' || r.token_version !== payload.tv) {
+      return res.status(401).json({ error: 'Sessão encerrada. Entre novamente.', code: 'login' });
     }
-
-    if (!allowedRoles.includes(req.user.role)) {
-      return res.status(403).json({ error: 'Insufficient permissions' });
+    const idleMs = (await config.get('geral.sessaoMin')) * 60000;
+    const idle = Date.now() - new Date(r.last_seen_at).getTime();
+    if (idle > idleMs) {
+      await db.query("UPDATE sessions SET revoked_at = NOW(), revoked_reason = 'inatividade' WHERE id = $1", [r.sid]);
+      const acc0 = await userAccess(r.id);
+      await audit.log(req, { action: 'Sessão expirada', module: 'auth', detail: 'Inatividade de ' + Math.round(idleMs / 60000) + ' min', actor: { id: r.id, name: r.name, roles: acc0.roles } });
+      return res.status(401).json({ error: 'Sessão expirada por inatividade. Entre novamente.', code: 'expirada' });
     }
-
+    // Chamadas automáticas (feed em tempo real) não contam como atividade do usuário
+    if (idle > TOUCH_MS && req.get('X-Background') !== '1') await db.query('UPDATE sessions SET last_seen_at = NOW() WHERE id = $1', [r.sid]);
+    const acc = await userAccess(r.id);
+    req.user = {
+      id: r.id, sid: r.sid, username: r.username, name: r.name, email: r.email,
+      registration: r.registration, position: r.position, hierarchy: r.hierarchy, department: r.department,
+      preferences: r.preferences || {}, roles: acc.roles, role: primaryRole(acc.roles), modules: acc.modules, isAdmin: acc.isAdmin
+    };
     next();
-  };
+  } catch (e) {
+    next(e);
+  }
+}
+
+const can = (user, mod) => !!user && user.modules.includes(mod);
+
+/** Exige acesso a pelo menos um dos módulos; registra tentativa negada. */
+const requireModule = (...mods) => async (req, res, next) => {
+  if (mods.some((m) => can(req.user, m))) return next();
+  await audit.log(req, { kind: 'negado', action: 'Acesso negado', module: mods[0], detail: 'Tentativa de acessar ' + (MODULE_LABEL[mods[0]] || mods[0]) + ' (' + req.method + ' ' + req.originalUrl.split('?')[0] + ')', level: 'warning' });
+  res.status(403).json({ error: 'Acesso negado: seu perfil não tem permissão para ' + (MODULE_LABEL[mods[0]] || mods[0]) + '.' });
 };
 
-/**
- * Check if user has required permission
- */
-const authorizePermission = (permissionName) => {
-  return async (req, res, next) => {
-    if (!req.user) {
-      return res.status(401).json({ error: 'User not authenticated' });
-    }
+/** Somente perfil Administrativo. */
+async function requireAdmin(req, res, next) {
+  if (req.user && req.user.isAdmin) return next();
+  await audit.log(req, { kind: 'negado', action: 'Acesso negado', module: 'auth', detail: 'Ação exclusiva do Administrativo (' + req.method + ' ' + req.originalUrl.split('?')[0] + ')', level: 'warning' });
+  res.status(403).json({ error: 'Acesso negado: ação exclusiva do perfil Administrativo.' });
+}
 
-    try {
-      const result = await pool.query(
-        `SELECT rp.permission_id FROM role_permissions rp
-         JOIN permissions p ON rp.permission_id = p.id
-         WHERE rp.role_id = (SELECT role_id FROM users WHERE id = $1)
-         AND p.name = $2`,
-        [req.user.id, permissionName]
-      );
-
-      if (result.rows.length === 0) {
-        return res.status(403).json({ error: 'Permission denied' });
-      }
-
-      next();
-    } catch (err) {
-      res.status(500).json({ error: 'Authorization check failed' });
-    }
-  };
-};
-
-/**
- * Allow only the user referenced by req.params[param] or an admin
- */
-const requireSelfOrAdmin = (param) => (req, res, next) => {
-  if (req.user && (req.user.role === 'admin' || String(req.user.id) === String(req.params[param]))) return next();
-  return res.status(403).json({ error: 'Forbidden' });
-};
-
-/**
- * Router-level validators for numeric route params
- */
-const ID_RE = /^[1-9]\d{0,9}$/;
-const registerParamValidators = (router) => {
-  ['id', 'userId', 'roleId', 'logId', 'permissionId'].forEach((p) =>
-    router.param(p, (req, res, next, v) => (ID_RE.test(v) ? next() : res.status(400).json({ error: 'Invalid parameter: ' + p }))));
-  router.param('month', (req, res, next, v) => (/^(0?[1-9]|1[0-2])$/.test(v) ? next() : res.status(400).json({ error: 'Invalid month' })));
-  router.param('year', (req, res, next, v) => (/^20\d{2}$/.test(v) ? next() : res.status(400).json({ error: 'Invalid year' })));
-};
-
-module.exports = {
-  requireSelfOrAdmin,
-  registerParamValidators,
-  authenticateToken,
-  authorizeRole,
-  authorizePermission
-};
+module.exports = { authenticate, requireModule, requireAdmin, can };

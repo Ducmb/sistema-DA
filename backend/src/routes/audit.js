@@ -1,119 +1,56 @@
+/**
+ * Log e Auditoria (somente Administrativo).
+ */
 const express = require('express');
-const pool = require('../db/connection');
-const { authenticateToken, authorizeRole, registerParamValidators } = require('../middleware/auth');
+const db = require('../db');
+const audit = require('../services/audit');
+const config = require('../services/config');
+const { ah } = require('../lib/http');
+const { MODULE_LABEL } = require('../services/access');
 
 const router = express.Router();
-registerParamValidators(router);
+const MODS = { ...MODULE_LABEL, auth: 'Autenticação', usuarios: 'Usuários & Permissões', inventario: 'Inventário', auditoria: 'Auditoria', perfil: 'Perfil' };
 
-/**
- * GET /api/audit/logs
- * Retrieve audit logs (admin/auditor only)
- */
-router.get('/logs', authenticateToken, authorizeRole('admin', 'auditor'), async (req, res) => {
-  try {
-    const { userId, resourceType, action, startDate, endDate, limit = 100, offset = 0 } = req.query;
+function filters(q) {
+  const where = [], p = [];
+  if (q.module && q.module !== 'todos') { p.push(q.module); where.push('module = $' + p.length); }
+  if (['info', 'warning', 'critical'].includes(q.level)) { p.push(q.level); where.push('level = $' + p.length); }
+  const period = q.period === undefined ? '30' : q.period;
+  if (period !== 'todos' && /^\d{1,4}$/.test(period)) { p.push(+period); where.push(`ts >= NOW() - make_interval(days => $${p.length})`); }
+  if (q.q && String(q.q).trim()) { p.push('%' + String(q.q).trim().toLowerCase().slice(0, 100) + '%'); where.push(`lower(user_name || ' ' || action || ' ' || detail) LIKE $${p.length}`); }
+  return { sql: where.length ? 'WHERE ' + where.join(' AND ') : '', p };
+}
 
-    let query = `
-      SELECT al.id, al.user_id, u.username, al.action, al.resource_type, al.resource_id,
-             al.ip_address, al.user_agent, al.status, al.created_at, al.request_id
-      FROM audit_logs al
-      LEFT JOIN users u ON al.user_id = u.id
-      WHERE 1=1
-    `;
-    const params = [];
-    let paramCount = 1;
+const row = (a) => ({ id: a.id, ts: a.ts, user: a.user_name, role: a.user_role, action: a.action, module: a.module, moduleLabel: MODS[a.module] || a.module, detail: a.detail, level: a.level, device: a.device, ip: a.ip });
 
-    if (userId) {
-      query += ` AND al.user_id = $${paramCount}`;
-      params.push(userId);
-      paramCount++;
-    }
+router.get('/', ah(async (req, res) => {
+  const { sql, p } = filters(req.query);
+  const max = await config.get('audit.maxRegistros');
+  const [list, kpi, mods] = await Promise.all([
+    db.query(`SELECT * FROM audit_logs ${sql} ORDER BY ts DESC, id DESC LIMIT ${+max}`, p),
+    db.query(`SELECT COUNT(*)::int total,
+                     COUNT(*) FILTER (WHERE action = 'Falha de login')::int falhas,
+                     COUNT(*) FILTER (WHERE action = 'Acesso negado')::int negados,
+                     COUNT(*) FILTER (WHERE level = 'critical')::int criticos
+                FROM audit_logs ${sql}`, p),
+    db.query('SELECT DISTINCT module FROM audit_logs ORDER BY module')
+  ]);
+  res.json({ rows: list.rows.map(row), kpis: kpi.rows[0], modules: mods.rows.map((m) => ({ value: m.module, label: MODS[m.module] || m.module })), limit: max });
+}));
 
-    if (resourceType) {
-      query += ` AND al.resource_type = $${paramCount}`;
-      params.push(resourceType);
-      paramCount++;
-    }
-
-    if (action) {
-      query += ` AND al.action = $${paramCount}`;
-      params.push(action);
-      paramCount++;
-    }
-
-    if (startDate) {
-      query += ` AND al.created_at >= $${paramCount}::timestamp`;
-      params.push(startDate);
-      paramCount++;
-    }
-
-    if (endDate) {
-      query += ` AND al.created_at <= $${paramCount}::timestamp`;
-      params.push(endDate);
-      paramCount++;
-    }
-
-    query += ` ORDER BY al.created_at DESC LIMIT $${paramCount} OFFSET $${paramCount + 1}`;
-    params.push(limit, offset);
-
-    const result = await pool.query(query, params);
-    const countResult = await pool.query('SELECT COUNT(*) FROM audit_logs');
-
-    res.json({
-      logs: result.rows,
-      total: parseInt(countResult.rows[0].count),
-      limit: parseInt(limit),
-      offset: parseInt(offset)
-    });
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch audit logs' });
-  }
-});
-
-/**
- * GET /api/audit/logs/:logId
- * Get detailed audit log entry
- */
-router.get('/logs/:logId', authenticateToken, authorizeRole('admin', 'auditor'), async (req, res) => {
-  try {
-    const { logId } = req.params;
-    const result = await pool.query(
-      `SELECT al.*, u.username FROM audit_logs al
-       LEFT JOIN users u ON al.user_id = u.id
-       WHERE al.id = $1`,
-      [logId]
-    );
-
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'Log not found' });
-    }
-
-    res.json(result.rows[0]);
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch audit log' });
-  }
-});
-
-/**
- * GET /api/audit/summary
- * Get audit activity summary
- */
-router.get('/summary', authenticateToken, authorizeRole('admin', 'auditor'), async (req, res) => {
-  try {
-    const result = await pool.query(`
-      SELECT 
-        COUNT(*) as total_logs,
-        COUNT(DISTINCT user_id) as unique_users,
-        COUNT(CASE WHEN status = 'failed' THEN 1 END) as failed_actions,
-        COUNT(CASE WHEN created_at > NOW() - INTERVAL '24 hours' THEN 1 END) as last_24h,
-        COUNT(CASE WHEN created_at > NOW() - INTERVAL '7 days' THEN 1 END) as last_7d
-      FROM audit_logs
-    `);
-
-    res.json(result.rows[0]);
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch audit summary' });
-  }
-});
+router.get('/export.csv', ah(async (req, res) => {
+  const { sql, p } = filters(req.query);
+  const { rows } = await db.query(`SELECT * FROM audit_logs ${sql} ORDER BY ts DESC, id DESC LIMIT 50000`, p);
+  const fmt = (d) => new Date(d).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }).replace(',', '');
+  const LV = { info: 'Informativo', warning: 'Atenção', critical: 'Crítico' };
+  // Prefixo ' evita que planilhas interpretem células como fórmulas (injeção CSV)
+  const cell = (c) => { let v = String(c == null ? '' : c); if (/^[=+\-@]/.test(v)) v = "'" + v; return '"' + v.replace(/"/g, '""') + '"'; };
+  const lines = [['Data/hora', 'Usuário', 'Perfil', 'Ação', 'Módulo', 'Detalhe', 'Gravidade', 'Dispositivo', 'IP']]
+    .concat(rows.map((a) => [fmt(a.ts), a.user_name, a.user_role, a.action, MODS[a.module] || a.module, a.detail, LV[a.level], a.device, a.ip]));
+  await audit.log(req, { kind: 'exportacao', action: 'Exportação do log', module: 'auditoria', detail: rows.length + ' registro(s)' });
+  res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+  res.setHeader('Content-Disposition', `attachment; filename="auditoria_${new Date().toISOString().slice(0, 10)}.csv"`);
+  res.send('\uFEFF' + lines.map((l) => l.map(cell).join(';')).join('\n'));
+}));
 
 module.exports = router;
