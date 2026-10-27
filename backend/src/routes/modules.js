@@ -9,6 +9,7 @@ function mount(api) {
   api.use('/almoxarifado', requireModule('almoxarifado'), require('./almoxarifado'));
   api.use('/patrimonio', requireModule('patrimonio'), require('./patrimonio'));
   api.use('/protocolo', requireModule('protocolo'), require('./protocolo'));
+  api.use('/mocoes', requireModule('mocoes'), require('./mocoes'));
   return api;
 }
 
