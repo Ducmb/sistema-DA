@@ -1,0 +1,1108 @@
+openapi: 3.0.0
+info:
+  title: Sistema de Gestão Integrada - Câmara Municipal
+  description: API RESTful para gestão de Compras, Protocolo, RH, Almoxarifado e Moções/Homenagens
+  version: 1.0.0
+  contact:
+    name: Diretoria Administrativa
+    email: api@camara.sp.gov.br
+  license:
+    name: Proprietary
+    url: https://camara.sp.gov.br/legal
+
+servers:
+  - url: https://api.camara.sp.gov.br/v1
+    description: Production
+  - url: http://localhost:3000/v1
+    description: Development
+
+paths:
+  /auth/login:
+    post:
+      operationId: loginUser
+      tags:
+        - Authentication
+      summary: Autenticação de usuário
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: roberto.alencar@camara.sp.gov.br
+                password:
+                  type: string
+                  format: password
+                  minLength: 8
+      responses:
+        '200':
+          description: Login bem-sucedido
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    description: JWT access token (válido por 24h)
+                  user:
+                    $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+
+  /auth/logout:
+    post:
+      operationId: logoutUser
+      tags:
+        - Authentication
+      summary: Logout e invalidação de token
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Logout realizado com sucesso
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /users:
+    get:
+      operationId: listUsers
+      tags:
+        - Users (RH)
+      summary: Listar todos os usuários do sistema
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: role
+          in: query
+          schema:
+            type: string
+            enum: [admin, user]
+          description: Filtrar por função
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [active, invited, archived]
+        - name: sector
+          in: query
+          schema:
+            type: string
+            description: Filtrar por setor
+      responses:
+        '200':
+          description: Lista de usuários
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+    post:
+      operationId: createUser
+      tags:
+        - Users (RH)
+      summary: Criar novo usuário (requer role=admin)
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - email
+                - role
+                - sector
+              properties:
+                name:
+                  type: string
+                  minLength: 3
+                  example: Ana Beatriz Silva
+                email:
+                  type: string
+                  format: email
+                role:
+                  type: string
+                  enum: [admin, user]
+                sector:
+                  type: string
+                  example: Almoxarifado
+                phone:
+                  type: string
+                  pattern: '^\(\d{2}\)\s\d{4,5}-\d{4}$'
+                permissions:
+                  type: object
+                  properties:
+                    compras:
+                      type: boolean
+                    protocolo:
+                      type: boolean
+                    rh:
+                      type: boolean
+                    almoxarifado:
+                      type: boolean
+                    mocoes:
+                      type: boolean
+      responses:
+        '201':
+          description: Usuário criado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+  /users/{userId}:
+    get:
+      operationId: getUser
+      tags:
+        - Users (RH)
+      summary: Obter dados de um usuário específico
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Dados do usuário
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+    patch:
+      operationId: updateUser
+      tags:
+        - Users (RH)
+      summary: Atualizar dados de um usuário
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                phone:
+                  type: string
+                status:
+                  type: string
+                  enum: [active, invited, archived]
+      responses:
+        '200':
+          description: Usuário atualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /users/{userId}/permissions:
+    patch:
+      operationId: updateUserPermissions
+      tags:
+        - Users (RH)
+      summary: Atualizar permissões RBAC de um usuário
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                compras:
+                  type: boolean
+                protocolo:
+                  type: boolean
+                rh:
+                  type: boolean
+                almoxarifado:
+                  type: boolean
+                mocoes:
+                  type: boolean
+      responses:
+        '200':
+          description: Permissões atualizadas
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  userId:
+                    type: integer
+                  permissions:
+                    type: object
+                  updatedAt:
+                    type: string
+                    format: date-time
+                  auditLog:
+                    type: string
+                    description: ID da entrada de auditoria criada
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+  /products:
+    get:
+      operationId: listProducts
+      tags:
+        - Almoxarifado (Inventory)
+      summary: Listar produtos no almoxarifado
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: category
+          in: query
+          schema:
+            type: string
+            enum: [Higiene, Papelaria]
+        - name: verifyPending
+          in: query
+          schema:
+            type: boolean
+          description: Filtrar apenas items pendentes de verificação
+        - name: critical
+          in: query
+          schema:
+            type: boolean
+          description: Filtrar items com estoque crítico
+      responses:
+        '200':
+          description: Lista de produtos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+
+    post:
+      operationId: createProduct
+      tags:
+        - Almoxarifado (Inventory)
+      summary: Criar novo produto
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductInput'
+      responses:
+        '201':
+          description: Produto criado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+
+  /products/{productCode}:
+    get:
+      operationId: getProduct
+      tags:
+        - Almoxarifado (Inventory)
+      summary: Obter detalhes de um produto
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: productCode
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Dados do produto
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    patch:
+      operationId: updateProduct
+      tags:
+        - Almoxarifado (Inventory)
+      summary: Atualizar stock/dados de um produto
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: productCode
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                stock:
+                  type: integer
+                  minimum: 0
+                avgConsumption:
+                  type: number
+                verify:
+                  type: boolean
+      responses:
+        '200':
+          description: Produto atualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+
+  /inventory/sampling:
+    post:
+      operationId: createSamplingScale
+      tags:
+        - Almoxarifado (Inventory)
+      summary: Gerar nova escala de amostragem
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - method
+                - sampleSize
+                - responsibleUserId
+              properties:
+                method:
+                  type: string
+                  enum: [alta, baixa, aleatorio]
+                  description: Método de seleção de items
+                sampleSize:
+                  type: integer
+                  minimum: 1
+                  maximum: 10
+                responsibleUserId:
+                  type: integer
+                  description: ID do usuário responsável pela contagem
+      responses:
+        '201':
+          description: Escala de amostragem criada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SamplingScale'
+
+  /inventory/sampling/{scaleId}/submit:
+    post:
+      operationId: submitSamplingAudit
+      tags:
+        - Almoxarifado (Inventory)
+      summary: Submeter contagem da escala de amostragem
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: scaleId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - items
+              properties:
+                items:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - productCode
+                      - counted
+                    properties:
+                      productCode:
+                        type: string
+                      counted:
+                        type: integer
+                        minimum: 0
+      responses:
+        '200':
+          description: Auditoria submetida; saldos atualizados
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  scaleId:
+                    type: string
+                  status:
+                    type: string
+                    enum: [submitted, archived]
+                  divergences:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        productCode:
+                          type: string
+                        expected:
+                          type: integer
+                        counted:
+                          type: integer
+                        divergence:
+                          type: integer
+                  auditLog:
+                    type: string
+
+  /motions:
+    get:
+      operationId: listMotions
+      tags:
+        - Protocolo (Motions)
+      summary: Listar moções (Portaria DA 01/2026)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: councilmember
+          in: query
+          schema:
+            type: string
+          description: Filtrar por vereador proponente
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, approved, archived]
+      responses:
+        '200':
+          description: Lista de moções
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Motion'
+
+    post:
+      operationId: createMotion
+      tags:
+        - Protocolo (Motions)
+      summary: Registrar nova moção
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - reqId
+                - motionNum
+                - vereador
+              properties:
+                reqId:
+                  type: string
+                  example: "274/2026"
+                reqDate:
+                  type: string
+                  format: date
+                motionNum:
+                  type: string
+                  pattern: '^\d{3}/\d{4}$'
+                  example: "040/2026"
+                procNum:
+                  type: string
+                  example: "600/2026"
+                vereador:
+                  type: string
+                  minLength: 3
+                checked:
+                  type: boolean
+                  default: true
+      responses:
+        '201':
+          description: Moção registrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Motion'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+
+  /honors:
+    get:
+      operationId: listHonors
+      tags:
+        - Protocolo (Honors Gallery)
+      summary: Listar quadros de homenageados (Portaria DA 03/2023)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: councilmember
+          in: query
+          schema:
+            type: string
+        - name: legislature
+          in: query
+          schema:
+            type: string
+            example: "57ª Legislatura"
+      responses:
+        '200':
+          description: Lista de quadros de homenageados
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Honor'
+
+    post:
+      operationId: createHonor
+      tags:
+        - Protocolo (Honors Gallery)
+      summary: Registrar novo quadro (com validação Portaria 03/2023)
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - reqId
+                - honoree
+                - docNum
+                - vereador
+                - legislature
+              properties:
+                reqId:
+                  type: string
+                  example: "599/2025"
+                honoree:
+                  type: string
+                  minLength: 3
+                  example: "JP Chermont"
+                docNum:
+                  type: string
+                  example: "0100/2025"
+                procNum:
+                  type: string
+                  example: "1911/2025"
+                deliveryDate:
+                  type: string
+                  format: date
+                reqDate:
+                  type: string
+                  format: date
+                vereador:
+                  type: string
+                  minLength: 3
+                legislature:
+                  type: string
+                  example: "57ª Legislatura"
+      responses:
+        '201':
+          description: Quadro registrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Honor'
+        '400':
+          description: Validação falhou ou limite de 1 quadro/vereador/legislatura atingido
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Vereador Márcio Teixeira já possui um quadro na 57ª Legislatura (Portaria DA 03/2023, Art. 3º)"
+                  code:
+                    type: string
+                    enum: [HONOR_LIMIT_EXCEEDED, VALIDATION_ERROR]
+
+  /purchases:
+    get:
+      operationId: listPurchases
+      tags:
+        - Compras (Purchases)
+      summary: Listar requisições de compra
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [draft, submitted, approved, rejected, completed]
+        - name: category
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de compras
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Purchase'
+
+    post:
+      operationId: createPurchase
+      tags:
+        - Compras (Purchases)
+      summary: Criar nova requisição de compra
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PurchaseInput'
+      responses:
+        '201':
+          description: Requisição criada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Purchase'
+
+  /audit-log:
+    get:
+      operationId: listAuditLog
+      tags:
+        - Audit & Compliance
+      summary: Obter log de auditoria (requer role=admin)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: module
+          in: query
+          schema:
+            type: string
+            enum: [auth, users, products, inventory, motions, honors, purchases]
+        - name: action
+          in: query
+          schema:
+            type: string
+            enum: [create, read, update, delete]
+        - name: userId
+          in: query
+          schema:
+            type: integer
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Registros de auditoria
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditLog'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        matricula:
+          type: string
+        role:
+          type: string
+          enum: [admin, user]
+        sector:
+          type: string
+        status:
+          type: string
+          enum: [active, invited, archived]
+        phone:
+          type: string
+        permissions:
+          type: object
+          properties:
+            compras:
+              type: boolean
+            protocolo:
+              type: boolean
+            rh:
+              type: boolean
+            almoxarifado:
+              type: boolean
+            mocoes:
+              type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Product:
+      type: object
+      properties:
+        code:
+          type: string
+          example: "1 50 05 0024 8"
+        name:
+          type: string
+        priority:
+          type: string
+          enum: [Alta, Baixa]
+        frequency:
+          type: string
+          enum: [Semanal, Mensal]
+        stock:
+          type: integer
+          minimum: 0
+        avgConsumption:
+          type: number
+          format: double
+        category:
+          type: string
+          enum: [Higiene, Papelaria]
+        verify:
+          type: boolean
+          description: Pendente de verificação física
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    ProductInput:
+      type: object
+      required:
+        - code
+        - name
+        - priority
+        - frequency
+        - stock
+        - avgConsumption
+        - category
+      properties:
+        code:
+          type: string
+        name:
+          type: string
+        priority:
+          type: string
+          enum: [Alta, Baixa]
+        frequency:
+          type: string
+          enum: [Semanal, Mensal]
+        stock:
+          type: integer
+        avgConsumption:
+          type: number
+        category:
+          type: string
+
+    SamplingScale:
+      type: object
+      properties:
+        scaleId:
+          type: string
+          format: uuid
+        method:
+          type: string
+          enum: [alta, baixa, aleatorio]
+        sampleSize:
+          type: integer
+        responsibleUserId:
+          type: integer
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              productCode:
+                type: string
+              name:
+                type: string
+              expectedStock:
+                type: integer
+              counted:
+                type: integer
+              status:
+                type: string
+                enum: [pending, counted, submitted]
+        status:
+          type: string
+          enum: [active, submitted, archived]
+        createdAt:
+          type: string
+          format: date-time
+        submittedAt:
+          type: string
+          format: date-time
+
+    Motion:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        reqId:
+          type: string
+        reqDate:
+          type: string
+          format: date
+        motionNum:
+          type: string
+        procNum:
+          type: string
+        vereador:
+          type: string
+        checked:
+          type: boolean
+        status:
+          type: string
+          enum: [pending, approved, archived]
+        createdAt:
+          type: string
+          format: date-time
+
+    Honor:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        reqId:
+          type: string
+        docNum:
+          type: string
+        procNum:
+          type: string
+        honoree:
+          type: string
+        vereador:
+          type: string
+        legislature:
+          type: string
+        deliveryDate:
+          type: string
+          format: date
+        reqDate:
+          type: string
+          format: date
+        checked:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+
+    Purchase:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        reqNum:
+          type: string
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              productCode:
+                type: string
+              quantity:
+                type: integer
+              estimatedCost:
+                type: number
+        totalValue:
+          type: number
+        status:
+          type: string
+          enum: [draft, submitted, approved, rejected, completed]
+        createdBy:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        submittedAt:
+          type: string
+          format: date-time
+
+    PurchaseInput:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required:
+              - productCode
+              - quantity
+            properties:
+              productCode:
+                type: string
+              quantity:
+                type: integer
+                minimum: 1
+              estimatedCost:
+                type: number
+
+    AuditLog:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        module:
+          type: string
+        action:
+          type: string
+        userId:
+          type: integer
+        ipAddress:
+          type: string
+          format: ipv4
+        details:
+          type: object
+          additionalProperties: true
+        timestamp:
+          type: string
+          format: date-time
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtido via /auth/login. Válido por 24 horas.
+
+  responses:
+    BadRequestError:
+      description: Requisição inválida
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              details:
+                type: array
+                items:
+                  type: string
+
+    UnauthorizedError:
+      description: Não autenticado ou token expirado
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Invalid or expired token"
+
+    ForbiddenError:
+      description: Acesso negado (permissão insuficiente)
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              requiredPermission:
+                type: string
+
+    NotFoundError:
+      description: Recurso não encontrado
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string

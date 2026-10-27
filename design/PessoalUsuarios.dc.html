@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <script src="./theme.js"></script>
+  <script src="./sectors.js"></script>
+  <style>
+    @keyframes toastIn { from { opacity: 0; transform: translate(-50%, -12px); } to { opacity: 1; transform: translate(-50%, 0); } }
+  </style>
+</helmet>
+<div style="display: flex; flex-direction: column; gap: 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #1D1D1B;">
+
+
+    
+
+    
+
+    <!-- RBAC Matrix card -->
+    <div style="background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 12px; padding: 24px; animation: fadeInUp 0.5s ease-out both;">
+      <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 24px;">
+        <div>
+          <h2 style="font-size: 16px; font-weight: 700; color: #1D1D1B;">Matriz de Controle de Acesso (RBAC)</h2>
+          <p style="font-size: 12.5px; color: #999999; margin-top: 4px;">Configurações e privilégios de acesso aos módulos no servidor</p>
+        </div>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <button onClick="{{ openSectors }}" style="display: flex; align-items: center; gap: 8px; padding: 10px 16px; background-color: #FFFFFF; color: #1C543A; border: 1px solid #1C543A; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap;" style-hover="background-color: #F4F9F6;">🏢 Setores</button>
+          <button onClick="{{ openNewUser }}" style="display: flex; align-items: center; gap: 8px; padding: 10px 16px; background-color: #1C543A; color: #FFFFFF; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap;" style-hover="background-color: #164530;">👤⁺ Novo Servidor</button>
+        </div>
+      </div>
+
+      <!-- Search & Filter -->
+      <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 20px;">
+        <div style="position: relative; flex: 1; min-width: 200px;">
+          <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 13px; color: #999999; pointer-events: none;">🔍</span>
+          <input type="text" value="{{ searchTerm }}" onInput="{{ handleSearchInput }}" placeholder="Buscar por nome ou setor..." style="width: 100%; padding: 10px 12px 10px 34px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px;" style-focus="border-color: #1C543A; outline: none;"/>
+        </div>
+        <div style="display: flex; gap: 6px; background-color: #F5F5F5; border-radius: 8px; padding: 4px;">
+          <sc-for list="{{ roleFilters }}" as="rf" hint-placeholder-count="3">
+            <button onClick="{{ rf.onSelect }}" style="padding: 7px 14px; border: none; border-radius: 6px; font-size: 12.5px; font-weight: 600; cursor: pointer; background-color: {{ rf.bg }}; color: {{ rf.color }};">{{ rf.label }}</button>
+          </sc-for>
+        </div>
+      </div>
+
+      <!-- Results count -->
+      <p style="font-size: 12px; color: #999999; margin-bottom: 14px;">{{ resultLabel }}</p>
+
+      <!-- Empty state -->
+      <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+        <div style="border: 1px dashed #D9D9D9; border-radius: 12px; padding: 40px 20px; text-align: center;">
+          <p style="font-size: 26px; margin-bottom: 8px;">🔍</p>
+          <p style="font-size: 14px; font-weight: 700; color: #1D1D1B;">Nenhum servidor encontrado</p>
+          <p style="font-size: 12.5px; color: #999999; margin-top: 4px;">Ajuste a busca ou o filtro de perfil.</p>
+        </div>
+      </sc-if>
+
+      <!-- User cards -->
+      <div style="display: flex; flex-direction: column; gap: 18px;">
+        <sc-for list="{{ users }}" as="user" hint-placeholder-count="3">
+          <div style="border: 1px solid #E8E8E8; border-radius: 12px; padding: 20px 22px;">
+
+            <!-- User row -->
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+              <div style="display: flex; align-items: center; gap: 14px; min-width: 0;">
+                <div style="width: 42px; height: 42px; border-radius: 50%; background-color: {{ user.avatarBg }}; color: {{ user.avatarColor }}; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; flex-shrink: 0;">{{ user.initials }}</div>
+                <div style="min-width: 0;">
+                  <p style="font-size: 15px; font-weight: 700; color: #1D1D1B;">{{ user.name }}</p>
+                  <p style="font-size: 12.5px; color: #999999; margin-top: 2px;">Setor: {{ user.department }}</p>
+                </div>
+                <span style="font-size: 10.5px; font-weight: 700; letter-spacing: 0.3px; padding: 5px 12px; border-radius: 999px; background-color: {{ user.cargoBg }}; color: {{ user.cargoColor }}; white-space: nowrap;">{{ user.cargo }}</span>
+              </div>
+              <div style="display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; max-width: 420px;">
+                <sc-for list="{{ user.roleChips }}" as="rc" hint-placeholder-count="2">
+                  <button type="button" onClick="{{ rc.toggle }}" aria-pressed="{{ rc.on }}" title="{{ rc.hint }}" style="min-height: 30px; padding: 0 10px; border-radius: 999px; border: 1px solid {{ rc.border }}; background-color: {{ rc.bg }}; color: {{ rc.color }}; font-size: 10.5px; font-weight: 700; letter-spacing: 0.3px; text-transform: uppercase; cursor: pointer; white-space: nowrap;">{{ rc.mark }} {{ rc.label }}</button>
+                </sc-for>
+              </div>
+            </div>
+
+            <!-- Divider -->
+            <div style="height: 1px; background-color: #F0F0F0; margin: 18px 0;"></div>
+
+            <!-- Module permission toggles -->
+            <div style="display: grid; grid-template-columns: {{ moduleGridColumns }}; gap: 12px;">
+              <sc-for list="{{ user.perms }}" as="perm" hint-placeholder-count="5">
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; border: 1px solid #E8E8E8; border-radius: 8px; padding: 12px 14px;">
+                  <span style="font-size: 12.5px; font-weight: 600; color: #1D1D1B; min-width: 0;">{{ perm.label }}</span>
+                  <div onClick="{{ perm.onToggle }}" role="switch" aria-checked="{{ perm.on }}" style="width: 44px; height: 24px; border-radius: 999px; background-color: {{ perm.trackColor }}; position: relative; cursor: pointer; flex-shrink: 0; transition: background-color 0.25s ease;">
+                    <div style="width: 18px; height: 18px; border-radius: 50%; background-color: #FFFFFF; position: absolute; top: 3px; left: 3px; transform: {{ perm.knobTransform }}; transition: transform 0.25s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.25);"></div>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <!-- Audit Log -->
+    <div style="background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 12px; padding: 24px; animation: fadeInUp 0.5s ease-out 0.2s both;">
+      <h2 style="font-size: 16px; font-weight: 700; color: #1D1D1B; margin-bottom: 4px;">Auditoria de Alterações</h2>
+      <p style="font-size: 12.5px; color: #999999; margin-bottom: 18px;">Histórico de modificações de permissões e configurações de acesso</p>
+      
+      <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+          <thead>
+            <tr style="border-bottom: 1px solid #E8E8E8; background-color: #F9F9F9;">
+              <th style="padding: 12px 16px; text-align: left; font-weight: 700; color: #999999; text-transform: uppercase; font-size: 11px; letter-spacing: 0.4px;">Administrador</th>
+              <th style="padding: 12px 16px; text-align: left; font-weight: 700; color: #999999; text-transform: uppercase; font-size: 11px; letter-spacing: 0.4px;">Data &amp; Hora</th>
+              <th style="padding: 12px 16px; text-align: left; font-weight: 700; color: #999999; text-transform: uppercase; font-size: 11px; letter-spacing: 0.4px;">Ação</th>
+              <th style="padding: 12px 16px; text-align: left; font-weight: 700; color: #999999; text-transform: uppercase; font-size: 11px; letter-spacing: 0.4px;">Usuário Afetado</th>
+              <th style="padding: 12px 16px; text-align: left; font-weight: 700; color: #999999; text-transform: uppercase; font-size: 11px; letter-spacing: 0.4px;">Detalhe</th>
+            </tr>
+          </thead>
+          <tbody>
+            <sc-for list="{{ auditLog }}" as="log" hint-placeholder-count="5">
+              <tr style="border-bottom: 1px solid #F0F0F0;">
+                <td style="padding: 12px 16px; color: #1D1D1B; font-weight: 600;">{{ log.admin }}</td>
+                <td style="padding: 12px 16px; color: #666666; font-family: 'SF Mono', monospace; font-size: 12px;">{{ log.timestamp }}</td>
+                <td style="padding: 12px 16px;">
+                  <span style="padding: 4px 10px; border-radius: 4px; font-size: 11.5px; font-weight: 600; background-color: {{ log.actionBg }}; color: {{ log.actionColor }};">{{ log.action }}</span>
+                </td>
+                <td style="padding: 12px 16px; color: #1D1D1B;">{{ log.targetUser }}</td>
+                <td style="padding: 12px 16px; color: #666666;">{{ log.detail }}</td>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  
+
+  </div>
+
+  <!-- Novo Servidor Modal -->
+  <sc-if value="{{ newUserOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeNewUser }}" style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; padding: 24px; z-index: 90;">
+      <div onClick="{{ stopPropagation }}" style="background-color: #FFFFFF; border-radius: 14px; width: 100%; max-width: 460px; max-height: 88vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.25); animation: fadeInUp 0.3s ease-out;">
+
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 20px 24px; border-bottom: 1px solid #F0F0F0;">
+          <div>
+            <h3 style="font-size: 16px; font-weight: 700; color: #1D1D1B;">Cadastrar Novo Servidor</h3>
+            <p style="font-size: 12px; color: #999999; margin-top: 2px;">Pré-cadastro administrativo de acesso</p>
+          </div>
+          <button onClick="{{ closeNewUser }}" style="width: 30px; height: 30px; border-radius: 6px; border: none; background-color: #F5F5F5; font-size: 15px; color: #666666; cursor: pointer; flex-shrink: 0;" style-hover="background-color: #E8E8E8;">✕</button>
+        </div>
+
+        <div style="padding: 22px 24px; display: flex; flex-direction: column; gap: 16px;">
+          <div>
+            <label style="font-size: 11.5px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">Nome Completo</label>
+            <input type="text" value="{{ form.name }}" onInput="{{ handleNameInput }}" placeholder="Ex: Fernanda Souza Lima" style="width: 100%; padding: 10px 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px;" style-focus="border-color: #1C543A; outline: none;"/>
+          </div>
+          <div>
+            <label style="font-size: 11.5px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">E-mail Institucional</label>
+            <input type="email" value="{{ form.email }}" onInput="{{ handleEmailInput }}" placeholder="nome@camara.local" style="width: 100%; padding: 10px 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px;" style-focus="border-color: #1C543A; outline: none;"/>
+          </div>
+          <div>
+            <label style="font-size: 11.5px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">Setor / Lotação</label>
+            <input type="text" list="dl-cc-pessoalusu1" autocomplete="off" placeholder="Digite ou selecione o centro de custo" value="{{ form.department }}" onChange="{{ handleDeptInput }}" style="width: 100%; padding: 10px 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; background-color: #FFFFFF;"/><datalist id="dl-cc-pessoalusu1"><sc-for list="{{ sectors }}" as="sec" hint-placeholder-count="3"><option value="{{ sec }}"></option></sc-for></datalist>
+          </div>
+          <div>
+            <label style="font-size: 11.5px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">Cargo (Hierarquia no setor)</label>
+            <select value="{{ form.cargo }}" onChange="{{ handleCargoInput }}" style="width: 100%; padding: 10px 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; background-color: #FFFFFF;">
+              <option value="Diretoria">Diretoria (topo da hierarquia)</option>
+              <option value="Chefia">Chefia</option>
+              <option value="Funcionário">Funcionário</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size: 11.5px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">Perfis de acesso</label>
+            <div role="group" aria-label="Perfis de acesso" style="display: flex; flex-wrap: wrap; gap: 6px;">
+              <sc-for list="{{ formRoleChips }}" as="rc" hint-placeholder-count="6">
+                <button type="button" onClick="{{ rc.toggle }}" aria-pressed="{{ rc.on }}" title="{{ rc.hint }}" style="min-height: 36px; padding: 0 12px; border-radius: 999px; border: 1px solid {{ rc.border }}; background-color: {{ rc.bg }}; color: {{ rc.color }}; font-size: 12px; font-weight: 700; cursor: pointer;">{{ rc.mark }} {{ rc.label }}</button>
+              </sc-for>
+            </div>
+            <p style="font-size: 11px; color: #666666; margin-top: 6px;">Marque um ou mais perfis. O acesso final é a soma dos módulos de cada perfil.</p>
+            <p style="font-size: 11px; color: #999999; margin-top: 6px;">Administradores recebem acesso a todos os módulos por padrão; os privilégios podem ser ajustados na matriz após o cadastro.</p>
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: center; justify-content: flex-end; gap: 10px; padding: 18px 24px; border-top: 1px solid #F0F0F0;">
+          <button onClick="{{ closeNewUser }}" style="padding: 10px 16px; background-color: #FFFFFF; color: #666666; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;" style-hover="background-color: #F7F7F5;">Cancelar</button>
+          <button onClick="{{ submitNewUser }}" disabled="{{ submitDisabled }}" style="padding: 10px 18px; background-color: {{ submitBg }}; color: #FFFFFF; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: {{ submitCursor }};">Cadastrar Servidor</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- Gerenciar Setores Modal -->
+  <sc-if value="{{ sectorsOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeSectors }}" style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; padding: 24px; z-index: 90;">
+      <div onClick="{{ stopPropagation }}" style="background-color: #FFFFFF; border-radius: 14px; width: 100%; max-width: 440px; max-height: 88vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.25); animation: fadeInUp 0.3s ease-out;">
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 20px 24px; border-bottom: 1px solid #F0F0F0;">
+          <div>
+            <h3 style="font-size: 16px; font-weight: 700; color: #1D1D1B;">Gerenciar Setores</h3>
+            <p style="font-size: 12px; color: #999999; margin-top: 2px;">Subsetores da Diretoria Administrativa</p>
+          </div>
+          <button onClick="{{ closeSectors }}" style="width: 30px; height: 30px; border-radius: 6px; border: none; background-color: #F5F5F5; font-size: 15px; color: #666666; cursor: pointer; flex-shrink: 0;" style-hover="background-color: #E8E8E8;">✕</button>
+        </div>
+        <div style="padding: 22px 24px; display: flex; flex-direction: column; gap: 10px;">
+          <sc-for list="{{ sectors }}" as="sec" hint-placeholder-count="3">
+            <div style="display: flex; align-items: center; gap: 10px; padding: 10px 14px; border: 1px solid #E8E8E8; border-radius: 8px; font-size: 13px; font-weight: 600; color: #1D1D1B;">🏢 {{ sec }}</div>
+          </sc-for>
+          <div style="display: flex; gap: 8px; margin-top: 8px;">
+            <input type="text" value="{{ newSectorName }}" onInput="{{ handleNewSectorInput }}" placeholder="Nome do novo setor" style="flex: 1; padding: 10px 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px;" style-focus="border-color: #1C543A; outline: none;"/>
+            <button onClick="{{ addSector }}" disabled="{{ addSectorDisabled }}" style="padding: 10px 16px; background-color: {{ addSectorBg }}; color: #FFFFFF; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: {{ addSectorCursor }}; white-space: nowrap;">Adicionar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- Toast -->
+  <sc-if value="{{ saveSuccess }}" hint-placeholder-val="{{ false }}">
+    <div style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background-color: #1C543A; color: #FFFFFF; padding: 12px 22px; border-radius: 999px; font-size: 13px; font-weight: 600; box-shadow: 0 6px 20px rgba(28,84,58,0.35); z-index: 100; animation: toastIn 0.25s ease-out; display: flex; align-items: center; gap: 8px;">✓ Salvo com sucesso</div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: &quot;1000px&quot;, &quot;height&quot;: &quot;900px&quot;}}">
+class Component extends DCLogic {
+  MODULES = [
+    { key: 'compras', label: 'Compras' },
+    { key: 'protocolo', label: 'Protocolo' },
+    { key: 'rh', label: 'Gestão de Pessoal' },
+    { key: 'almoxarifado', label: 'Almoxarifado' },
+    { key: 'mocoes', label: 'Moções & Galeria' }
+  ];
+
+  state = {
+    exercicio: (window.DAExercicio ? window.DAExercicio.get() : 2026),
+    isMobile: typeof window !== 'undefined' ? window.innerWidth < 900 : false,
+    mobileMenuOpen: false,
+    saveSuccess: false,
+    newUserOpen: false,
+    sectorsOpen: false,
+    newSectorName: '',
+    sectors: (window.DASectors ? window.DASectors.get() : ['Diretoria Administrativa', 'Serviço de Licitações e Contratos', 'Serviço de Almoxarifado e Patrimônio']),
+    searchTerm: '',
+    roleFilter: 'todos',
+    form: { name: '', email: '', department: 'Diretoria Administrativa', cargo: 'Funcionário', role: 'Visualizador', roles: ['Visualizador'] },
+    users: [
+      { id: 1, name: 'Dr. Roberto Alencar', department: 'Diretoria Administrativa', cargo: 'Diretoria', role: 'Administrativo', initials: 'DR',
+        access: { compras: true, protocolo: true, rh: true, almoxarifado: true, mocoes: true } },
+      { id: 2, name: 'Ana Beatriz Silva', department: 'Serviço de Almoxarifado e Patrimônio', cargo: 'Chefia', role: 'Usuário', initials: 'AB',
+        access: { compras: false, protocolo: true, rh: false, almoxarifado: true, mocoes: false } },
+      { id: 3, name: 'Carlos Eduardo Costa', department: 'Serviço de Licitações e Contratos', cargo: 'Funcionário', role: 'Usuário', initials: 'CE',
+        access: { compras: false, protocolo: false, rh: true, almoxarifado: false, mocoes: true } }
+    ],
+    auditLog: [
+      { admin: 'Dr. Roberto Alencar', timestamp: '14/07/2026 14:32', action: 'Acesso Concedido', targetUser: 'Carlos Eduardo Costa', actionBg: '#DCFCE7', actionColor: '#166534', detail: 'Módulo de RH' },
+      { admin: 'Dr. Roberto Alencar', timestamp: '14/07/2026 13:15', action: 'Usuário Criado', targetUser: 'Ana Beatriz Silva', actionBg: '#E0E7FF', actionColor: '#3730A3', detail: 'Perfil: Usuário' },
+      { admin: 'Dr. Roberto Alencar', timestamp: '13/07/2026 10:22', action: 'Acesso Revogado', targetUser: 'Maria Oliveira', actionBg: '#FEE2E2', actionColor: '#991B1B', detail: 'Módulo de Compras' },
+      { admin: 'Dr. Roberto Alencar', timestamp: '12/07/2026 16:45', action: 'Perfil Alterado', targetUser: 'João Pereira', actionBg: '#FEF3C7', actionColor: '#92400E', detail: 'Administrativo → Usuário' },
+      { admin: 'Dr. Roberto Alencar', timestamp: '12/07/2026 09:10', action: 'Acesso Concedido', targetUser: 'Patricia Costa', actionBg: '#DCFCE7', actionColor: '#166534', detail: 'Módulo de Protocolo' }
+    ]
+  };
+
+  componentDidUpdate(pp, ps) {
+    if (ps.users === this.state.users) return;
+    try { localStorage.setItem('DA_users_v1', JSON.stringify(this.state.users));
+      const ov = {}; this.state.users.forEach(u => { ov[u.name] = { ...u.access }; }); localStorage.setItem('DA_user_access', JSON.stringify(ov)); } catch (e) {}
+  }
+  componentDidMount() {
+    try { const s = JSON.parse(localStorage.getItem('DA_users_v1')); if (Array.isArray(s) && s.length) this.setState({ users: s }); } catch (e) {}
+    this._onEx = e => this.setState({ exercicio: e.detail.ano });
+    window.addEventListener('exerciciochange', this._onEx);
+    const waitEx = () => { if (window.DAExercicio) this.setState({ exercicio: window.DAExercicio.get() }); else setTimeout(waitEx, 150); };
+    waitEx();
+    const loadSectors = () => {
+      if (window.DASectors) this.setState({ sectors: window.DASectors.get() });
+      else setTimeout(loadSectors, 200);
+    };
+    loadSectors();
+    this._onSectors = (e) => this.setState({ sectors: e.detail.sectors });
+    window.addEventListener('sectorschange', this._onSectors);
+    this.handleResize = () => { this.setState({ isMobile: window.innerWidth < 900 }); };
+    window.addEventListener('resize', this.handleResize);
+  }
+  componentWillUnmount() {
+    window.removeEventListener('resize', this.handleResize);
+  }
+
+  openMobileMenu = () => { this.setState({ mobileMenuOpen: true }); };
+  closeMobileMenu = () => { this.setState({ mobileMenuOpen: false }); };
+
+  handleSearchInput = (e) => { const v = e.target.value; this.setState({ searchTerm: v }); };
+  setRoleFilter = (f) => { this.setState({ roleFilter: f }); };
+
+  openNewUser = () => { this.setState({ newUserOpen: true, form: { name: '', email: '', department: this.state.sectors[0], cargo: 'Funcionário', role: 'Visualizador', roles: ['Visualizador'] } }); };
+  closeNewUser = () => { this.setState({ newUserOpen: false }); };
+  stopPropagation = (e) => { e.stopPropagation(); };
+  handleNameInput = (e) => { const v = e.target.value; this.setState(s => ({ form: { ...s.form, name: v } })); };
+  handleEmailInput = (e) => { const v = e.target.value; this.setState(s => ({ form: { ...s.form, email: v } })); };
+  handleDeptInput = (e) => { const v = e.target.value; this.setState(s => ({ form: { ...s.form, department: v } })); };
+  handleCargoInput = (e) => { const v = e.target.value; this.setState(s => ({ form: { ...s.form, cargo: v } })); };
+  ROLES = ['Administrativo', 'Compras', 'Almoxarifado', 'Patrimônio', 'Gerenciamento', 'Visualizador'];
+  ROLE_HINT = { 'Administrativo': 'Vê tudo', 'Compras': 'Compras & Licitações, Moções', 'Almoxarifado': 'Almoxarifado, Moções', 'Patrimônio': 'Patrimônio', 'Gerenciamento': 'Protocolo', 'Visualizador': 'Analytics e Perfil' };
+  _rolesOf(u) { const r = Array.isArray(u.roles) && u.roles.length ? u.roles : [u.role === 'Usuário' ? 'Visualizador' : u.role]; return r.filter(Boolean); }
+  _chips(sel, onToggle) { return this.ROLES.map(r => { const on = sel.indexOf(r) >= 0; return { label: r, on, mark: on ? '✓' : '+', hint: (on ? 'Remover perfil · ' : 'Adicionar perfil · ') + this.ROLE_HINT[r], bg: on ? (r === 'Administrativo' ? '#1C543A' : '#EAF3EE') : '#FFFFFF', color: on ? (r === 'Administrativo' ? '#FFFFFF' : '#1C543A') : '#666666', border: on ? '#1C543A' : '#E0E0E0', toggle: () => onToggle(r, on) }; }); }
+  toggleUserRole = (uid, r, on) => {
+    const u = this.state.users.find(x => x.id === uid); if (!u) return; let roles = this._rolesOf(u);
+    if (on && roles.length === 1) return;
+    roles = on ? roles.filter(x => x !== r) : roles.concat(r);
+    this.setState(s => ({ users: s.users.map(x => x.id === uid ? { ...x, roles, role: roles.indexOf('Administrativo') >= 0 ? 'Administrativo' : roles[0] } : x) }));
+    if (window.DAAudit) window.DAAudit.log(on ? 'Perfil removido' : 'Perfil adicionado', 'usuarios', u.name + ' · ' + r, on ? 'warning' : 'info');
+  };
+  handleRoleInput = (e) => { const v = e.target.value; this.setState(s => ({ form: { ...s.form, role: v } })); };
+
+  openSectors = () => { this.setState({ sectorsOpen: true, newSectorName: '' }); };
+  closeSectors = () => { this.setState({ sectorsOpen: false }); };
+  handleNewSectorInput = (e) => { this.setState({ newSectorName: e.target.value }); };
+  addSector = () => {
+    const name = this.state.newSectorName.trim();
+    if (!name || this.state.sectors.includes(name)) return;
+    const updated = window.DASectors ? window.DASectors.add(name) : [...this.state.sectors, name];
+    this.setState({ sectors: updated, newSectorName: '' });
+  };
+
+  submitNewUser = () => {
+    if (window.DAAudit && this.state.form && this.state.form.name) window.DAAudit.log('Usuário Criado', 'usuarios', this.state.form.name + ' · Perfis: ' + ((this.state.form.roles || [this.state.form.role]).join(', ')));
+    const f = this.state.form;
+    if (!f.name.trim() || !f.email.trim() || !f.department.trim()) return;
+    const parts = f.name.trim().split(/\s+/);
+    const initials = ((parts[0][0] || '') + (parts.length > 1 ? parts[parts.length - 1][0] : '')).toUpperCase();
+    const fr = (f.roles && f.roles.length ? f.roles : [f.role]); const isAdmin = fr.indexOf('Administrativo') >= 0;
+    const newUser = {
+      roles: fr,
+      id: Date.now(),
+      name: f.name.trim(),
+      department: f.department,
+      cargo: f.cargo,
+      role: isAdmin ? 'Administrativo' : fr[0],
+      initials: initials,
+      access: {
+        compras: isAdmin, protocolo: isAdmin, rh: isAdmin,
+        almoxarifado: isAdmin, mocoes: isAdmin
+      }
+    };
+    const now = new Date();
+    const timestamp = now.toLocaleDateString('pt-BR') + ' ' + now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    const auditEntry = {
+      admin: 'Dr. Roberto Alencar',
+      timestamp: timestamp,
+      action: 'Usuário Criado',
+      targetUser: f.name.trim(),
+      actionBg: '#E0E7FF',
+      actionColor: '#3730A3',
+      detail: 'Perfil: ' + f.role
+    };
+    this.setState(s => ({
+      users: [...s.users, newUser],
+      auditLog: [auditEntry, ...s.auditLog],
+      newUserOpen: false,
+      saveSuccess: true
+    }));
+    clearTimeout(this._toastTimer);
+    this._toastTimer = setTimeout(() => this.setState({ saveSuccess: false }), 2000);
+  };
+
+  toggleAccess = (userId, moduleKey) => {
+    // RF07: instant async persist (mock) — no manual Save
+    const user = this.state.users.find(u => u.id === userId);
+    const wasOn = user.access[moduleKey];
+    const now = new Date();
+    const timestamp = now.toLocaleDateString('pt-BR') + ' ' + now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    const moduleLabel = this.MODULES.find(m => m.key === moduleKey)?.label || moduleKey;
+    if (window.DAAudit) window.DAAudit.log(wasOn ? 'Acesso Revogado' : 'Acesso Concedido', 'usuarios', user.name + ' · Módulo de ' + moduleLabel, wasOn ? 'warning' : 'info');
+    const auditEntry = {
+      admin: 'Dr. Roberto Alencar',
+      timestamp: timestamp,
+      action: wasOn ? 'Acesso Revogado' : 'Acesso Concedido',
+      targetUser: user.name,
+      actionBg: wasOn ? '#FEE2E2' : '#DCFCE7',
+      actionColor: wasOn ? '#991B1B' : '#166534',
+      detail: 'Módulo de ' + moduleLabel
+    };
+    this.setState(s => ({
+      users: s.users.map(u =>
+        u.id === userId ? { ...u, access: { ...u.access, [moduleKey]: !u.access[moduleKey] } } : u
+      ),
+      auditLog: [auditEntry, ...s.auditLog],
+      saveSuccess: true
+    }));
+    clearTimeout(this._toastTimer);
+    this._toastTimer = setTimeout(() => this.setState({ saveSuccess: false }), 2000);
+  };
+
+
+
+  renderVals() {
+    const isMobile = this.state.isMobile;
+    const isAdmin = (role) => role === 'Administrativo' || role === 'Administrador';
+
+    const term = this.state.searchTerm.trim().toLowerCase();
+    const roleFilter = this.state.roleFilter;
+    const isAdminRole = (role) => role === 'Administrativo' || role === 'Administrador';
+    const filtered = this.state.users.filter(u => {
+      const matchesTerm = !term || u.name.toLowerCase().includes(term) || u.department.toLowerCase().includes(term);
+      const matchesRole = roleFilter === 'todos'
+        || (roleFilter === 'admin' && isAdminRole(u.role))
+        || (roleFilter === 'user' && !isAdminRole(u.role));
+      return matchesTerm && matchesRole;
+    });
+
+    const filterDefs = [
+      { key: 'todos', label: 'Todos' },
+      { key: 'admin', label: 'Administrativo' },
+      { key: 'user', label: 'Usuário' }
+    ];
+    const roleFilters = filterDefs.map(f => ({
+      label: f.label,
+      onSelect: () => this.setRoleFilter(f.key),
+      bg: roleFilter === f.key ? '#FFFFFF' : 'transparent',
+      color: roleFilter === f.key ? '#1C543A' : '#777777'
+    }));
+
+    const total = this.state.users.length;
+    const shown = filtered.length;
+    const resultLabel = (term || roleFilter !== 'todos')
+      ? shown + ' de ' + total + ' servidores'
+      : total + ' servidores cadastrados';
+
+    const CARGO_STYLE = {
+      'Diretoria': { bg: '#FDF0D5', color: '#92400E' },
+      'Chefia': { bg: '#DCEAFE', color: '#1E40AF' },
+      'Funcionário': { bg: '#EEEEEE', color: '#555555' }
+    };
+    const users = filtered.map(u => ({
+      ...u,
+      cargoBg: (CARGO_STYLE[u.cargo] || CARGO_STYLE['Funcionário']).bg,
+      cargoColor: (CARGO_STYLE[u.cargo] || CARGO_STYLE['Funcionário']).color,
+      avatarBg: isAdmin(u.role) ? '#1C543A' : '#EEEEEE',
+      avatarColor: isAdmin(u.role) ? '#FFFFFF' : '#666666',
+      roleChips: this._chips(this._rolesOf(u), (r, on) => this.toggleUserRole(u.id, r, on)),
+      badgeBg: isAdmin(u.role) ? '#1C543A' : '#EEEEEE',
+      badgeColor: isAdmin(u.role) ? '#FFFFFF' : '#555555',
+      perms: this.MODULES.map(m => {
+        const on = !!u.access[m.key];
+        return {
+      formRoleChips: this._chips((this.state.form && this.state.form.roles) || ['Visualizador'], (r, on) => this.setState(s => { let rs = (s.form.roles || [s.form.role]).slice(); if (on && rs.length === 1) return null; rs = on ? rs.filter(x => x !== r) : rs.concat(r); return { form: { ...s.form, roles: rs, role: rs.indexOf('Administrativo') >= 0 ? 'Administrativo' : rs[0] } }; })),
+      exercicio: String(this.state.exercicio), exercicioAnos: (window.DAExercicio ? window.DAExercicio.anos : [2026, 2025, 2024]).map(String),
+      setExercicio: e => { if (window.DAExercicio) window.DAExercicio.set(e.target.value); else this.setState({ exercicio: +e.target.value }); },
+          key: m.key,
+          label: m.label,
+          on: on,
+          trackColor: on ? '#1C543A' : '#D9D9D9',
+          knobTransform: on ? 'translateX(20px)' : 'translateX(0)',
+          onToggle: () => this.toggleAccess(u.id, m.key)
+        };
+      })
+    }));
+
+    return {
+      isMobile: isMobile,
+      mobileMenuOpen: this.state.mobileMenuOpen,
+      openMobileMenu: this.openMobileMenu,
+      closeMobileMenu: this.closeMobileMenu,
+      sidebarPosition: isMobile ? 'fixed' : 'sticky',
+      sidebarTransform: isMobile ? (this.state.mobileMenuOpen ? 'translateX(0)' : 'translateX(-100%)') : 'translateX(0)',
+      mainPadding: isMobile ? '18px 16px 32px' : '28px 36px 40px',
+      titleFontSize: isMobile ? '22px' : '30px',
+      moduleGridColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+      saveSuccess: this.state.saveSuccess,
+      newUserOpen: this.state.newUserOpen,
+      form: this.state.form,
+      submitDisabled: !(this.state.form.name.trim() && this.state.form.email.trim() && this.state.form.department.trim()),
+      submitBg: (this.state.form.name.trim() && this.state.form.email.trim() && this.state.form.department.trim()) ? '#1C543A' : '#B8C7BF',
+      submitCursor: (this.state.form.name.trim() && this.state.form.email.trim() && this.state.form.department.trim()) ? 'pointer' : 'not-allowed',
+      searchTerm: this.state.searchTerm,
+      handleSearchInput: this.handleSearchInput,
+      roleFilters: roleFilters,
+      resultLabel: resultLabel,
+      isEmpty: shown === 0,
+      auditLog: this.state.auditLog,
+      openNewUser: this.openNewUser,
+      closeNewUser: this.closeNewUser,
+      stopPropagation: this.stopPropagation,
+      handleNameInput: this.handleNameInput,
+      handleEmailInput: this.handleEmailInput,
+      handleDeptInput: this.handleDeptInput,
+      handleCargoInput: this.handleCargoInput,
+      handleRoleInput: this.handleRoleInput,
+      submitNewUser: this.submitNewUser,
+      sectors: this.state.sectors,
+      sectorsOpen: this.state.sectorsOpen,
+      openSectors: this.openSectors,
+      closeSectors: this.closeSectors,
+      newSectorName: this.state.newSectorName,
+      handleNewSectorInput: this.handleNewSectorInput,
+      addSector: this.addSector,
+      addSectorDisabled: !this.state.newSectorName.trim(),
+      addSectorBg: this.state.newSectorName.trim() ? '#1C543A' : '#B8C7BF',
+      addSectorCursor: this.state.newSectorName.trim() ? 'pointer' : 'not-allowed',
+      users: users
+    };
+  }
+}
+</script>
+</body>
+</html>

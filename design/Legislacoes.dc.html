@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+  <script src="./theme.js"></script>
+  <script src="./config.js"></script>
+  <script src="./session.js"></script>
+  <script src="./liccont.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema DA - Legislações</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #FFFFFF;
+      color: #1D1D1B;
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</helmet>
+
+<div style="display: flex; min-height: 100vh; background-color: #FFFFFF; position: relative;">
+
+  <sc-if value="{{ navOverlayVisible }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ navClose }}" style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); z-index: 40;"></div>
+  </sc-if>
+
+  <!-- Sidebar -->
+  <aside style="background-color: #1C543A; color: #FFFFFF; width: 250px; flex-shrink: 0; display: flex; flex-direction: column; padding: 22px 16px; gap: 22px; position: {{ navSidebarPosition }}; top: 0; left: 0; height: 100vh; overflow-y: auto; z-index: 50; transform: {{ navSidebarTransform }}; transition: transform 0.3s cubic-bezier(0.34, 1.25, 0.64, 1);">
+      <a href="Dashboard.dc.html" title="Voltar ao Painel de Controle" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: #FFFFFF; padding: 0 4px;">
+        <div style="width: 36px; height: 36px; background-color: #FFFFFF; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; color: #1C543A; flex-shrink: 0;">DA</div>
+        <div>
+          <p style="font-size: 12.5px; font-weight: 700; line-height: 1.3; color: #FFFFFF;">CÂMARA MUNICIPAL</p>
+          <p style="font-size: 9.5px; letter-spacing: 0.4px; color: rgba(255,255,255,0.65); text-transform: uppercase;">Diretoria Administrativa</p>
+        </div>
+      </a>
+      <nav style="display: flex; flex-direction: column; gap: 2px;">
+        <p style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: rgba(255,255,255,0.5); padding: 0 12px; margin-bottom: 6px;">Sistemas &amp; Gestão</p>
+        <a href="Dashboard.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">▦</span>Painel de Controle</a>
+        <sc-for list="{{ navLinks }}" as="link" hint-placeholder-count="4">
+          <a href="{{ link.href }}" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 13px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">{{ link.icon }}</span>{{ link.label }}</a>
+        </sc-for>
+      </nav>
+      <nav style="display: flex; flex-direction: column; gap: 2px;">
+        <p style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: rgba(255,255,255,0.5); padding: 0 12px; margin-bottom: 6px;">Módulos Complementares</p>
+        <a href="AnalyticsModule.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">📈</span>Analytics &amp; Relatórios</a>
+        <a href="RHModule.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">🧑‍💼</span>Gestão de Pessoal</a>
+        <a href="Legislacoes.dc.html" aria-current="page" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 13px; transition: background-color 0.2s; background-color: #FFFFFF; color: #1C543A; font-weight: 700;"><span style="width: 18px; text-align: center; flex-shrink: 0;">⚖</span>Legislações</a>
+        <a href="AuditLog.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">🛡</span>Log e Auditoria</a>
+        <a href="Configuracoes.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">⚙</span>Configurações do Sistema</a>
+      <a href="ProtocoloModule.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">📋</span>Protocolo</a>
+      </nav>
+      <div style="margin-top: auto; display: flex; flex-direction: column; gap: 4px; padding-top: 8px;">
+        <a href="UserProfile.dc.html" style="display: flex; align-items: center; gap: 10px; background-color: rgba(255,255,255,0.08); border-radius: 10px; padding: 12px; text-decoration: none; color: #FFFFFF;" style-hover="background-color: rgba(255,255,255,0.14);">
+          <div style="width: 34px; height: 34px; border-radius: 50%; background-color: #F0B429; color: #1C543A; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; flex-shrink: 0;">RA</div>
+          <div style="min-width: 0;">
+            <p style="font-size: 12.5px; font-weight: 700; color: #FFFFFF;">Dr. Roberto Alencar</p>
+            <p style="font-size: 10.5px; color: rgba(255,255,255,0.6);">DA-2026-948 · Diretoria</p>
+          </div>
+        </a>
+        <div role="group" aria-label="Aparência" style="display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 40px; padding: 0 12px;">
+          <span style="font-size: 11px; font-weight: 600; letter-spacing: 0.3px; color: rgba(255,255,255,0.6);">Aparência</span>
+          <div style="display: flex; padding: 2px; border-radius: 999px; background-color: rgba(0,0,0,0.22);">
+            <button onClick="{{ navThemeLight }}" aria-pressed="{{ navThemeIsLight }}" aria-label="Modo padrão" title="Modo padrão" style="width: 30px; height: 26px; border: none; border-radius: 999px; background-color: {{ navThemeLightBg }}; color: {{ navThemeLightFg }}; font-size: 13px; line-height: 1; cursor: pointer; transition: background-color 0.2s;">☀</button>
+            <button onClick="{{ navThemeDarkSet }}" aria-pressed="{{ navThemeDark }}" aria-label="Modo escuro" title="Modo escuro" style="width: 30px; height: 26px; border: none; border-radius: 999px; background-color: {{ navThemeDarkBg }}; color: {{ navThemeDarkFg }}; font-size: 13px; line-height: 1; cursor: pointer; transition: background-color 0.2s;">☾</button>
+          </div>
+        </div>
+        <a href="Login.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; color: rgba(255,255,255,0.7); text-decoration: none; font-size: 12.5px; font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1); color: #FFFFFF;"><span style="width: 18px; text-align: center; flex-shrink: 0;">⎋</span>Sair do sistema</a>
+      </div>
+    </aside>
+
+  <!-- Main -->
+  <div style="flex: 1; min-width: 0; display: flex; flex-direction: column;">
+    <div style="position: sticky; top: 0; z-index: 30; background-color: rgba(255,255,255,0.96); backdrop-filter: blur(6px); border-bottom: 1px solid #E8E8E8; min-height: 64px; padding: 10px {{ navGutter }}; display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+      <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
+        <sc-if value="{{ navIsMobile }}" hint-placeholder-val="{{ false }}">
+          <button onClick="{{ navOpen }}" aria-label="Abrir menu" style="width: 44px; height: 44px; border-radius: 8px; border: 1px solid #E0E0E0; background-color: #FFFFFF; font-size: 18px; color: #1D1D1B; cursor: pointer; flex-shrink: 0;">☰</button>
+          <a href="Dashboard.dc.html" title="Painel de Controle" style="width: 36px; height: 36px; background-color: #1C543A; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 12px; color: #FFFFFF; text-decoration: none; flex-shrink: 0;">DA</a>
+        </sc-if>
+        <sc-if value="{{ navShowBreadcrumb }}" hint-placeholder-val="{{ true }}">
+          <div style="display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: #666666; white-space: nowrap;">
+            <a href="Dashboard.dc.html" style="color: #666666; text-decoration: none;" style-hover="color: #1C543A;">Painel de Controle</a>
+            <span style="color: #CCCCCC;">›</span>
+            <span style="color: #1D1D1B; font-weight: 600;">Legislações</span>
+          </div>
+        </sc-if>
+      </div>
+      <div style="display: flex; align-items: center; gap: 10px; flex: 1; justify-content: flex-end; min-width: 0;">
+        <div style="position: relative; flex: 1; max-width: 340px; min-width: 0;">
+          <input type="search" placeholder="Buscar módulos e telas…" aria-label="Busca global" value="{{ navSearch }}" onInput="{{ navSearchInput }}" onFocus="{{ navSearchFocus }}" onBlur="{{ navSearchBlur }}" onKeyDown="{{ navSearchKey }}" style="width: 100%; height: 44px; padding: 0 12px 0 34px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; color: #1D1D1B; background-color: #F9F9F9;" style-focus="border-color: #1C543A; background-color: #FFFFFF; outline: none;"/>
+          <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 14px; color: #999999; pointer-events: none;">⌕</span>
+          <sc-if value="{{ navSearchOpen }}" hint-placeholder-val="{{ false }}">
+            <div style="position: absolute; top: 50px; right: 0; left: 0; min-width: 240px; background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 8px; box-shadow: 0 12px 32px rgba(0,0,0,0.12); padding: 6px; z-index: 60;">
+              <sc-for list="{{ navSearchResults }}" as="r" hint-placeholder-count="3">
+                <a href="{{ r.href }}" onMouseDown="{{ r.go }}" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 10px; border-radius: 6px; text-decoration: none; color: #1D1D1B; font-size: 13px;" style-hover="background-color: #F2F7F4;">
+                  <span style="width: 20px; text-align: center; flex-shrink: 0;">{{ r.icon }}</span>
+                  <span style="flex: 1; font-weight: 600;">{{ r.label }}</span>
+                  <span style="font-size: 11px; color: #999999;">{{ r.group }}</span>
+                </a>
+              </sc-for>
+              <sc-if value="{{ navSearchEmpty }}" hint-placeholder-val="{{ false }}">
+                <p style="padding: 12px 10px; font-size: 12.5px; color: #999999;">Nenhum resultado para “{{ navSearch }}”</p>
+              </sc-if>
+            </div>
+          </sc-if>
+        </div>
+        <a href="NotificationsModule.dc.html" title="Notificações" style="position: relative; width: 44px; height: 44px; border-radius: 8px; border: 1px solid #E0E0E0; background-color: #FFFFFF; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 16px; flex-shrink: 0;" style-hover="border-color: #1C543A;">🔔<span style="position: absolute; top: 9px; right: 10px; width: 7px; height: 7px; border-radius: 50%; background-color: #DC2626; border: 1.5px solid #FFFFFF;"></span></a>
+      </div>
+    </div>
+    <main style="flex: 1; padding: {{ mainPadding }}; display: flex; flex-direction: column; gap: 22px; background-color: #FFFFFF; min-width: 0;">
+    <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+      <div>
+        <p style="font-size: 11px; font-weight: 700; letter-spacing: 0.6px; color: #1C543A; text-transform: uppercase;">Base normativa</p>
+        <h1 style="font-size: {{ titleFontSize }}; font-weight: 800; color: #1D1D1B; margin-top: 6px;">Legislações</h1>
+        <p style="font-size: 13px; color: #666666; margin-top: 4px; max-width: 640px;">Resoluções, portarias, bases legais e recomendações usadas pela Diretoria Administrativa. Itens inativos ficam guardados para consulta histórica.</p>
+      </div>
+      <sc-if value="{{ canEdit }}" hint-placeholder-val="{{ true }}"><button onClick="{{ openNew }}" style="height: 44px; padding: 0 18px; background-color: #1C543A; color: #FFFFFF; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer;" style-hover="background-color: #153A2E;">+ Nova norma</button></sc-if>
+    </div>
+    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+      <sc-for list="{{ typeChips }}" as="tc" hint-placeholder-count="5">
+        <button onClick="{{ tc.apply }}" aria-pressed="{{ tc.on }}" style="height: 38px; padding: 0 14px; border-radius: 999px; border: 1px solid {{ tc.border }}; background-color: {{ tc.bg }}; color: {{ tc.color }}; font-size: 12.5px; font-weight: 600; cursor: pointer;">{{ tc.label }} · {{ tc.count }}</button>
+      </sc-for>
+    </div>
+    <div style="background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 8px; padding: 14px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
+      <input type="search" value="{{ q }}" onInput="{{ setQ }}" placeholder="Buscar por número, ementa, órgão ou palavra-chave" aria-label="Buscar legislação" style="flex: 1; min-width: 220px; height: 44px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px;" style-focus="border-color: #1C543A; outline: none;"/>
+      <select value="{{ status }}" onChange="{{ setStatus }}" aria-label="Situação" style="height: 44px; padding: 0 10px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; background-color: #FFFFFF;">
+        <option value="ativas">Somente ativas</option><option value="inativas">Somente inativas</option><option value="todas">Ativas e inativas</option>
+      </select>
+      <span style="font-size: 12px; color: #666666;">{{ shown }} norma(s)</span>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px;">
+      <sc-for list="{{ rows }}" as="n" hint-placeholder-count="6">
+        <div style="background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 8px; opacity: {{ n.opacity }};">
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+            <span style="font-size: 10.5px; font-weight: 700; padding: 3px 10px; border-radius: 999px; background-color: {{ n.typeBg }}; color: {{ n.typeColor }}; text-transform: uppercase; letter-spacing: 0.3px;">{{ n.tipo }}</span>
+            <sc-if value="{{ canEdit }}" hint-placeholder-val="{{ false }}">
+              <button onClick="{{ n.toggle }}" role="switch" aria-checked="{{ n.ativa }}" aria-label="{{ n.toggleLabel }}" title="{{ n.toggleLabel }}" style="width: 44px; height: 24px; border-radius: 999px; border: none; background-color: {{ n.switchBg }}; position: relative; cursor: pointer; flex-shrink: 0;"><span style="position: absolute; top: 3px; left: {{ n.knob }}; width: 18px; height: 18px; border-radius: 50%; background-color: #FFFFFF; box-shadow: 0 1px 3px rgba(0,0,0,0.25); transition: left 0.25s;"></span></button>
+            </sc-if>
+          </div>
+          <p style="font-family: Georgia, 'Times New Roman', serif; font-size: 16px; font-weight: 700; color: #1D1D1B;">{{ n.numero }}</p>
+          <p style="font-size: 13px; color: #444444; line-height: 1.45;">{{ n.ementa }}</p>
+          <p style="font-size: 11.5px; color: #666666;">{{ n.orgao }} · {{ n.dataFmt }} · {{ n.statusLabel }}</p>
+          <div style="display: flex; flex-wrap: wrap; gap: 4px;"><sc-if value="{{ n.hasPdf }}" hint-placeholder-val="{{ false }}"><span style="font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; background-color: #FDF3F2; color: #B91C1C;">PDF anexado</span></sc-if><sc-for list="{{ n.tagList }}" as="tg" hint-placeholder-count="2"><span style="font-size: 11px; padding: 2px 8px; border-radius: 999px; background-color: #F0F0F0; color: #444444;">{{ tg }}</span></sc-for></div>
+          <div style="display: flex; gap: 8px; margin-top: auto; padding-top: 6px;">
+            <button onClick="{{ n.view }}" style="height: 36px; padding: 0 12px; border: 1px solid #1C543A; border-radius: 8px; background-color: #1C543A; color: #FFFFFF; font-size: 12.5px; font-weight: 700; cursor: pointer;" style-hover="background-color: #153A2E;">Abrir texto</button>
+            <sc-if value="{{ canEdit }}" hint-placeholder-val="{{ false }}"><button onClick="{{ n.edit }}" style="height: 36px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; background-color: #FFFFFF; color: #1D1D1B; font-size: 12.5px; font-weight: 600; cursor: pointer;">✎ Editar</button></sc-if>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+    <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}"><p style="padding: 30px; text-align: center; font-size: 13px; color: #666666; background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 8px;">Nenhuma norma com esses filtros.</p></sc-if>
+    <sc-if value="{{ viewOpen }}" hint-placeholder-val="{{ false }}">
+      <div onClick="{{ closeView }}" style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 95;">
+        <div onClick="{{ stop }}" role="dialog" aria-modal="true" aria-label="{{ view.numero }}" style="background-color: #FFFFFF; border-radius: 12px; width: 100%; max-width: 920px; max-height: 94vh; display: flex; flex-direction: column; overflow: hidden;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding: 20px 24px; border-bottom: 1px solid #1C543A;">
+            <div style="min-width: 0;">
+              <span style="font-size: 10.5px; font-weight: 700; padding: 3px 10px; border-radius: 999px; background-color: {{ view.typeBg }}; color: {{ view.typeColor }}; text-transform: uppercase; letter-spacing: 0.3px;">{{ view.tipo }}</span>
+              <h3 style="font-family: Georgia, 'Times New Roman', serif; font-size: 20px; font-weight: 700; color: #1D1D1B; margin-top: 8px;">{{ view.numero }}</h3>
+              <p style="font-size: 12px; color: #666666; margin-top: 4px;">{{ view.orgao }} · {{ view.dataFmt }} · {{ view.statusLabel }}</p>
+            </div>
+            <button onClick="{{ closeView }}" aria-label="Fechar" style="width: 40px; height: 40px; flex-shrink: 0; border-radius: 8px; border: 1px solid #E0E0E0; background-color: #FFFFFF; font-size: 15px; cursor: pointer;">✕</button>
+          </div>
+          <sc-if value="{{ view.hasPdf }}" hint-placeholder-val="{{ false }}">
+            <div style="flex: 1; min-height: 0; display: flex; flex-direction: column; background-color: #F4F4F2;">
+              <sc-if value="{{ pdfLoading }}" hint-placeholder-val="{{ false }}"><p style="padding: 40px; text-align: center; font-size: 13px; color: #666666;">Carregando PDF…</p></sc-if>
+              <sc-if value="{{ pdfReady }}" hint-placeholder-val="{{ false }}"><iframe src="{{ pdfUrl }}" title="{{ view.pdfName }}" style="width: 100%; height: 68vh; border: none; display: block;"></iframe></sc-if>
+            </div>
+          </sc-if>
+          <sc-if value="{{ view.noPdf }}" hint-placeholder-val="{{ true }}">
+          <div style="padding: 22px 28px; overflow-y: auto; font-family: Georgia, 'Times New Roman', serif; color: #1D1D1B;">
+            <p style="font-size: 15px; font-style: italic; line-height: 1.6; color: #444444; margin-bottom: 18px;">{{ view.ementa }}</p>
+            <sc-if value="{{ view.hasTexto }}" hint-placeholder-val="{{ false }}">
+              <p style="font-size: 15px; line-height: 1.7; white-space: pre-wrap; text-wrap: pretty;">{{ view.texto }}</p>
+            </sc-if>
+            <sc-if value="{{ view.semTexto }}" hint-placeholder-val="{{ false }}">
+              <p style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 13px; color: #666666; background-color: #F7F7F6; border-radius: 8px; padding: 14px;">Nenhum PDF anexado a esta norma. Use "Editar" para anexar o PDF ou colar o texto, ou abra o texto original.</p>
+            </sc-if>
+          </div>
+          </sc-if>
+          <div style="display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 10px; padding: 14px 24px; border-top: 1px solid #F0F0F0;">
+            <sc-if value="{{ pdfReady }}" hint-placeholder-val="{{ false }}"><a href="{{ pdfUrl }}" download="{{ view.pdfName }}" style="height: 44px; padding: 0 16px; display: inline-flex; align-items: center; border: 1px solid #E0E0E0; border-radius: 8px; color: #1D1D1B; font-size: 13px; font-weight: 600; text-decoration: none;">Baixar PDF</a></sc-if>
+            <sc-if value="{{ view.hasLink }}" hint-placeholder-val="{{ false }}"><a href="{{ view.link }}" target="_blank" rel="noopener noreferrer" style="height: 44px; padding: 0 16px; display: inline-flex; align-items: center; border: 1px solid #1C543A; border-radius: 8px; color: #1C543A; font-size: 13px; font-weight: 700; text-decoration: none;">Texto original ↗</a></sc-if>
+            <button onClick="{{ closeView }}" style="height: 44px; padding: 0 16px; border: none; border-radius: 8px; background-color: #1C543A; color: #FFFFFF; font-size: 13px; font-weight: 700; cursor: pointer;">Fechar</button>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+    <sc-if value="{{ formOpen }}" hint-placeholder-val="{{ false }}">
+      <div onClick="{{ closeForm }}" style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 95;">
+        <div onClick="{{ stop }}" role="dialog" aria-modal="true" style="background-color: #FFFFFF; border-radius: 12px; width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto; padding: 22px; display: flex; flex-direction: column; gap: 12px;">
+          <h3 style="font-size: 16px; font-weight: 700;">{{ formTitle }}</h3>
+          <div><label style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 6px;">Tipo</label><select value="{{ form.tipo }}" onChange="{{ setTipo }}" style="width: 100%; height: 44px; padding: 0 10px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; background-color: #FFFFFF;"><sc-for list="{{ tipos }}" as="tp" hint-placeholder-count="5"><option value="{{ tp }}">{{ tp }}</option></sc-for></select></div>
+          <sc-for list="{{ fields }}" as="f" hint-placeholder-count="6">
+            <div><label style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 6px;">{{ f.label }}</label><input type="{{ f.type }}" value="{{ f.value }}" onInput="{{ f.set }}" placeholder="{{ f.ph }}" style="width: 100%; height: 44px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px;" style-focus="border-color: #1C543A; outline: none;"/></div>
+          </sc-for>
+          <div>
+            <label style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 6px;">PDF da norma</label>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; border: 1px dashed #B8C7BF; border-radius: 8px; padding: 12px;">
+              <label style="height: 40px; padding: 0 14px; display: inline-flex; align-items: center; border: 1px solid #1C543A; border-radius: 8px; color: #1C543A; font-size: 13px; font-weight: 700; cursor: pointer;">{{ pdfPickLabel }}<input type="file" accept="application/pdf" onChange="{{ pickPdf }}" style="display: none;"/></label>
+              <span style="font-size: 12.5px; color: #444444; min-width: 0; overflow-wrap: anywhere;">{{ formPdfLabel }}</span>
+              <sc-if value="{{ formHasPdf }}" hint-placeholder-val="{{ false }}"><button type="button" onClick="{{ removePdf }}" style="height: 36px; padding: 0 12px; border: 1px solid #F5C2C2; border-radius: 8px; background-color: #FFFFFF; color: #B91C1C; font-size: 12.5px; font-weight: 600; cursor: pointer; margin-left: auto;">Remover PDF</button></sc-if>
+            </div>
+            <p style="font-size: 11.5px; color: #666666; margin-top: 6px;">Somente PDF, até 15 MB. O arquivo é exibido no modal "Abrir texto".</p>
+          </div>
+          <div><label style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 6px;">Texto da norma (opcional, usado quando não houver PDF)</label><textarea value="{{ form.texto }}" onInput="{{ setTexto }}" rows="8" placeholder="Cole aqui o texto integral ou os artigos principais" style="width: 100%; padding: 10px 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; font-family: Georgia, 'Times New Roman', serif; line-height: 1.55; resize: vertical;" style-focus="border-color: #1C543A; outline: none;"></textarea></div>
+          <sc-if value="{{ formError }}" hint-placeholder-val="{{ false }}"><p style="font-size: 12px; color: #B91C1C;">{{ formError }}</p></sc-if>
+          <div style="display: flex; justify-content: flex-end; gap: 10px;">
+            <button onClick="{{ closeForm }}" style="height: 44px; padding: 0 16px; border: 1px solid #E0E0E0; border-radius: 8px; background-color: #FFFFFF; font-size: 13px; cursor: pointer;">Cancelar</button>
+            <button onClick="{{ submitForm }}" style="height: 44px; padding: 0 16px; border: none; border-radius: 8px; background-color: #1C543A; color: #FFFFFF; font-size: 13px; font-weight: 700; cursor: pointer;">Salvar</button>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+</main>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: &quot;100%&quot;, &quot;height&quot;: &quot;900px&quot;}}">
+class Component extends DCLogic {
+  KEY = 'DA_legis_v1';
+  TIPOS = ['Base legal', 'Decreto', 'Resolução', 'Portaria', 'Recomendação'];
+  TC = { 'Base legal': ['#EAF3EE', '#1C543A'], 'Decreto': ['#EEF4FD', '#1E40AF'], 'Resolução': ['#F3EEFD', '#5B21B6'], 'Portaria': ['#FDF8EC', '#92400E'], 'Recomendação': ['#F0F0F0', '#444444'] };
+  SEED = [
+    { tipo: 'Base legal', numero: 'Lei nº 14.133/2021', ementa: 'Lei de Licitações e Contratos Administrativos.', orgao: 'União', data: '2021-04-01', link: 'https://www.planalto.gov.br/ccivil_03/_ato2019-2022/2021/lei/l14133.htm', tags: 'licitação, contratos, dispensa', ativa: true },
+    { tipo: 'Decreto', numero: 'Decreto nº 12.807/2025', ementa: 'Atualiza os valores dos limites de dispensa da Lei nº 14.133/2021, vigentes a partir de 01/01/2026.', orgao: 'União', data: '2025-12-30', link: '', tags: 'limites, dispensa, art. 75', ativa: true },
+    { tipo: 'Decreto', numero: 'Decreto nº 12.343/2024', ementa: 'Valores de limites de dispensa vigentes em 2025 — substituído pelo Decreto nº 12.807/2025.', orgao: 'União', data: '2024-12-30', link: '', tags: 'limites, histórico', ativa: false },
+    { tipo: 'Base legal', numero: 'Lei nº 13.709/2018 (LGPD)', ementa: 'Lei Geral de Proteção de Dados Pessoais.', orgao: 'União', data: '2018-08-14', link: 'https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm', tags: 'privacidade, dados pessoais', ativa: true },
+    { tipo: 'Portaria', numero: 'Portaria DA nº 01/2026', ementa: 'Regulamenta o controle de moções na Câmara Municipal.', orgao: 'Diretoria Administrativa', data: '2026-01-05', link: '', tags: 'moções', ativa: true },
+    { tipo: 'Portaria', numero: 'Portaria DA nº 03/2023', ementa: 'Regras e cotas para homenagens e galeria de homenageados.', orgao: 'Diretoria Administrativa', data: '2023-03-10', link: '', tags: 'homenagens, cotas', ativa: true }
+  ].map((n, i) => ({ id: 'L' + (i + 1), ...n }));
+  state = { q: '', type: 'todos', status: 'ativas', form: null, formError: '', items: null, viewId: null, pdfUrl: '', pdfLoading: false, pendingPdf: null };
+  _db() { if (!this._dbp) this._dbp = new Promise((res, rej) => { const r = indexedDB.open('DA_legis_pdf', 1); r.onupgradeneeded = () => r.result.createObjectStore('pdf'); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }); return this._dbp; }
+  async _pdfPut(id, blob) { const db = await this._db(); return new Promise((res, rej) => { const tx = db.transaction('pdf', 'readwrite'); blob ? tx.objectStore('pdf').put(blob, id) : tx.objectStore('pdf').delete(id); tx.oncomplete = res; tx.onerror = () => rej(tx.error); }); }
+  async _pdfGet(id) { const db = await this._db(); return new Promise((res, rej) => { const r = db.transaction('pdf').objectStore('pdf').get(id); r.onsuccess = () => res(r.result || null); r.onerror = () => rej(r.error); }); }
+  _revoke() { if (this.state.pdfUrl) URL.revokeObjectURL(this.state.pdfUrl); }
+  async _openView(n) {
+    this._revoke(); this.setState({ viewId: n.id, pdfUrl: '', pdfLoading: !!n.pdfName });
+    if (!n.pdfName) return;
+    try { const b = await this._pdfGet(n.id); if (this.state.viewId !== n.id) return; this.setState({ pdfUrl: b ? URL.createObjectURL(b) : '', pdfLoading: false }); } catch (e) { this.setState({ pdfLoading: false }); }
+  }
+  _closeView() { this._revoke(); this.setState({ viewId: null, pdfUrl: '', pdfLoading: false }); }
+  componentDidMount() {
+    this._esc = e => { if (e.key === 'Escape') { this._closeView(); this.setState({ form: null }); } };
+    window.addEventListener('keydown', this._esc); let s = null; try { s = JSON.parse(localStorage.getItem(this.KEY)); } catch (e) {} this.setState({ items: Array.isArray(s) ? s : this.SEED }); }
+  componentWillUnmount() { window.removeEventListener('keydown', this._esc); this._revoke(); }
+  _save(items) { this.setState({ items }); try { localStorage.setItem(this.KEY, JSON.stringify(items)); } catch (e) {} }
+
+  getNavLinksForRole = (role) => {
+    const can = m => !window.DASession || !window.DASession.get() || window.DASession.can(m);
+    const access = { compras: can('compras'), motions: can('mocoes'), almoxarifado: can('almoxarifado'), patrimonio: can('patrimonio'), users: can('rh') };
+    return [
+      { label: 'Almoxarifado', href: 'AlmoxarifadoAmostragem.dc.html', icon: '📦', key: 'almoxarifado' },
+      { label: 'Compras & Licitações', href: 'ComprasModule.dc.html', icon: '🛒', key: 'compras' },
+      { label: 'Moções & Homenagens', href: 'MocoesHomenagens.dc.html', icon: '🎗', key: 'motions' },
+      { label: 'Patrimônio', href: 'PatrimonioModule.dc.html', icon: '🏛', key: 'patrimonio' }
+    ].filter(l => access[l.key]).sort((a, b) => a.label.localeCompare(b.label, 'pt-BR', { sensitivity: 'base' }));
+  };
+
+  _shellVals() {
+    if (!this._navBound) {
+      this._navBound = true;
+      window.addEventListener('resize', () => this.forceUpdate());
+      window.addEventListener('themechange', () => this.forceUpdate());
+    }
+    const st = this.state || {};
+    const isMobile = window.innerWidth < 900;
+    const open = !!st.navMenuOpen && isMobile;
+    const norm = s => String(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    const q = norm((st.navSearch || '').trim());
+    const INDEX = [["Dashboard.dc.html","▦","Painel de Controle","Sistemas & Gestão","painel dashboard indicadores alertas prazos fluxo"],["AlmoxarifadoAmostragem.dc.html","📦","Almoxarifado","Sistemas & Gestão","almoxarifado estoque amostragem materiais contagem"],["MocoesHomenagens.dc.html","🎗","Moções & Homenagens","Sistemas & Gestão","mocoes homenagens galeria vereador portaria"],["PatrimonioModule.dc.html","🏛","Patrimônio","Sistemas & Gestão","patrimonio bens tombamento transferencias ativos"],["UserProfile.dc.html","👤","Meus Dados (Perfil)","Sistemas & Gestão","perfil meus dados telefone email aniversario"],["ComprasModule.dc.html","🛒","Compras & Licitações","Sistemas & Gestão","compras licitacoes requisicoes fornecedores pregao"],["ProtocoloModule.dc.html","📋","Protocolo","Complementares","protocolo documentos processos prazos"],["RHModule.dc.html","🧑‍💼","Gestão de Pessoal","Complementares","rh recursos humanos servidores ferias"],["AnalyticsModule.dc.html","📈","Analytics & Relatórios","Complementares","analytics relatorios metricas indicadores"],["AuditLog.dc.html","🛡","Log e Auditoria","Administração","log auditoria seguranca acessos lgpd logins"],["Configuracoes.dc.html","⚙","Configurações do Sistema","Administração","configuracoes parametros parametrizacao ajustes alertas limites acessos perfis"]];
+    const results = q ? INDEX.filter(i => norm(i[2] + ' ' + i[4]).includes(q)).slice(0, 6).map(i => ({ href: i[0], icon: i[1], label: i[2], group: i[3], go: () => { window.location.href = i[0]; } })) : [];
+    return {
+      navIsMobile: isMobile,
+      navOverlayVisible: open,
+      navSidebarPosition: isMobile ? 'fixed' : 'sticky',
+      navSidebarTransform: isMobile ? (open ? 'translateX(0)' : 'translateX(-100%)') : 'translateX(0)',
+      navOpen: () => this.setState({ navMenuOpen: true }),
+      navClose: () => this.setState({ navMenuOpen: false }),
+      navGutter: isMobile ? '16px' : '36px',
+      navHeaderPad: isMobile ? '18px 16px 12px' : '28px 36px 16px',
+      navTitleSize: isMobile ? '24px' : '30px',
+      navShowBreadcrumb: !isMobile,
+      navSearch: st.navSearch || '',
+      navSearchInput: (e) => this.setState({ navSearch: e.target.value, navSearchFocused: true }),
+      navSearchFocus: () => this.setState({ navSearchFocused: true }),
+      navSearchBlur: () => setTimeout(() => this.setState({ navSearchFocused: false }), 150),
+      navSearchKey: (e) => {
+        if (e.key === 'Enter' && results.length) window.location.href = results[0].href;
+        if (e.key === 'Escape') this.setState({ navSearch: '', navSearchFocused: false });
+      },
+      navSearchResults: results,
+      navSearchOpen: !!(st.navSearchFocused && q),
+      navSearchEmpty: !!q && results.length === 0,
+      ...(() => { const dk = !!(window.theme && window.theme.isDark && window.theme.isDark()); return { navThemeDark: dk, navThemeIsLight: !dk, navThemeLightBg: dk ? 'transparent' : 'rgba(255,255,255,0.9)', navThemeLightFg: dk ? 'rgba(255,255,255,0.6)' : '#1C543A', navThemeDarkBg: dk ? 'rgba(255,255,255,0.18)' : 'transparent', navThemeDarkFg: dk ? '#FFFFFF' : 'rgba(255,255,255,0.6)', navThemeLight: () => { if (window.theme) window.theme.set('light'); }, navThemeDarkSet: () => { if (window.theme) window.theme.set('dark'); } }; })()
+    };
+  }
+
+  renderVals() {
+    const st = this.state, isMobile = window.innerWidth < 900, items = st.items || this.SEED, f = st.form || {};
+    const sess = window.DASession && window.DASession.get(); const role = (sess && sess.role) || 'Visualizador';
+    const ed = window.DAConfig ? window.DAConfig.get('leg.editores') : 'Administrativo';
+      const r2 = (window.DASession && window.DASession.role) ? window.DASession.role() : role;
+      const canEdit = r2 === 'Administrativo' || (ed === 'Administrativo e Gerenciamento' && r2 === 'Gerenciamento');
+    const q = st.q.trim().toLowerCase();
+    const vRec = st.viewId ? items.find(n => n.id === st.viewId) : null;
+    const byStatus = items.filter(n => st.status === 'todas' || (st.status === 'ativas' ? n.ativa : !n.ativa));
+    const list = byStatus.filter(n => (st.type === 'todos' || n.tipo === st.type) && (!q || (n.numero + ' ' + n.ementa + ' ' + n.orgao + ' ' + (n.tags || '') + ' ' + (n.texto || '')).toLowerCase().includes(q))).sort((a, b) => String(b.data).localeCompare(String(a.data)));
+    const FIELDS = [['numero', 'Número / título', 'text', 'Ex.: Portaria DA nº 02/2026'], ['ementa', 'Ementa', 'text', 'Resumo do que a norma trata'], ['orgao', 'Órgão emissor', 'text', 'Ex.: Diretoria Administrativa'], ['data', 'Data de publicação', 'date', ''], ['link', 'Link para o texto integral', 'url', 'https://'], ['tags', 'Palavras-chave (separadas por vírgula)', 'text', 'licitação, contratos']];
+    const chip = (key, label, count) => { const on = st.type === key; return { label, count, on, bg: on ? '#1C543A' : '#FFFFFF', color: on ? '#FFFFFF' : '#444444', border: on ? '#1C543A' : '#E0E0E0', apply: () => this.setState({ type: key }) }; };
+    return {
+      ...this._shellVals(),
+      navLinks: this.getNavLinksForRole(role),
+      mainPadding: isMobile ? '18px 16px 32px' : '28px 36px 40px', titleFontSize: isMobile ? '24px' : '30px',
+      canEdit, q: st.q, status: st.status, shown: list.length, isEmpty: !list.length, tipos: this.TIPOS,
+      setQ: e => this.setState({ q: e.target.value }), setStatus: e => this.setState({ status: e.target.value }),
+      typeChips: [chip('todos', 'Todas', byStatus.length)].concat(this.TIPOS.map(tp => chip(tp, tp, byStatus.filter(n => n.tipo === tp).length))),
+      rows: list.map(n => { const c = this.TC[n.tipo] || this.TC['Recomendação'];
+        return { ...n, typeBg: c[0], typeColor: c[1], dataFmt: n.data ? n.data.split('-').reverse().join('/') : '—', statusLabel: n.ativa ? 'Ativa' : 'Inativa', opacity: n.ativa ? '1' : '0.65',
+          tagList: String(n.tags || '').split(',').map(x => x.trim()).filter(Boolean), hasLink: /^https?:\/\//.test(n.link || ''),
+          switchBg: n.ativa ? '#1C543A' : '#D9D9D9', knob: n.ativa ? '23px' : '3px', toggleLabel: n.ativa ? 'Inativar norma' : 'Reativar norma',
+          toggle: () => { this._save(items.map(x => x.id === n.id ? { ...x, ativa: !x.ativa } : x)); if (window.DAAudit) window.DAAudit.log(n.ativa ? 'Norma inativada' : 'Norma reativada', 'legislacoes', n.numero); },
+          view: () => this._openView(n), hasPdf: !!n.pdfName,
+          edit: () => this.setState({ form: { ...n }, formError: '', pendingPdf: null }) }; }),
+      viewOpen: !!vRec, view: vRec ? (() => { const c = this.TC[vRec.tipo] || this.TC['Recomendação']; return { ...vRec, typeBg: c[0], typeColor: c[1], dataFmt: vRec.data ? vRec.data.split('-').reverse().join('/') : '—', statusLabel: vRec.ativa ? 'Ativa' : 'Inativa', hasPdf: !!vRec.pdfName && !!st.pdfUrl || !!vRec.pdfName && st.pdfLoading, noPdf: !vRec.pdfName || (!st.pdfUrl && !st.pdfLoading), hasTexto: !!String(vRec.texto || '').trim(), semTexto: !String(vRec.texto || '').trim(), hasLink: /^https?:\/\//.test(vRec.link || '') }; })() : {},
+      closeView: () => this._closeView(), pdfUrl: st.pdfUrl, pdfReady: !!st.pdfUrl, pdfLoading: st.pdfLoading,
+      formHasPdf: !!(st.pendingPdf ? st.pendingPdf.file : f.pdfName && !(st.pendingPdf && st.pendingPdf.remove)),
+      formPdfLabel: st.pendingPdf ? (st.pendingPdf.file ? st.pendingPdf.file.name + ' (' + Math.round(st.pendingPdf.file.size / 1024) + ' KB)' : 'PDF será removido ao salvar') : (f.pdfName || 'Nenhum arquivo anexado'),
+      pdfPickLabel: (f.pdfName || (st.pendingPdf && st.pendingPdf.file)) ? 'Trocar PDF' : 'Anexar PDF',
+      pickPdf: e => { const file = e.target.files && e.target.files[0]; e.target.value = ''; if (!file) return;
+        if (file.type !== 'application/pdf' && !/\.pdf$/i.test(file.name)) { this.setState({ formError: 'Selecione um arquivo PDF.' }); return; }
+        if (file.size > 15 * 1024 * 1024) { this.setState({ formError: 'O PDF deve ter no máximo 15 MB.' }); return; }
+        this.setState({ pendingPdf: { file }, formError: '' }); },
+      removePdf: () => this.setState({ pendingPdf: { remove: true } }),
+      setTexto: e => { const v = e.target.value; this.setState(s => ({ form: { ...s.form, texto: v } })); },
+      formOpen: !!st.form, form: f, formTitle: f.id ? 'Editar norma' : 'Nova norma', formError: st.formError, stop: e => e.stopPropagation(),
+      openNew: () => this.setState({ form: { tipo: st.type !== 'todos' ? st.type : 'Portaria', numero: '', ementa: '', orgao: 'Diretoria Administrativa', data: '', link: '', tags: '', texto: '', ativa: true }, formError: '', pendingPdf: null }),
+      closeForm: () => this.setState({ form: null, pendingPdf: null }),
+      setTipo: e => { const v = e.target.value; this.setState(s => ({ form: { ...s.form, tipo: v } })); },
+      fields: FIELDS.map(([k, label, type, ph]) => ({ label, type, ph, value: f[k] || '', set: e => { const v = e.target.value; this.setState(s => ({ form: { ...s.form, [k]: v } })); } })),
+      submitForm: () => {
+        if (!String(f.numero || '').trim() || !String(f.ementa || '').trim()) { this.setState({ formError: 'Informe o número/título e a ementa.' }); return; }
+        if (f.link && !/^https?:\/\//.test(f.link)) { this.setState({ formError: 'O link deve começar com http:// ou https://' }); return; }
+        const id = f.id || 'L' + Date.now(); const pp = st.pendingPdf;
+        const rec = { ...f, id, numero: f.numero.trim(), ementa: f.ementa.trim() };
+        if (pp && pp.file) rec.pdfName = pp.file.name; else if (pp && pp.remove) delete rec.pdfName;
+        if (pp) this._pdfPut(id, pp.file || null).catch(() => this.setState({ formError: 'Não foi possível salvar o PDF neste navegador.' }));
+        this._save(f.id ? items.map(x => x.id === f.id ? rec : x) : [rec].concat(items));
+        if (window.DAAudit) window.DAAudit.log(f.id ? 'Norma editada' : 'Norma cadastrada', 'legislacoes', rec.numero);
+        this.setState({ form: null, pendingPdf: null });
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>

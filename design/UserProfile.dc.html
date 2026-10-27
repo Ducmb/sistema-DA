@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <script src="./theme.js"></script>
+  <script src="./config.js"></script>
+  <script src="./session.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema DA - Meu Perfil</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #FAFAFA;
+      color: #1D1D1B;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    input:focus { outline: none; }
+    input[readonly] { background-color: #F5F5F5; }
+  </style>
+</helmet>
+
+<div style="display: flex; min-height: 100vh; background-color: #FFFFFF; position: relative;">
+  <sc-if value="{{ navOverlayVisible }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ navClose }}" style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); z-index: 40;"></div>
+  </sc-if>
+  <aside style="background-color: #1C543A; color: #FFFFFF; width: 250px; flex-shrink: 0; display: flex; flex-direction: column; padding: 22px 16px; gap: 22px; position: {{ navSidebarPosition }}; top: 0; left: 0; height: 100vh; overflow-y: auto; z-index: 50; transform: {{ navSidebarTransform }}; transition: transform 0.3s cubic-bezier(0.34, 1.25, 0.64, 1);">
+      <a href="Dashboard.dc.html" title="Voltar ao Painel de Controle" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: #FFFFFF; padding: 0 4px;">
+        <div style="width: 36px; height: 36px; background-color: #FFFFFF; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; color: #1C543A; flex-shrink: 0;">DA</div>
+        <div>
+          <p style="font-size: 12.5px; font-weight: 700; line-height: 1.3; color: #FFFFFF;">CÂMARA MUNICIPAL</p>
+          <p style="font-size: 9.5px; letter-spacing: 0.4px; color: rgba(255,255,255,0.65); text-transform: uppercase;">Diretoria Administrativa</p>
+        </div>
+      </a>
+      <nav style="display: flex; flex-direction: column; gap: 2px;">
+        <p style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: rgba(255,255,255,0.5); padding: 0 12px; margin-bottom: 6px;">Sistemas &amp; Gestão</p>
+        <a href="Dashboard.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 13px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">▦</span>Painel de Controle</a>
+        <a href="AlmoxarifadoAmostragem.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 13px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">📦</span>Almoxarifado</a>
+        <a href="ComprasModule.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 13px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">🛒</span>Compras &amp; Licitações</a>
+        <a href="MocoesHomenagens.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 13px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">🎗</span>Moções &amp; Homenagens</a>
+        <a href="PatrimonioModule.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 13px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">🏛</span>Patrimônio</a>
+      </nav>
+      <nav style="display: flex; flex-direction: column; gap: 2px;">
+        <p style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: rgba(255,255,255,0.5); padding: 0 12px; margin-bottom: 6px;">Módulos Complementares</p>
+        <a href="AnalyticsModule.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">📈</span>Analytics &amp; Relatórios</a>
+        <a href="RHModule.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">🧑‍💼</span>Gestão de Pessoal</a>
+        <a href="Legislacoes.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">⚖</span>Legislações</a>
+        <a href="AuditLog.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">🛡</span>Log e Auditoria</a>
+        <a href="Configuracoes.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">⚙</span>Configurações do Sistema</a>
+      <a href="ProtocoloModule.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">📋</span>Protocolo</a>
+      </nav>
+      <div style="margin-top: auto; display: flex; flex-direction: column; gap: 4px; padding-top: 8px;">
+        <a href="UserProfile.dc.html" style="display: flex; align-items: center; gap: 10px; background-color: rgba(255,255,255,0.08); border-radius: 10px; padding: 12px; text-decoration: none; color: #FFFFFF;" style-hover="background-color: rgba(255,255,255,0.14);">
+          <div style="width: 34px; height: 34px; border-radius: 50%; background-color: #F0B429; color: #1C543A; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; flex-shrink: 0;">RA</div>
+          <div style="min-width: 0;">
+            <p style="font-size: 12.5px; font-weight: 700; color: #FFFFFF;">Dr. Roberto Alencar</p>
+            <p style="font-size: 10.5px; color: rgba(255,255,255,0.6);">DA-2026-948 · Diretoria</p>
+          </div>
+        </a>
+        <div role="group" aria-label="Aparência" style="display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 40px; padding: 0 12px;">
+          <span style="font-size: 11px; font-weight: 600; letter-spacing: 0.3px; color: rgba(255,255,255,0.6);">Aparência</span>
+          <div style="display: flex; padding: 2px; border-radius: 999px; background-color: rgba(0,0,0,0.22);">
+            <button onClick="{{ navThemeLight }}" aria-pressed="{{ navThemeIsLight }}" aria-label="Modo padrão" title="Modo padrão" style="width: 30px; height: 26px; border: none; border-radius: 999px; background-color: {{ navThemeLightBg }}; color: {{ navThemeLightFg }}; font-size: 13px; line-height: 1; cursor: pointer; transition: background-color 0.2s;">☀</button>
+            <button onClick="{{ navThemeDarkSet }}" aria-pressed="{{ navThemeDark }}" aria-label="Modo escuro" title="Modo escuro" style="width: 30px; height: 26px; border: none; border-radius: 999px; background-color: {{ navThemeDarkBg }}; color: {{ navThemeDarkFg }}; font-size: 13px; line-height: 1; cursor: pointer; transition: background-color 0.2s;">☾</button>
+          </div>
+        </div>
+        <a href="Login.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; color: rgba(255,255,255,0.7); text-decoration: none; font-size: 12.5px; font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1); color: #FFFFFF;"><span style="width: 18px; text-align: center; flex-shrink: 0;">⎋</span>Sair do sistema</a>
+      </div>
+    </aside>
+  <div style="flex: 1; min-width: 0; display: flex; flex-direction: column;">
+    <div style="position: sticky; top: 0; z-index: 30; background-color: rgba(255,255,255,0.96); backdrop-filter: blur(6px); border-bottom: 1px solid #E8E8E8; min-height: 64px; padding: 10px {{ navGutter }}; display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+      <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
+        <sc-if value="{{ navIsMobile }}" hint-placeholder-val="{{ false }}">
+          <button onClick="{{ navOpen }}" aria-label="Abrir menu" style="width: 44px; height: 44px; border-radius: 8px; border: 1px solid #E0E0E0; background-color: #FFFFFF; font-size: 18px; color: #1D1D1B; cursor: pointer; flex-shrink: 0;">☰</button>
+          <a href="Dashboard.dc.html" title="Painel de Controle" style="width: 36px; height: 36px; background-color: #1C543A; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 12px; color: #FFFFFF; text-decoration: none; flex-shrink: 0;">DA</a>
+        </sc-if>
+        <sc-if value="{{ navShowBreadcrumb }}" hint-placeholder-val="{{ true }}">
+          <div style="display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: #666666; white-space: nowrap;">
+            <a href="Dashboard.dc.html" style="color: #666666; text-decoration: none;" style-hover="color: #1C543A;">Painel de Controle</a>
+            <span style="color: #CCCCCC;">›</span>
+            <span style="color: #1D1D1B; font-weight: 600;">Meus Dados (Perfil)</span>
+          </div>
+        </sc-if>
+      </div>
+      <div style="display: flex; align-items: center; gap: 10px; flex: 1; justify-content: flex-end; min-width: 0;">
+        <div style="position: relative; flex: 1; max-width: 340px; min-width: 0;">
+          <input type="search" placeholder="Buscar módulos e telas…" aria-label="Busca global" value="{{ navSearch }}" onInput="{{ navSearchInput }}" onFocus="{{ navSearchFocus }}" onBlur="{{ navSearchBlur }}" onKeyDown="{{ navSearchKey }}" style="width: 100%; height: 44px; padding: 0 12px 0 34px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; color: #1D1D1B; background-color: #F9F9F9;" style-focus="border-color: #1C543A; background-color: #FFFFFF; outline: none;"/>
+          <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 14px; color: #999999; pointer-events: none;">⌕</span>
+          <sc-if value="{{ navSearchOpen }}" hint-placeholder-val="{{ false }}">
+            <div style="position: absolute; top: 50px; right: 0; left: 0; min-width: 240px; background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 8px; box-shadow: 0 12px 32px rgba(0,0,0,0.12); padding: 6px; z-index: 60;">
+              <sc-for list="{{ navSearchResults }}" as="r" hint-placeholder-count="3">
+                <a href="{{ r.href }}" onMouseDown="{{ r.go }}" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 10px; border-radius: 6px; text-decoration: none; color: #1D1D1B; font-size: 13px;" style-hover="background-color: #F2F7F4;">
+                  <span style="width: 20px; text-align: center; flex-shrink: 0;">{{ r.icon }}</span>
+                  <span style="flex: 1; font-weight: 600;">{{ r.label }}</span>
+                  <span style="font-size: 11px; color: #999999;">{{ r.group }}</span>
+                </a>
+              </sc-for>
+              <sc-if value="{{ navSearchEmpty }}" hint-placeholder-val="{{ false }}">
+                <p style="padding: 12px 10px; font-size: 12.5px; color: #999999;">Nenhum resultado para “{{ navSearch }}”</p>
+              </sc-if>
+            </div>
+          </sc-if>
+        </div>
+        <a href="NotificationsModule.dc.html" title="Notificações" style="position: relative; width: 44px; height: 44px; border-radius: 8px; border: 1px solid #E0E0E0; background-color: #FFFFFF; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 16px; flex-shrink: 0;" style-hover="border-color: #1C543A;">🔔<span style="position: absolute; top: 9px; right: 10px; width: 7px; height: 7px; border-radius: 50%; background-color: #DC2626; border: 1.5px solid #FFFFFF;"></span></a>
+      </div>
+    </div>
+    <div style="padding: {{ navHeaderPad }}; display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+      <div>
+        <p style="font-size: 11px; font-weight: 700; letter-spacing: 0.6px; color: #1C543A; text-transform: uppercase;">Sistema de Gestão Integrada &nbsp;•&nbsp; Meu Perfil</p>
+        <h1 style="font-size: {{ navTitleSize }}; font-weight: 800; color: #1D1D1B; margin-top: 6px;">Meu Perfil</h1>
+      </div>
+    </div>
+
+  <main style="flex: 1; width: 100%; max-width: 880px; padding: 24px {{ navGutter }} 40px;">
+    <form onSubmit="{{ handleSave }}" style="display: flex; flex-direction: column; gap: 24px;">
+      
+      <!-- Profile Header -->
+      <div style="animation: fadeIn 0.6s ease-out; background-color: #FFFFFF; padding: 24px; border-radius: 8px; border: 1px solid #E8E8E8; display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
+        <div style="width: 80px; height: 80px; border-radius: 50%; background-color: #1C543A; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 32px; flex-shrink: 0;">
+          {{ userInitials }}
+        </div>
+        <div>
+          <p style="font-size: 20px; font-weight: 600; color: #1D1D1B;">{{ profile.name }}</p>
+          <p style="font-size: 14px; color: #999999; margin-top: 4px;">{{ profile.department }} • {{ profile.role }}</p>
+          <p style="font-size: 13px; color: #666666; margin-top: 8px;">{{ profile.email }}</p>
+        </div>
+      </div>
+
+      <!-- Functional Data (Read-only) -->
+      <div style="animation: fadeIn 0.6s ease-out 0.1s both; background-color: #FFFFFF; padding: 24px; border-radius: 8px; border: 1px solid #E8E8E8;">
+        <h2 style="font-size: 14px; font-weight: 600; text-transform: uppercase; color: #999999; margin-bottom: 20px; letter-spacing: 0.5px; padding-bottom: 16px; border-bottom: 1px solid #E8E8E8;">Dados Funcionais</h2>
+        
+        <div style="display: grid; grid-template-columns: {{ formColumns }}; gap: 20px;">
+          <!-- Full Name -->
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font-size: 12px; font-weight: 600; color: #1D1D1B;">Nome Completo</label>
+            <input 
+              type="text"
+              value="{{ profile.name }}"
+              readOnly
+              style="padding: 10px 12px; border: 1px solid #E8E8E8; border-radius: 6px; font-size: 13px; color: #999999; background-color: #F5F5F5; cursor: not-allowed;"
+            />
+          </div>
+
+          <!-- Registration Number -->
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font-size: 12px; font-weight: 600; color: #1D1D1B;">Matrícula</label>
+            <input 
+              type="text"
+              value="{{ profile.registration }}"
+              readOnly
+              style="padding: 10px 12px; border: 1px solid #E8E8E8; border-radius: 6px; font-size: 13px; color: #999999; background-color: #F5F5F5; cursor: not-allowed;"
+            />
+          </div>
+
+          <!-- Position -->
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font-size: 12px; font-weight: 600; color: #1D1D1B;">Cargo</label>
+            <input 
+              type="text"
+              value="{{ profile.position }}"
+              readOnly
+              style="padding: 10px 12px; border: 1px solid #E8E8E8; border-radius: 6px; font-size: 13px; color: #999999; background-color: #F5F5F5; cursor: not-allowed;"
+            />
+          </div>
+
+          <!-- Institutional Email -->
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font-size: 12px; font-weight: 600; color: #1D1D1B;">E-mail Institucional</label>
+            <input 
+              type="email"
+              value="{{ profile.institutionalEmail }}"
+              readOnly
+              style="padding: 10px 12px; border: 1px solid #E8E8E8; border-radius: 6px; font-size: 13px; color: #999999; background-color: #F5F5F5; cursor: not-allowed;"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- Personal Data (Editable) -->
+      <div style="animation: fadeIn 0.6s ease-out 0.2s both; background-color: #FFFFFF; padding: 24px; border-radius: 8px; border: 1px solid #E8E8E8;">
+        <h2 style="font-size: 14px; font-weight: 600; text-transform: uppercase; color: #999999; margin-bottom: 20px; letter-spacing: 0.5px; padding-bottom: 16px; border-bottom: 1px solid #E8E8E8;">Dados Pessoais e de Contato</h2>
+        
+        <div style="display: grid; grid-template-columns: {{ formColumns }}; gap: 20px;">
+          <!-- Phone -->
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font-size: 12px; font-weight: 600; color: #1D1D1B;">Telefone</label>
+            <input 
+              type="tel"
+              value="{{ editedProfile.phone }}"
+              onChange="{{ handlePhoneChange }}"
+              placeholder="(XX) XXXXX-XXXX"
+              style="padding: 10px 12px; border: 1px solid #E8E8E8; border-radius: 6px; font-size: 13px; color: #1D1D1B; background-color: #FFFFFF; transition: all 0.2s ease;"
+              style-focus="border-color: #1C543A; box-shadow: 0 0 0 2px rgba(28, 84, 58, 0.1);"
+            />
+          </div>
+
+          <!-- Personal Email -->
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font-size: 12px; font-weight: 600; color: #1D1D1B;">E-mail Pessoal</label>
+            <input 
+              type="email"
+              value="{{ editedProfile.personalEmail }}"
+              onChange="{{ handlePersonalEmailChange }}"
+              placeholder="seu.email@example.com"
+              style="padding: 10px 12px; border: 1px solid #E8E8E8; border-radius: 6px; font-size: 13px; color: #1D1D1B; background-color: #FFFFFF; transition: all 0.2s ease;"
+              style-focus="border-color: #1C543A; box-shadow: 0 0 0 2px rgba(28, 84, 58, 0.1);"
+            />
+          </div>
+
+          <!-- Birthday -->
+          <div style="display: flex; flex-direction: column; gap: 6px; grid-column: 1;">
+            <label style="font-size: 12px; font-weight: 600; color: #1D1D1B;">Data de Aniversário</label>
+            <input 
+              type="date"
+              value="{{ editedProfile.birthday }}"
+              onChange="{{ handleBirthdayChange }}"
+              style="padding: 10px 12px; border: 1px solid #E8E8E8; border-radius: 6px; font-size: 13px; color: #1D1D1B; background-color: #FFFFFF; transition: all 0.2s ease;"
+              style-focus="border-color: #1C543A; box-shadow: 0 0 0 2px rgba(28, 84, 58, 0.1);"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div style="animation: fadeIn 0.6s ease-out 0.3s both; display: flex; gap: 12px; justify-content: flex-end;">
+        <button 
+          type="button"
+          onClick="{{ handleCancel }}"
+          style="padding: 10px 20px; background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 6px; font-size: 13px; font-weight: 600; color: #666666; cursor: pointer; transition: all 0.2s ease;"
+          style-hover="background-color: #F5F5F5; border-color: #D0D0D0;"
+        >
+          Cancelar
+        </button>
+        <button 
+          type="submit"
+          disabled="{{ saveDisabled }}"
+          style="padding: 10px 20px; background-color: {{ saveButtonBg }}; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; color: #FFFFFF; cursor: {{ saveButtonCursor }}; transition: all 0.2s ease;"
+          style-hover="background-color: {{ saveButtonHoverBg }};"
+        >
+          Salvar Alterações
+        </button>
+      </div>
+
+      <!-- Success Message -->
+      <sc-if value="{{ saveSuccess }}" hint-placeholder-val="{{ false }}">
+        <div style="animation: fadeIn 0.3s ease-out; padding: 14px 16px; background-color: #F0FDF4; border: 1px solid #86EFAC; border-radius: 6px; color: #166534; font-size: 13px; display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 16px;">✓</span>
+          Perfil atualizado com sucesso
+        </div>
+      </sc-if>
+
+      <!-- Error Message -->
+      <sc-if value="{{ errorMessage }}" hint-placeholder-val="{{ false }}">
+        <div style="animation: fadeIn 0.3s ease-out; padding: 14px 16px; background-color: #FEE; border: 1px solid #FCC; border-radius: 6px; color: #933; font-size: 13px; display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 16px;">⚠</span>
+          {{ errorMessage }}
+        </div>
+      </sc-if>
+    </form>
+
+    <!-- Aparência -->
+    <section style="margin-top: 24px; background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 8px; padding: 22px; animation: fadeIn 0.6s ease-out 0.35s both;">
+      <div style="padding-bottom: 12px; margin-bottom: 16px; border-bottom: 1px solid #1C543A;">
+        <h3 style="font-size: 15px; font-weight: 700; color: #1D1D1B;">Aparência</h3>
+        <p style="font-size: 12px; color: #666666; margin-top: 2px;">A escolha vale só para o seu usuário. Outros servidores continuam com a aparência que escolheram.</p>
+      </div>
+      <div role="radiogroup" aria-label="Tema" style="display: flex; gap: 12px; flex-wrap: wrap;">
+          <button onClick="{{ ap.light.pick }}" aria-pressed="{{ ap.light.on }}" style="flex: 1; min-width: 200px; display: flex; gap: 12px; align-items: center; text-align: left; padding: 14px; border-radius: 8px; border: 2px solid {{ ap.light.border }}; background-color: #FFFFFF; cursor: pointer;">
+            <span aria-hidden="true" style="width: 52px; height: 38px; border-radius: 6px; overflow: hidden; display: flex; flex-shrink: 0; border: 1px solid #E8E8E8;"><span style="width: 14px; background-color: #1C543A;"></span><span style="flex: 1; background-color: #FFFFFF; display: flex; flex-direction: column; gap: 3px; padding: 5px;"><span style="height: 5px; border-radius: 2px; background-color: #E0E0E0;"></span><span style="height: 5px; width: 60%; border-radius: 2px; background-color: #E0E0E0;"></span></span></span>
+            <span style="flex: 1; min-width: 0;"><span style="display: block; font-size: 13.5px; font-weight: 700; color: #1D1D1B;">Modo padrão</span><span style="display: block; font-size: 12px; color: #666666; margin-top: 2px;">Fundo branco institucional</span></span>
+            <span style="font-size: 16px; color: #1C543A; font-weight: 800;">{{ ap.light.mark }}</span>
+          </button>
+          <button onClick="{{ ap.dark.pick }}" aria-pressed="{{ ap.dark.on }}" style="flex: 1; min-width: 200px; display: flex; gap: 12px; align-items: center; text-align: left; padding: 14px; border-radius: 8px; border: 2px solid {{ ap.dark.border }}; background-color: #FFFFFF; cursor: pointer;">
+            <span aria-hidden="true" style="width: 52px; height: 38px; border-radius: 6px; overflow: hidden; display: flex; flex-shrink: 0; border: 1px solid #E8E8E8;"><span style="width: 14px; background-color: #1C543A;"></span><span style="flex: 1; background-color: #1B2024; display: flex; flex-direction: column; gap: 3px; padding: 5px;"><span style="height: 5px; border-radius: 2px; background-color: #3A4247;"></span><span style="height: 5px; width: 60%; border-radius: 2px; background-color: #3A4247;"></span></span></span>
+            <span style="flex: 1; min-width: 0;"><span style="display: block; font-size: 13.5px; font-weight: 700; color: #1D1D1B;">Modo escuro</span><span style="display: block; font-size: 12px; color: #666666; margin-top: 2px;">Fundo grafite, menos brilho</span></span>
+            <span style="font-size: 16px; color: #1C543A; font-weight: 800;">{{ ap.dark.mark }}</span>
+          </button>
+      </div>
+    </section>
+
+    <!-- Segurança: alterar senha -->
+    <section style="margin-top: 24px; background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 8px; padding: 22px; animation: fadeIn 0.6s ease-out 0.4s both;">
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 12px; margin-bottom: 18px; border-bottom: 1px solid #1C543A; flex-wrap: wrap;">
+        <div>
+          <h2 style="font-size: 15px; font-weight: 700; color: #1D1D1B;">Segurança — Alterar Senha</h2>
+          <p style="font-size: 12px; color: #666666; margin-top: 2px;">A senha é armazenada com hash seguro (RNF01). Você será desconectado dos outros dispositivos.</p>
+        </div>
+        <button type="button" onClick="{{ togglePwVisible }}" style="height: 36px; padding: 0 12px; background-color: #FFFFFF; border: 1px solid #E0E0E0; border-radius: 6px; font-size: 12px; font-weight: 600; color: #1D1D1B; cursor: pointer;" style-hover="background-color: #F5F5F5;">{{ pwToggleLabel }}</button>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px;">
+          <div><label style="font-size: 12px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">Senha atual</label><div style="position: relative;"><input type="{{ pwInputType }}" value="{{ pwForm.current }}" onInput="{{ pwCurrent }}" placeholder="••••••••" autocomplete="current-password" style="width: 100%; height: 44px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; color: #1D1D1B; background-color: #FFFFFF; padding-right: 44px;" style-focus="border-color: #1C543A; outline: none;"/></div></div>
+          <div><label style="font-size: 12px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">Nova senha</label><div style="position: relative;"><input type="{{ pwInputType }}" value="{{ pwForm.next }}" onInput="{{ pwNext }}" placeholder="Mínimo 8 caracteres" autocomplete="new-password" style="width: 100%; height: 44px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; color: #1D1D1B; background-color: #FFFFFF; padding-right: 44px;" style-focus="border-color: #1C543A; outline: none;"/></div></div>
+          <div><label style="font-size: 12px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">Confirmar nova senha</label><div style="position: relative;"><input type="{{ pwInputType }}" value="{{ pwForm.confirm }}" onInput="{{ pwConfirm }}" placeholder="Repita a nova senha" autocomplete="new-password" style="width: 100%; height: 44px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; color: #1D1D1B; background-color: #FFFFFF; padding-right: 44px;" style-focus="border-color: #1C543A; outline: none;"/></div></div>
+      </div>
+      <div style="margin-top: 14px; display: flex; flex-direction: column; gap: 8px;">
+        <div style="display: flex; gap: 4px; max-width: 320px;">
+          <sc-for list="{{ pwStrengthBars }}" as="bar" hint-placeholder-count="4">
+            <div style="flex: 1; height: 5px; border-radius: 3px; background-color: {{ bar.color }}; transition: background-color 0.2s;"></div>
+          </sc-for>
+        </div>
+        <p style="font-size: 12px; font-weight: 600; color: {{ pwStrengthColor }};">{{ pwStrengthLabel }}</p>
+        <div style="display: flex; flex-wrap: wrap; gap: 6px 14px;">
+          <sc-for list="{{ pwRules }}" as="rule" hint-placeholder-count="4">
+            <span style="font-size: 12px; color: {{ rule.color }};">{{ rule.icon }} {{ rule.label }}</span>
+          </sc-for>
+        </div>
+      </div>
+      <sc-if value="{{ pwError }}" hint-placeholder-val="{{ false }}"><p style="margin-top: 12px; font-size: 12.5px; color: #DC2626; font-weight: 600;">{{ pwError }}</p></sc-if>
+      <sc-if value="{{ pwSuccess }}" hint-placeholder-val="{{ false }}"><p style="margin-top: 12px; font-size: 12.5px; color: #1C543A; font-weight: 600;">✓ Senha alterada com sucesso.</p></sc-if>
+      <div style="display: flex; justify-content: flex-end; margin-top: 16px;">
+        <button type="button" onClick="{{ submitPw }}" disabled="{{ pwDisabled }}" style="height: 44px; padding: 0 20px; background-color: #1C543A; color: #FFFFFF; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer;" style-hover="background-color: #164530;" style-disabled="background-color: #CCCCCC; cursor: not-allowed;">Alterar senha</button>
+      </div>
+    </section>
+  </main>
+</div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: &quot;100%&quot;, &quot;height&quot;: &quot;900px&quot;}}">
+class Component extends DCLogic {
+  state = {
+    isMobile: typeof window !== 'undefined' ? window.innerWidth < 700 : false,
+    profile: {
+      name: 'João da Silva Santos',
+      registration: 'MAT-2019-001',
+      position: 'Assessor Administrativo',
+      department: 'Compras',
+      role: 'Usuário Padrão',
+      email: 'joao.santos@camara.local',
+      institutionalEmail: 'joao.santos@camara.local',
+      phone: '(85) 98765-4321',
+      personalEmail: 'joao.santos@email.com',
+      birthday: '1985-06-15'
+    },
+    editedProfile: {
+      phone: '(85) 98765-4321',
+      personalEmail: 'joao.santos@email.com',
+      birthday: '1985-06-15'
+    },
+    originalProfile: {
+      phone: '(85) 98765-4321',
+      personalEmail: 'joao.santos@email.com',
+      birthday: '1985-06-15'
+    },
+    saveSuccess: false,
+    errorMessage: '',
+    pwForm: { current: '', next: '', confirm: '' },
+    pwVisible: false, pwError: '', pwSuccess: false
+  };
+
+  componentDidMount() {
+    this.handleResize = () => { this.setState({ isMobile: window.innerWidth < 700 }); };
+    window.addEventListener('resize', this.handleResize);
+  }
+  componentWillUnmount() {
+    window.removeEventListener('resize', this.handleResize);
+  }
+  handleFieldChange = (field, value) => {
+    this.setState(s => ({
+      editedProfile: { ...s.editedProfile, [field]: value },
+      errorMessage: ''
+    }));
+  };
+
+  handlePhoneChange = (e) => { this.handleFieldChange('phone', e.target.value); };
+  handlePersonalEmailChange = (e) => { this.handleFieldChange('personalEmail', e.target.value); };
+  handleBirthdayChange = (e) => { this.handleFieldChange('birthday', e.target.value); };
+
+  handleCancel = () => {
+    this.setState(s => ({
+      editedProfile: { ...s.originalProfile },
+      saveSuccess: false,
+      errorMessage: ''
+    }));
+  };
+
+  handleSave = async (e) => {
+    e.preventDefault();
+    const { editedProfile } = this.state;
+
+    // Validation
+    if (!this.validateEmail(editedProfile.personalEmail)) {
+      this.setState({ errorMessage: 'E-mail pessoal inválido' });
+      return;
+    }
+
+    if (!this.validatePhone(editedProfile.phone)) {
+      this.setState({ errorMessage: 'Telefone inválido. Use (XX) XXXXX-XXXX ou (XX) XXXX-XXXX' });
+      return;
+    }
+
+    this.setState({ errorMessage: '' });
+    
+    // Simulate API call
+    await new Promise(r => setTimeout(r, 600));
+
+    this.setState(s => ({
+      originalProfile: { ...s.editedProfile },
+      saveSuccess: true,
+      errorMessage: ''
+    }));
+
+    setTimeout(() => this.setState({ saveSuccess: false }), 3000);
+  };
+
+  validateEmail = (email) => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+  };
+
+  validatePhone = (phone) => {
+    const re = /^\(\d{2}\)\s*\d{4,5}-\d{4}$/;
+    return re.test(phone);
+  };
+
+  pwCurrent = (e) => { const v = e.target.value; this.setState(s => ({ pwForm: { ...s.pwForm, current: v }, pwError: '', pwSuccess: false })); };
+  pwNext = (e) => { const v = e.target.value; this.setState(s => ({ pwForm: { ...s.pwForm, next: v }, pwError: '', pwSuccess: false })); };
+  pwConfirm = (e) => { const v = e.target.value; this.setState(s => ({ pwForm: { ...s.pwForm, confirm: v }, pwError: '', pwSuccess: false })); };
+  togglePwVisible = () => { this.setState(s => ({ pwVisible: !s.pwVisible })); };
+  _pwRules(p) {
+    return [
+      { label: (window.DAConfig ? +window.DAConfig.get('geral.senhaMin') : 8) + '+ caracteres', ok: p.length >= (window.DAConfig ? +window.DAConfig.get('geral.senhaMin') : 8) },
+      { label: 'Letra maiúscula', ok: /[A-Z]/.test(p) },
+      { label: 'Número', ok: /\d/.test(p) },
+      { label: 'Símbolo', ok: /[^A-Za-z0-9]/.test(p) }
+    ];
+  }
+  submitPw = () => {
+    const f = this.state.pwForm;
+    if (!f.current) { this.setState({ pwError: 'Informe a senha atual.' }); return; }
+    if (this._pwRules(f.next).some(r => !r.ok)) { this.setState({ pwError: 'A nova senha não atende a todos os requisitos.' }); return; }
+    if (f.next === f.current) { this.setState({ pwError: 'A nova senha deve ser diferente da atual.' }); return; }
+    if (f.next !== f.confirm) { this.setState({ pwError: 'A confirmação não confere com a nova senha.' }); return; }
+    this.setState({ pwForm: { current: '', next: '', confirm: '' }, pwSuccess: true, pwError: '' });
+  };
+
+  _shellVals() {
+    if (!this._navBound) {
+      this._navBound = true;
+      window.addEventListener('resize', () => this.forceUpdate());
+      window.addEventListener('themechange', () => this.forceUpdate());
+    }
+    const st = this.state || {};
+    const isMobile = window.innerWidth < 900;
+    const open = !!st.navMenuOpen && isMobile;
+    const norm = s => String(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    const q = norm((st.navSearch || '').trim());
+    const INDEX = [["Dashboard.dc.html","▦","Painel de Controle","Sistemas & Gestão","painel dashboard indicadores alertas prazos fluxo"],["AlmoxarifadoAmostragem.dc.html","📦","Almoxarifado","Sistemas & Gestão","almoxarifado estoque amostragem materiais contagem"],["MocoesHomenagens.dc.html","🎗","Moções & Homenagens","Sistemas & Gestão","mocoes homenagens galeria vereador portaria"],["PatrimonioModule.dc.html","🏛","Patrimônio","Sistemas & Gestão","patrimonio bens tombamento transferencias ativos"],["UserProfile.dc.html","👤","Meus Dados (Perfil)","Sistemas & Gestão","perfil meus dados telefone email aniversario"],["ComprasModule.dc.html","🛒","Compras & Licitações","Sistemas & Gestão","compras licitacoes requisicoes fornecedores pregao"],["ProtocoloModule.dc.html","📋","Protocolo","Complementares","protocolo documentos processos prazos"],["RHModule.dc.html","🧑‍💼","Gestão de Pessoal","Complementares","rh recursos humanos servidores ferias"],["AnalyticsModule.dc.html","📈","Analytics & Relatórios","Complementares","analytics relatorios metricas indicadores"],["AuditLog.dc.html","🛡","Log e Auditoria","Administração","log auditoria seguranca acessos lgpd logins"],["Configuracoes.dc.html","⚙","Configurações do Sistema","Administração","configuracoes parametros parametrizacao ajustes alertas limites acessos perfis"],["Legislacoes.dc.html","⚖","Legislações","Administração","legislacao leis decretos portarias resolucoes recomendacoes normas"]];
+    const results = q ? INDEX.filter(i => norm(i[2] + ' ' + i[4]).includes(q)).slice(0, 6).map(i => ({ href: i[0], icon: i[1], label: i[2], group: i[3], go: () => { window.location.href = i[0]; } })) : [];
+    return {
+      navIsMobile: isMobile,
+      navOverlayVisible: open,
+      navSidebarPosition: isMobile ? 'fixed' : 'sticky',
+      navSidebarTransform: isMobile ? (open ? 'translateX(0)' : 'translateX(-100%)') : 'translateX(0)',
+      navOpen: () => this.setState({ navMenuOpen: true }),
+      navClose: () => this.setState({ navMenuOpen: false }),
+      navGutter: isMobile ? '16px' : '36px',
+      navHeaderPad: isMobile ? '18px 16px 12px' : '28px 36px 16px',
+      navTitleSize: isMobile ? '24px' : '30px',
+      navShowBreadcrumb: !isMobile,
+      navSearch: st.navSearch || '',
+      navSearchInput: (e) => this.setState({ navSearch: e.target.value, navSearchFocused: true }),
+      navSearchFocus: () => this.setState({ navSearchFocused: true }),
+      navSearchBlur: () => setTimeout(() => this.setState({ navSearchFocused: false }), 150),
+      navSearchKey: (e) => {
+        if (e.key === 'Enter' && results.length) window.location.href = results[0].href;
+        if (e.key === 'Escape') this.setState({ navSearch: '', navSearchFocused: false });
+      },
+      navSearchResults: results,
+      navSearchOpen: !!(st.navSearchFocused && q),
+      navSearchEmpty: !!q && results.length === 0,
+      ...(() => { const dk = !!(window.theme && window.theme.isDark && window.theme.isDark()); return { navThemeDark: dk, navThemeIsLight: !dk, navThemeLightBg: dk ? 'transparent' : 'rgba(255,255,255,0.9)', navThemeLightFg: dk ? 'rgba(255,255,255,0.6)' : '#1C543A', navThemeDarkBg: dk ? 'rgba(255,255,255,0.18)' : 'transparent', navThemeDarkFg: dk ? '#FFFFFF' : 'rgba(255,255,255,0.6)', navThemeLight: () => { if (window.theme) window.theme.set('light'); }, navThemeDarkSet: () => { if (window.theme) window.theme.set('dark'); } }; })()
+    };
+  }
+
+  renderVals() {
+    const hasChanges = JSON.stringify(this.state.editedProfile) !== JSON.stringify(this.state.originalProfile);
+    return {
+      ap: (() => { const dk = !!(window.theme && window.theme.isDark && window.theme.isDark()); const mk = (on, t) => ({ on, border: on ? '#1C543A' : '#E8E8E8', mark: on ? '✓' : '', pick: () => { if (window.theme) window.theme.set(t); this.forceUpdate(); } }); return { light: mk(!dk, 'light'), dark: mk(dk, 'dark') }; })(),
+      ...this._shellVals(),
+      saveDisabled: JSON.stringify(this.state.editedProfile) === JSON.stringify(this.state.originalProfile),
+      ...(() => {
+        const f = this.state.pwForm;
+        const rules = this._pwRules(f.next);
+        const score = f.next ? rules.filter(r => r.ok).length : 0;
+        const COLORS = ['#E8E8E8', '#DC2626', '#F59E0B', '#3B82F6', '#1C543A'];
+        const LABELS = ['Digite a nova senha', 'Fraca', 'Razoável', 'Boa', 'Forte'];
+        return {
+          pwForm: f, pwCurrent: this.pwCurrent, pwNext: this.pwNext, pwConfirm: this.pwConfirm,
+          pwInputType: this.state.pwVisible ? 'text' : 'password', togglePwVisible: this.togglePwVisible,
+          pwToggleLabel: this.state.pwVisible ? '🙈 Ocultar senhas' : '👁 Mostrar senhas',
+          pwStrengthBars: [1, 2, 3, 4].map(i => ({ color: i <= score ? COLORS[score] : '#E8E8E8' })),
+          pwStrengthLabel: LABELS[score], pwStrengthColor: score ? COLORS[score] : '#666666',
+          pwRules: rules.map(r => ({ label: r.label, icon: r.ok ? '✓' : '○', color: r.ok ? '#1C543A' : '#666666' })),
+          pwError: this.state.pwError, pwSuccess: this.state.pwSuccess, submitPw: this.submitPw,
+          pwDisabled: !(f.current && f.next && f.confirm)
+        };
+      })(),
+      isMobile: this.state.isMobile,
+      formColumns: this.state.isMobile ? '1fr' : '1fr 1fr',
+      profile: this.state.profile,
+      editedProfile: this.state.editedProfile,
+      hasChanges,
+      saveSuccess: this.state.saveSuccess,
+      errorMessage: this.state.errorMessage,
+      userInitials: this.state.profile.name.split(' ').map(n => n[0]).join(''),
+      handleFieldChange: this.handleFieldChange,
+      handlePhoneChange: this.handlePhoneChange,
+      handlePersonalEmailChange: this.handlePersonalEmailChange,
+      handleBirthdayChange: this.handleBirthdayChange,
+      handleCancel: this.handleCancel,
+      handleSave: this.handleSave,
+      mainPadding: this.state.isMobile ? '14px' : '20px',
+      saveButtonBg: hasChanges ? '#1C543A' : '#CCCCCC',
+      saveButtonCursor: hasChanges ? 'pointer' : 'not-allowed',
+      saveButtonHoverBg: hasChanges ? '#164530' : '#CCCCCC'
+    };
+  }
+}
+
+</script>
+</body>
+</html>

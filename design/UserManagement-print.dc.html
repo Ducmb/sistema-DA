@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+  <script src="./theme.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema DA - Gestão de Usuários e Segurança</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #FFFFFF; color: #1D1D1B; }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes toastIn { from { opacity: 0; transform: translate(-50%, -12px); } to { opacity: 1; transform: translate(-50%, 0); } }
+    a { color: #1C543A; }
+    a:hover { color: #164530; }
+    @page { size: letter; margin: 0; }
+    @media print {
+      *, *::before, *::after {
+        animation-delay: -99s !important; animation-duration: .001s !important;
+        animation-iteration-count: 1 !important; animation-fill-mode: both !important;
+        animation-play-state: running !important; transition-duration: 0s !important;
+      }
+      body { padding: 0.5in 0.6in; }
+      aside { display: none !important; }
+      main { flex: 1; padding: 0 !important; display: flex; flex-direction: column; gap: 20px; }
+      button[onclick*="openMobileMenu"], button[onclick*="closeMobileMenu"] { display: none !important; }
+      .page-break { page-break-before: always; }
+      h1, h2 { orphans: 3; widows: 3; }
+      table { width: 100%; border-collapse: collapse; }
+      tr { break-inside: avoid; }
+      div[style*="animation"] { animation: none !important; }
+    }
+  </style>
+</helmet>
+
+<div style="display: flex; min-height: 100vh; background-color: #FFFFFF; position: relative;">
+
+  <sc-if value="{{ mobileMenuOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeMobileMenu }}" style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); z-index: 40; display: none;"></div>
+  </sc-if>
+
+  <!-- Sidebar -->
+  <aside style="background-color: #1C543A; color: #FFFFFF; width: 250px; flex-shrink: 0; display: flex; flex-direction: column; padding: 24px 18px; gap: 28px; position: sticky; top: 0; left: 0; height: 100vh; z-index: 50; transform: translateX(0); transition: none;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <div style="width: 36px; height: 36px; background-color: #FFFFFF; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 16px; color: #1C543A; flex-shrink: 0;">C</div>
+      <div>
+        <p style="font-size: 12.5px; font-weight: 700; line-height: 1.3; color: #FFFFFF;">CÂMARA MUNICIPAL</p>
+        <p style="font-size: 9.5px; letter-spacing: 0.4px; color: rgba(255,255,255,0.65); text-transform: uppercase;">Diretoria Administrativa</p>
+      </div>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 4px;">
+      <p style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: rgba(255,255,255,0.5); padding: 0 10px; margin-bottom: 6px;">Sistemas &amp; Gestão</p>
+      <a href="Dashboard.dc.html" style="display: flex; align-items: center; gap: 10px; padding: 11px 12px; border-radius: 8px; color: rgba(255,255,255,0.85); text-decoration: none; font-size: 13px; font-weight: 600;">▦ Painel de Controle</a>
+      <a href="MocoesHomenagens.dc.html" style="display: flex; align-items: center; gap: 10px; padding: 11px 12px; border-radius: 8px; color: rgba(255,255,255,0.85); text-decoration: none; font-size: 13px; font-weight: 600;">🎗 Moções &amp; Homenagens</a>
+      <a href="AlmoxarifadoAmostragem.dc.html" style="display: flex; align-items: center; gap: 10px; padding: 11px 12px; border-radius: 8px; color: rgba(255,255,255,0.85); text-decoration: none; font-size: 13px; font-weight: 600;">📦 Almoxarifado</a>
+    </div>
+    <div style="margin-top: auto; display: flex; align-items: center; gap: 10px; background-color: rgba(255,255,255,0.08); border-radius: 10px; padding: 12px;">
+      <div style="width: 34px; height: 34px; border-radius: 50%; background-color: #F0B429; color: #1C543A; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; flex-shrink: 0;">RA</div>
+      <div>
+        <p style="font-size: 12.5px; font-weight: 700;">Dr. Roberto Alencar</p>
+        <p style="font-size: 10.5px; color: rgba(255,255,255,0.6);">DA-2026-948</p>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main style="flex: 1; padding: 28px 36px 40px; display: flex; flex-direction: column; gap: 24px; min-width: 0;">
+
+    <!-- Page header -->
+    <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+      <div>
+        <p style="font-size: 11px; font-weight: 700; letter-spacing: 0.6px; color: #1C543A; text-transform: uppercase;">Sistema de Gestão Integrada &nbsp;•&nbsp; Users</p>
+        <h1 style="font-size: 30px; font-weight: 800; color: #1D1D1B; margin-top: 6px;">Gestão de Usuários e Segurança</h1>
+      </div>
+      <span style="font-size: 12px; font-weight: 600; color: #1D1D1B; background-color: #FFFFFF; border: 1px solid #E0E0E0; border-radius: 8px; padding: 8px 14px; white-space: nowrap; font-family: 'SF Mono', ui-monospace, monospace;">Exercício Fiscal: 2026</span>
+    </div>
+
+    <!-- RBAC Matrix card -->
+    <div style="background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 12px; padding: 24px;">
+      <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 24px;">
+        <div>
+          <h2 style="font-size: 16px; font-weight: 700; color: #1D1D1B;">Matriz de Controle de Acesso (RBAC)</h2>
+          <p style="font-size: 12.5px; color: #999999; margin-top: 4px;">Configurações e privilégios de acesso aos módulos no servidor</p>
+        </div>
+      </div>
+
+      <!-- Search & Filter -->
+      <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 20px;">
+        <div style="position: relative; flex: 1; min-width: 200px;">
+          <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 13px; color: #999999; pointer-events: none;">🔍</span>
+          <input type="text" value="{{ searchTerm }}" onInput="{{ handleSearchInput }}" placeholder="Buscar por nome ou setor..." style="width: 100%; padding: 10px 12px 10px 34px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px;"/>
+        </div>
+        <div style="display: flex; gap: 6px; background-color: #F5F5F5; border-radius: 8px; padding: 4px;">
+          <sc-for list="{{ roleFilters }}" as="rf" hint-placeholder-count="3">
+            <button onClick="{{ rf.onSelect }}" style="padding: 7px 14px; border: none; border-radius: 6px; font-size: 12.5px; font-weight: 600; cursor: pointer; background-color: {{ rf.bg }}; color: {{ rf.color }};">{{ rf.label }}</button>
+          </sc-for>
+        </div>
+      </div>
+
+      <!-- Results count -->
+      <p style="font-size: 12px; color: #999999; margin-bottom: 14px;">{{ resultLabel }}</p>
+
+      <!-- Empty state -->
+      <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+        <div style="border: 1px dashed #D9D9D9; border-radius: 12px; padding: 40px 20px; text-align: center;">
+          <p style="font-size: 26px; margin-bottom: 8px;">🔍</p>
+          <p style="font-size: 14px; font-weight: 700; color: #1D1D1B;">Nenhum servidor encontrado</p>
+          <p style="font-size: 12.5px; color: #999999; margin-top: 4px;">Ajuste a busca ou o filtro de perfil.</p>
+        </div>
+      </sc-if>
+
+      <!-- User cards -->
+      <div style="display: flex; flex-direction: column; gap: 18px; break-inside: avoid;">
+        <sc-for list="{{ users }}" as="user" hint-placeholder-count="3">
+          <div style="border: 1px solid #E8E8E8; border-radius: 12px; padding: 20px 22px; break-inside: avoid;">
+
+            <!-- User row -->
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+              <div style="display: flex; align-items: center; gap: 14px; min-width: 0;">
+                <div style="width: 42px; height: 42px; border-radius: 50%; background-color: {{ user.avatarBg }}; color: {{ user.avatarColor }}; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; flex-shrink: 0;">{{ user.initials }}</div>
+                <div style="min-width: 0;">
+                  <p style="font-size: 15px; font-weight: 700; color: #1D1D1B;">{{ user.name }}</p>
+                  <p style="font-size: 12.5px; color: #999999; margin-top: 2px;">Setor: {{ user.department }}</p>
+                </div>
+              </div>
+              <span style="font-size: 10.5px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase; padding: 6px 14px; border-radius: 999px; background-color: {{ user.badgeBg }}; color: {{ user.badgeColor }}; white-space: nowrap;">Perfil: {{ user.role }}</span>
+            </div>
+
+            <!-- Divider -->
+            <div style="height: 1px; background-color: #F0F0F0; margin: 18px 0;"></div>
+
+            <!-- Module permission toggles -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;">
+              <sc-for list="{{ user.perms }}" as="perm" hint-placeholder-count="5">
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; border: 1px solid #E8E8E8; border-radius: 8px; padding: 12px 14px;">
+                  <span style="font-size: 12.5px; font-weight: 600; color: #1D1D1B; min-width: 0;">{{ perm.label }}</span>
+                  <div role="switch" aria-checked="{{ perm.on }}" style="width: 44px; height: 24px; border-radius: 999px; background-color: {{ perm.trackColor }}; position: relative; flex-shrink: 0;">
+                    <div style="width: 18px; height: 18px; border-radius: 50%; background-color: #FFFFFF; position: absolute; top: 3px; left: 3px; transform: {{ perm.knobTransform }}; box-shadow: 0 1px 3px rgba(0,0,0,0.25);"></div>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <!-- Audit Log -->
+    <div style="background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 12px; padding: 24px; page-break-inside: avoid;">
+      <h2 style="font-size: 16px; font-weight: 700; color: #1D1D1B; margin-bottom: 4px;">Auditoria de Alterações</h2>
+      <p style="font-size: 12.5px; color: #999999; margin-bottom: 18px;">Histórico de modificações de permissões e configurações de acesso</p>
+      
+      <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+          <thead>
+            <tr style="border-bottom: 1px solid #E8E8E8; background-color: #F9F9F9;">
+              <th style="padding: 12px 16px; text-align: left; font-weight: 700; color: #999999; text-transform: uppercase; font-size: 11px; letter-spacing: 0.4px;">Administrador</th>
+              <th style="padding: 12px 16px; text-align: left; font-weight: 700; color: #999999; text-transform: uppercase; font-size: 11px; letter-spacing: 0.4px;">Data &amp; Hora</th>
+              <th style="padding: 12px 16px; text-align: left; font-weight: 700; color: #999999; text-transform: uppercase; font-size: 11px; letter-spacing: 0.4px;">Ação</th>
+              <th style="padding: 12px 16px; text-align: left; font-weight: 700; color: #999999; text-transform: uppercase; font-size: 11px; letter-spacing: 0.4px;">Usuário Afetado</th>
+              <th style="padding: 12px 16px; text-align: left; font-weight: 700; color: #999999; text-transform: uppercase; font-size: 11px; letter-spacing: 0.4px;">Detalhe</th>
+            </tr>
+          </thead>
+          <tbody>
+            <sc-for list="{{ auditLog }}" as="log" hint-placeholder-count="5">
+              <tr style="border-bottom: 1px solid #F0F0F0; break-inside: avoid;">
+                <td style="padding: 12px 16px; color: #1D1D1B; font-weight: 600;">{{ log.admin }}</td>
+                <td style="padding: 12px 16px; color: #666666; font-family: 'SF Mono', monospace; font-size: 12px;">{{ log.timestamp }}</td>
+                <td style="padding: 12px 16px;">
+                  <span style="padding: 4px 10px; border-radius: 4px; font-size: 11.5px; font-weight: 600; background-color: {{ log.actionBg }}; color: {{ log.actionColor }};">{{ log.action }}</span>
+                </td>
+                <td style="padding: 12px 16px; color: #1D1D1B;">{{ log.targetUser }}</td>
+                <td style="padding: 12px 16px; color: #666666;">{{ log.detail }}</td>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: &quot;100%&quot;, &quot;height&quot;: &quot;860px&quot;}}">
+class Component extends DCLogic {
+  MODULES = [
+    { key: 'compras', label: 'Compras' },
+    { key: 'protocolo', label: 'Protocolo' },
+    { key: 'rh', label: 'Gestão de Pessoal' },
+    { key: 'almoxarifado', label: 'Almoxarifado' },
+    { key: 'mocoes', label: 'Moções & Galeria' }
+  ];
+
+  state = {
+    isMobile: false,
+    mobileMenuOpen: false,
+    saveSuccess: false,
+    newUserOpen: false,
+    searchTerm: '',
+    roleFilter: 'todos',
+    form: { name: '', email: '', department: '', role: 'Usuário' },
+    users: [
+      { id: 1, name: 'Dr. Roberto Alencar', department: 'Diretoria Geral', role: 'Administrativo', initials: 'DR',
+        access: { compras: true, protocolo: true, rh: true, almoxarifado: true, mocoes: true } },
+      { id: 2, name: 'Ana Beatriz Silva', department: 'Almoxarifado', role: 'Usuário', initials: 'AB',
+        access: { compras: false, protocolo: true, rh: false, almoxarifado: true, mocoes: false } },
+      { id: 3, name: 'Carlos Eduardo Costa', department: 'Gestão de Pessoal', role: 'Usuário', initials: 'CE',
+        access: { compras: false, protocolo: false, rh: true, almoxarifado: false, mocoes: true } }
+    ],
+    auditLog: [
+      { admin: 'Dr. Roberto Alencar', timestamp: '14/07/2026 14:32', action: 'Acesso Concedido', targetUser: 'Carlos Eduardo Costa', actionBg: '#DCFCE7', actionColor: '#166534', detail: 'Módulo de RH' },
+      { admin: 'Dr. Roberto Alencar', timestamp: '14/07/2026 13:15', action: 'Usuário Criado', targetUser: 'Ana Beatriz Silva', actionBg: '#E0E7FF', actionColor: '#3730A3', detail: 'Perfil: Usuário' },
+      { admin: 'Dr. Roberto Alencar', timestamp: '13/07/2026 10:22', action: 'Acesso Revogado', targetUser: 'Maria Oliveira', actionBg: '#FEE2E2', actionColor: '#991B1B', detail: 'Módulo de Compras' },
+      { admin: 'Dr. Roberto Alencar', timestamp: '12/07/2026 16:45', action: 'Perfil Alterado', targetUser: 'João Pereira', actionBg: '#FEF3C7', actionColor: '#92400E', detail: 'Administrativo → Usuário' },
+      { admin: 'Dr. Roberto Alencar', timestamp: '12/07/2026 09:10', action: 'Acesso Concedido', targetUser: 'Patricia Costa', actionBg: '#DCFCE7', actionColor: '#166534', detail: 'Módulo de Protocolo' }
+    ]
+  };
+
+  componentDidMount() {
+    // No resize listener for print
+  }
+  componentWillUnmount() {}
+
+  openMobileMenu = () => {};
+  closeMobileMenu = () => {};
+
+  handleSearchInput = (e) => { const v = e.target.value; this.setState({ searchTerm: v }); };
+  setRoleFilter = (f) => { this.setState({ roleFilter: f }); };
+
+  openNewUser = () => {};
+  closeNewUser = () => {};
+  stopPropagation = (e) => { e.stopPropagation(); };
+  handleNameInput = (e) => {};
+  handleEmailInput = (e) => {};
+  handleDeptInput = (e) => {};
+  handleRoleInput = (e) => {};
+
+  submitNewUser = () => {};
+
+  toggleAccess = (userId, moduleKey) => {};
+
+  renderVals() {
+    const isAdmin = (role) => role === 'Administrativo' || role === 'Administrador';
+
+    const term = this.state.searchTerm.trim().toLowerCase();
+    const roleFilter = this.state.roleFilter;
+    const isAdminRole = (role) => role === 'Administrativo' || role === 'Administrador';
+    const filtered = this.state.users.filter(u => {
+      const matchesTerm = !term || u.name.toLowerCase().includes(term) || u.department.toLowerCase().includes(term);
+      const matchesRole = roleFilter === 'todos'
+        || (roleFilter === 'admin' && isAdminRole(u.role))
+        || (roleFilter === 'user' && !isAdminRole(u.role));
+      return matchesTerm && matchesRole;
+    });
+
+    const filterDefs = [
+      { key: 'todos', label: 'Todos' },
+      { key: 'admin', label: 'Administrativo' },
+      { key: 'user', label: 'Usuário' }
+    ];
+    const roleFilters = filterDefs.map(f => ({
+      label: f.label,
+      onSelect: () => this.setRoleFilter(f.key),
+      bg: roleFilter === f.key ? '#FFFFFF' : 'transparent',
+      color: roleFilter === f.key ? '#1C543A' : '#777777'
+    }));
+
+    const total = this.state.users.length;
+    const shown = filtered.length;
+    const resultLabel = (term || roleFilter !== 'todos')
+      ? shown + ' de ' + total + ' servidores'
+      : total + ' servidores cadastrados';
+
+    const users = filtered.map(u => ({
+      ...u,
+      avatarBg: isAdmin(u.role) ? '#1C543A' : '#EEEEEE',
+      avatarColor: isAdmin(u.role) ? '#FFFFFF' : '#666666',
+      badgeBg: isAdmin(u.role) ? '#1C543A' : '#EEEEEE',
+      badgeColor: isAdmin(u.role) ? '#FFFFFF' : '#555555',
+      perms: this.MODULES.map(m => {
+        const on = !!u.access[m.key];
+        return {
+          key: m.key,
+          label: m.label,
+          on: on,
+          trackColor: on ? '#1C543A' : '#D9D9D9',
+          knobTransform: on ? 'translateX(20px)' : 'translateX(0)',
+          onToggle: () => {}
+        };
+      })
+    }));
+
+    return {
+      isMobile: false,
+      mobileMenuOpen: false,
+      openMobileMenu: () => {},
+      closeMobileMenu: () => {},
+      sidebarPosition: 'sticky',
+      sidebarTransform: 'translateX(0)',
+      mainPadding: '28px 36px 40px',
+      titleFontSize: '30px',
+      moduleGridColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+      saveSuccess: false,
+      newUserOpen: false,
+      form: this.state.form,
+      submitDisabled: true,
+      submitBg: '#B8C7BF',
+      submitCursor: 'not-allowed',
+      searchTerm: this.state.searchTerm,
+      handleSearchInput: this.handleSearchInput,
+      roleFilters: roleFilters,
+      resultLabel: resultLabel,
+      isEmpty: shown === 0,
+      auditLog: this.state.auditLog,
+      openNewUser: () => {},
+      closeNewUser: () => {},
+      stopPropagation: () => {},
+      handleNameInput: () => {},
+      handleEmailInput: () => {},
+      handleDeptInput: () => {},
+      handleRoleInput: () => {},
+      submitNewUser: () => {},
+      users: users
+    };
+  }
+}
+
+</script>
+</body>
+</html>

@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <script src="./theme.js"></script>
+  <script src="./liccont.js"></script>
+</helmet>
+<div style="display: flex; flex-direction: column; gap: 16px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #1D1D1B;">
+  <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between;">
+    <div>
+      <h2 style="font-size: 18px; font-weight: 700;">Controle de Processos</h2>
+      <p style="font-size: 12.5px; color: #666666; margin-top: 2px;">Fase interna (6 etapas) e fase externa (18 etapas). Etapa parada há mais de 5 dias úteis fica marcada como atrasada.</p>
+    </div>
+    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+      <label style="font-size: 12px; font-weight: 600; color: #666666; display: flex; align-items: center; gap: 8px;">Atuando como
+        <select value="{{ actor }}" onChange="{{ setActor }}" style="height: 40px; padding: 0 10px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; background-color: #FFFFFF; color: #1D1D1B;">
+          <sc-for list="{{ actorOptions }}" as="ao" hint-placeholder-count="5"><option value="{{ ao.value }}">{{ ao.label }}</option></sc-for>
+        </select>
+      </label>
+      <button onClick="{{ openNew }}" style="height: 40px; padding: 0 16px; background-color: #1C543A; color: #FFFFFF; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer;" style-hover="background-color: #153A2E;">+ Novo processo</button>
+    </div>
+  </div>
+
+  <div style="background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 8px; padding: 18px;">
+    <h3 style="font-size: 14px; font-weight: 700; padding-bottom: 10px; margin-bottom: 14px; border-bottom: 1px solid #1C543A;">Carga por agente de contratação</h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px;">
+      <sc-for list="{{ loads }}" as="ld" hint-placeholder-count="4">
+        <div style="border: 1px solid {{ ld.border }}; background-color: {{ ld.bg }}; border-radius: 8px; display: flex; flex-direction: column; overflow: hidden;">
+        <button onClick="{{ ld.filter }}" aria-pressed="{{ ld.isFiltered }}" title="Filtrar processos deste agente" style="text-align: left; border: none; background: none; padding: 12px 14px; cursor: pointer; display: flex; flex-direction: column; gap: 6px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+            <span style="font-size: 13px; font-weight: 700; color: #1D1D1B;">{{ ld.agente }}</span>
+            <sc-if value="{{ ld.suggested }}" hint-placeholder-val="{{ false }}"><span style="font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 999px; background-color: #EAF3EE; color: #1C543A;">Menor carga</span></sc-if>
+          </div>
+          <div style="display: flex; align-items: baseline; gap: 6px;"><span style="font-size: 22px; font-weight: 800; color: #1C543A;">{{ ld.ativos }}</span><span style="font-size: 12px; color: #666666;">ativos de {{ ld.total }}</span></div>
+          <div style="height: 6px; border-radius: 999px; background-color: #EDEDEB;"><div style="height: 6px; border-radius: 999px; background-color: #1C543A; width: {{ ld.barPct }};"></div></div>
+          <span style="font-size: 11.5px; color: {{ ld.lateColor }}; font-weight: 600;">{{ ld.lateLabel }}</span>
+        </button>
+        <sc-if value="{{ isChefia }}" hint-placeholder-val="{{ false }}">
+          <button onClick="{{ ld.manage }}" style="height: 40px; border: none; border-top: 1px solid #E8E8E8; background-color: #FAFAF9; color: #1C543A; font-size: 12.5px; font-weight: 700; cursor: pointer;" style-hover="background-color: #F4F9F6;">Adicionar / remover processos</button>
+        </sc-if>
+        </div>
+      </sc-for>
+    </div>
+    <sc-if value="{{ hasUnassigned }}" hint-placeholder-val="{{ false }}">
+      <button onClick="{{ filterUnassigned }}" style="margin-top: 12px; width: 100%; text-align: left; min-height: 44px; padding: 10px 14px; border: 1px solid #F3D9A4; border-radius: 8px; background-color: #FDF8EC; color: #92400E; font-size: 12.5px; font-weight: 700; cursor: pointer;">{{ unassignedLabel }} — clique para ver e atribuir a um agente</button>
+    </sc-if>
+  </div>
+
+  <div style="background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 8px; padding: 14px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
+    <input type="search" value="{{ q }}" onInput="{{ setQ }}" placeholder="Buscar por nº do processo ou objeto" aria-label="Buscar processo" style="flex: 1; min-width: 200px; height: 40px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px;" style-focus="border-color: #1C543A; outline: none;"/>
+    <select value="{{ agentFilter }}" onChange="{{ setAgentFilter }}" aria-label="Filtrar por agente" style="height: 40px; padding: 0 10px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; background-color: #FFFFFF;">
+      <option value="todos">Todos os agentes</option><option value="__none">Sem agente</option>
+      <sc-for list="{{ agents }}" as="ag" hint-placeholder-count="4"><option value="{{ ag }}">{{ ag }}</option></sc-for>
+    </select>
+    <select value="{{ statusFilter }}" onChange="{{ setStatusFilter }}" aria-label="Filtrar por situação" style="height: 40px; padding: 0 10px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; background-color: #FFFFFF;">
+      <option value="ativos">Em andamento</option>
+      <option value="atrasados">Atrasados</option>
+      <option value="refazer">Com etapa a refazer</option>
+      <option value="concluidos">Concluídos</option>
+      <option value="todos">Todos</option>
+    </select>
+    <select value="{{ modoFilter }}" onChange="{{ setModoFilter }}" aria-label="Filtrar por modo de contratação" style="height: 40px; padding: 0 10px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; background-color: #FFFFFF;"><option value="todos">Todos os modos</option><sc-for list="{{ modos }}" as="mo" hint-placeholder-count="3"><option value="{{ mo }}">{{ mo }}</option></sc-for></select>
+    <select value="{{ etapaFilter }}" onChange="{{ setEtapaFilter }}" aria-label="Filtrar por etapa atual" style="height: 40px; padding: 0 10px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; background-color: #FFFFFF;"><option value="todas">Todas as etapas</option><sc-for list="{{ etapaOptions }}" as="eo" hint-placeholder-count="24"><option value="{{ eo.value }}">{{ eo.label }}</option></sc-for></select>
+    <sc-if value="{{ hasSel }}" hint-placeholder-val="{{ false }}">
+      <span style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 6px 0 12px; border-radius: 999px; background-color: #EAF3EE; color: #1C543A; font-size: 12.5px; font-weight: 700;">{{ selOnlyLabel }}<button onClick="{{ clearSel }}" aria-label="Mostrar todos os processos" style="height: 30px; padding: 0 10px; border: none; border-radius: 999px; background-color: #1C543A; color: #FFFFFF; font-size: 12px; font-weight: 700; cursor: pointer;">Mostrar todos ✕</button></span>
+    </sc-if>
+    <span style="font-size: 12px; color: #666666;">{{ shown }} processo(s)</span>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 10px;">
+    <sc-for list="{{ procs }}" as="p" hint-placeholder-count="5">
+      <div style="background-color: #FFFFFF; border: 1px solid {{ p.border }}; border-radius: 8px; overflow: hidden;">
+        <button onClick="{{ p.toggle }}" aria-expanded="{{ p.open }}" style="width: 100%; text-align: left; background: none; border: none; padding: 14px 16px; cursor: pointer; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: center;">
+          <div style="min-width: 0; display: flex; flex-direction: column; gap: 6px;">
+            <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
+              <span style="font-size: 12.5px; font-weight: 700; color: #1C543A; font-family: ui-monospace, monospace;">{{ p.interno }}</span>
+              <span style="font-size: 11.5px; color: #666666;">Externo {{ p.externo }}</span>
+              <span style="font-size: 10.5px; font-weight: 700; padding: 2px 8px; border-radius: 999px; background-color: {{ p.agBg }}; color: {{ p.agColor }};">{{ p.agenteLabel }}</span>
+              <span style="font-size: 10.5px; font-weight: 700; padding: 2px 8px; border-radius: 999px; background-color: {{ p.modoBg }}; color: {{ p.modoColor }};">{{ p.modo }}</span>
+              <sc-if value="{{ p.atrasado }}" hint-placeholder-val="{{ false }}"><span style="font-size: 10.5px; font-weight: 700; padding: 2px 8px; border-radius: 999px; background-color: #FDF3F2; color: #B91C1C;">Atrasado · {{ p.delay }} dias úteis</span></sc-if>
+              <sc-if value="{{ p.refazer }}" hint-placeholder-val="{{ false }}"><span style="font-size: 10.5px; font-weight: 700; padding: 2px 8px; border-radius: 999px; background-color: #FDF8EC; color: #92400E;">Refazer</span></sc-if>
+            </div>
+            <p style="font-size: 14px; font-weight: 600; color: #1D1D1B;">{{ p.objeto }}</p>
+            <p style="font-size: 12px; color: #444444;">Requisitante: <strong>{{ p.setor }}</strong> · Valor estimado: <strong>{{ p.valorFmt }}</strong></p>
+            <div style="display: flex; align-items: flex-end; gap: 2px; height: 22px;" aria-label="Progresso das 24 etapas">
+              <sc-for list="{{ p.ticks }}" as="tk" hint-placeholder-count="24"><div title="{{ tk.title }}" style="width: 7px; height: {{ tk.h }}; border-radius: 2px; background-color: {{ tk.color }}; margin-left: {{ tk.gap }};"></div></sc-for>
+            </div>
+          </div>
+          <div style="text-align: right;">
+            <p style="font-size: 11px; color: #666666; text-transform: uppercase; letter-spacing: 0.3px;">{{ p.faseLabel }}</p>
+            <p style="font-size: 13px; font-weight: 700; color: #1D1D1B;">{{ p.currentLabel }}</p>
+            <p style="font-size: 11.5px; color: #666666;">{{ p.pct }}% concluído</p>
+          </div>
+        </button>
+        <sc-if value="{{ p.open }}" hint-placeholder-val="{{ false }}">
+          <div style="border-top: 1px solid #F0F0F0; padding: 14px 16px; display: flex; flex-direction: column; gap: 12px; background-color: #FCFCFB;">
+            <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
+              <sc-if value="{{ p.canEditInfo }}" hint-placeholder-val="{{ false }}"><button onClick="{{ p.edit }}" style="height: 40px; padding: 0 14px; border: 1px solid #1C543A; border-radius: 8px; background-color: #FFFFFF; color: #1C543A; font-size: 12.5px; font-weight: 700; cursor: pointer;" style-hover="background-color: #F4F9F6;">✎ Editar informações</button></sc-if>
+              <sc-if value="{{ isChefia }}" hint-placeholder-val="{{ false }}">
+                <label style="display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: #444444;">Transferir para
+                  <select value="{{ p.agente }}" onChange="{{ p.transfer }}" aria-label="Transferir processo" style="height: 40px; padding: 0 10px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 12.5px; background-color: #FFFFFF;"><option value="">Sem agente</option><sc-for list="{{ agents }}" as="ag2" hint-placeholder-count="4"><option value="{{ ag2 }}">{{ ag2 }}</option></sc-for></select>
+                </label>
+                <button onClick="{{ p.remove }}" style="height: 40px; padding: 0 14px; border: 1px solid #F5C2C2; border-radius: 8px; background-color: #FFFFFF; color: #B91C1C; font-size: 12.5px; font-weight: 700; cursor: pointer; margin-left: auto;" style-hover="background-color: #FDF3F2;">Remover processo</button>
+              </sc-if>
+            </div>
+            <sc-if value="{{ p.readOnly }}" hint-placeholder-val="{{ false }}"><p style="font-size: 12px; color: #92400E; background-color: #FDF8EC; padding: 8px 12px; border-radius: 6px;">Somente leitura: apenas {{ p.agente }} (responsável) e a chefia podem marcar etapas.</p></sc-if>
+            <sc-for list="{{ p.groups }}" as="g" hint-placeholder-count="2">
+              <div>
+                <p style="font-size: 11px; font-weight: 700; color: #1C543A; text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 8px;">{{ g.title }}</p>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px;">
+                  <sc-for list="{{ g.stages }}" as="st" hint-placeholder-count="6">
+                    <div style="border: 1px solid {{ st.border }}; background-color: {{ st.bg }}; border-radius: 8px; padding: 8px 10px; display: flex; flex-direction: column; gap: 6px;">
+                      <div style="display: flex; justify-content: space-between; gap: 6px;"><span style="font-size: 12px; font-weight: 600; color: #1D1D1B;">{{ st.n }}. {{ st.label }}</span><span style="font-size: 10.5px; color: #666666;">{{ st.meta }}</span></div>
+                      <select value="{{ st.s }}" onChange="{{ st.change }}" disabled="{{ p.readOnly }}" aria-label="Situação da etapa {{ st.label }}" style="height: 34px; padding: 0 8px; border: 1px solid #E0E0E0; border-radius: 6px; font-size: 12.5px; background-color: #FFFFFF; color: #1D1D1B;">
+                        <option value="pend">Pendente</option>
+                        <option value="ok">Concluída</option>
+                        <option value="refazer">Refazer</option>
+                        <option value="na">Não se aplica</option>
+                      </select>
+                      <sc-if value="{{ st.hasJust }}" hint-placeholder-val="{{ false }}"><p style="font-size: 11px; color: #92400E;">Justificativa: {{ st.just }}</p></sc-if>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+    </sc-for>
+    <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}"><p style="padding: 30px; text-align: center; font-size: 13px; color: #666666; background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 8px;">Nenhum processo com esses filtros.</p></sc-if>
+  </div>
+
+  <sc-if value="{{ justOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeJust }}" style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 95;">
+      <div onClick="{{ stop }}" style="background-color: #FFFFFF; border-radius: 12px; width: 100%; max-width: 440px; padding: 22px; display: flex; flex-direction: column; gap: 12px;">
+        <h3 style="font-size: 16px; font-weight: 700;">Justificar "Refazer"</h3>
+        <p style="font-size: 12.5px; color: #666666;">{{ justLabel }}. A justificativa é obrigatória e gera um alerta amarelo no Painel.</p>
+        <textarea value="{{ justText }}" onInput="{{ setJust }}" rows="4" placeholder="Ex.: Pesquisa de preços com apenas 2 cotações válidas" style="padding: 10px 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; font-family: inherit; resize: vertical;" style-focus="border-color: #1C543A; outline: none;"></textarea>
+        <div style="display: flex; justify-content: flex-end; gap: 10px;">
+          <button onClick="{{ closeJust }}" style="height: 40px; padding: 0 16px; border: 1px solid #E0E0E0; border-radius: 8px; background-color: #FFFFFF; font-size: 13px; cursor: pointer;">Cancelar</button>
+          <button onClick="{{ confirmJust }}" disabled="{{ justDisabled }}" style="height: 40px; padding: 0 16px; border: none; border-radius: 8px; background-color: {{ justBtnBg }}; color: #FFFFFF; font-size: 13px; font-weight: 700; cursor: pointer;">Marcar para refazer</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ newOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeNew }}" style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 95;">
+      <div onClick="{{ stop }}" style="background-color: #FFFFFF; border-radius: 12px; width: 100%; max-width: 460px; padding: 22px; display: flex; flex-direction: column; gap: 14px;">
+        <h3 style="font-size: 16px; font-weight: 700;">{{ formTitle }}</h3>
+        <div><label style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 6px;">Nº do processo interno</label><input type="text" value="{{ nf.interno }}" onInput="{{ setNfInterno }}" placeholder="2450/2026" style="width: 100%; height: 40px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px;" style-focus="border-color: #1C543A; outline: none;"/></div>
+        <div><label style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 6px;">Objeto</label><input type="text" value="{{ nf.objeto }}" onInput="{{ setNfObjeto }}" placeholder="Aquisição de..." style="width: 100%; height: 40px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px;" style-focus="border-color: #1C543A; outline: none;"/></div>
+        <div><label style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 6px;">Modo de contratação</label><select value="{{ nf.modo }}" onChange="{{ setNfModo }}" style="width: 100%; height: 40px; padding: 0 10px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; background-color: #FFFFFF;"><sc-for list="{{ modos }}" as="mo" hint-placeholder-count="3"><option value="{{ mo }}">{{ mo }}</option></sc-for></select></div>
+        <div><label style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 6px;">Setor requisitante</label><input type="text" list="dl-cc-compraspro1" autocomplete="off" placeholder="Digite ou selecione o centro de custo" value="{{ nf.setor }}" onChange="{{ setNfSetor }}" style="width: 100%; height: 40px; padding: 0 10px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; background-color: #FFFFFF;"/><datalist id="dl-cc-compraspro1"><sc-for list="{{ setores }}" as="se" hint-placeholder-count="3"><option value="{{ se }}"></option></sc-for></datalist></div>
+        <div><label style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 6px;">Valor estimado (R$)</label><input type="number" min="0" step="0.01" value="{{ nf.valor }}" onInput="{{ setNfValor }}" placeholder="0,00" style="width: 100%; height: 40px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px;" style-focus="border-color: #1C543A; outline: none;"/></div>
+        <sc-if value="{{ isNewForm }}" hint-placeholder-val="{{ true }}">
+        <div>
+          <label style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 6px;">Agente de contratação</label>
+          <select value="{{ nf.agente }}" onChange="{{ setNfAgente }}" style="width: 100%; height: 40px; padding: 0 10px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; background-color: #FFFFFF;">
+            <sc-for list="{{ agentLoadOptions }}" as="alo" hint-placeholder-count="4"><option value="{{ alo.value }}">{{ alo.label }}</option></sc-for>
+          </select>
+          <p style="font-size: 11.5px; color: #1C543A; margin-top: 6px;">Sugestão do sistema: {{ suggested }} (menor número de processos ativos).</p>
+        </div>
+        </sc-if>
+        <sc-if value="{{ showChefiaNote }}" hint-placeholder-val="{{ false }}"><p style="font-size: 12px; color: #92400E; background-color: #FDF8EC; padding: 8px 12px; border-radius: 6px;">A atribuição precisa ser confirmada pela chefia ({{ chefia }}). Mude "Atuando como" para confirmar.</p></sc-if>
+        <div style="display: flex; justify-content: flex-end; gap: 10px;">
+          <button onClick="{{ closeNew }}" style="height: 40px; padding: 0 16px; border: 1px solid #E0E0E0; border-radius: 8px; background-color: #FFFFFF; font-size: 13px; cursor: pointer;">Cancelar</button>
+          <button onClick="{{ submitNew }}" disabled="{{ newDisabled }}" style="height: 40px; padding: 0 16px; border: none; border-radius: 8px; background-color: {{ newBtnBg }}; color: #FFFFFF; font-size: 13px; font-weight: 700; cursor: pointer;">{{ submitLabel }}</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ manageOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeManage }}" style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 95;">
+      <div onClick="{{ stop }}" role="dialog" aria-modal="true" style="background-color: #FFFFFF; border-radius: 12px; width: 100%; max-width: 620px; max-height: 90vh; overflow-y: auto; padding: 22px; display: flex; flex-direction: column; gap: 14px;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;">
+          <div><h3 style="font-size: 16px; font-weight: 700;">Processos de {{ manageAgent }}</h3><p style="font-size: 12.5px; color: #666666; margin-top: 2px;">{{ manageCount }} processo(s) atribuído(s). Ações registradas na auditoria.</p></div>
+          <button onClick="{{ closeManage }}" aria-label="Fechar" style="width: 40px; height: 40px; flex-shrink: 0; border-radius: 8px; border: 1px solid #E0E0E0; background-color: #FFFFFF; cursor: pointer;">✕</button>
+        </div>
+        <div style="border: 1px solid #E8E8E8; border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 8px;">
+          <p style="font-size: 12px; font-weight: 700; color: #1C543A; text-transform: uppercase; letter-spacing: 0.4px;">Adicionar processo existente</p>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <input type="search" list="dl-add-proc" value="{{ addQuery }}" onInput="{{ setAddQuery }}" placeholder="Buscar por nº do processo ou objeto…" aria-label="Processo a adicionar" autocomplete="off" style="flex: 1; min-width: 220px; height: 44px; padding: 0 10px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; background-color: #FFFFFF;"/>
+            <datalist id="dl-add-proc"><sc-for list="{{ addOptions }}" as="ao2" hint-placeholder-count="5"><option value="{{ ao2.label }}"></option></sc-for></datalist>
+            <button onClick="{{ addToAgent }}" disabled="{{ addDisabled }}" title="{{ addHint }}" style="height: 44px; padding: 0 16px; border: none; border-radius: 8px; background-color: {{ addBtnBg }}; color: #FFFFFF; font-size: 13px; font-weight: 700; cursor: pointer;">Adicionar</button>
+          </div>
+          <button onClick="{{ newForAgent }}" style="align-self: flex-start; height: 40px; padding: 0 14px; border: 1px solid #1C543A; border-radius: 8px; background-color: #FFFFFF; color: #1C543A; font-size: 12.5px; font-weight: 700; cursor: pointer;">+ Criar novo processo para {{ manageAgent }}</button>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <sc-for list="{{ manageList }}" as="mp" hint-placeholder-count="3">
+            <div style="display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 10px 12px; border: 1px solid #E8E8E8; border-radius: 8px;">
+              <div style="min-width: 0;"><p style="font-size: 12.5px; font-weight: 700; color: #1C543A;">{{ mp.interno }} · <span style="color: #666666; font-weight: 600;">{{ mp.modo }} · {{ mp.etapa }}</span></p><p style="font-size: 13px; color: #1D1D1B; overflow-wrap: anywhere;">{{ mp.objeto }}</p></div>
+              <button onClick="{{ mp.unassign }}" style="height: 40px; padding: 0 12px; border: 1px solid #F5C2C2; border-radius: 8px; background-color: #FFFFFF; color: #B91C1C; font-size: 12.5px; font-weight: 700; cursor: pointer; white-space: nowrap;" style-hover="background-color: #FDF3F2;">Remover do agente</button>
+            </div>
+          </sc-for>
+          <sc-if value="{{ manageEmpty }}" hint-placeholder-val="{{ false }}"><p style="padding: 16px; text-align: center; font-size: 13px; color: #666666;">Nenhum processo atribuído a este agente.</p></sc-if>
+        </div>
+        <p style="font-size: 11.5px; color: #666666;">"Remover do agente" deixa o processo sem responsável (ele continua no controle). Para excluir o processo, use "Remover processo" dentro dele.</p>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+    <div role="status" style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background-color: #1C543A; color: #FFFFFF; padding: 12px 22px; border-radius: 999px; font-size: 13px; font-weight: 600; z-index: 100;">✓ {{ toast }}</div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: &quot;1100px&quot;, &quot;height&quot;: &quot;900px&quot;}}">
+class Component extends DCLogic {
+  state = { ready: !!window.DALic, actor: 'Carlos Mendes Oliveira', q: '', agentFilter: 'todos', modoFilter: 'todos', etapaFilter: 'todas', editId: null, manageAgent: null, addPick: '', addQuery: '', statusFilter: new URLSearchParams(location.search).get('proc') ? 'todos' : 'ativos', openId: new URLSearchParams(location.search).get('proc'), just: null, justText: '', newOpen: false, nf: { interno: '', objeto: '', agente: '', modo: 'Dispensa', setor: '', valor: '' }, toast: '' };
+  componentDidMount() {
+    const wait = () => { if (window.DALic) this.setState({ ready: true }); else setTimeout(wait, 150); };
+    wait();
+    this._on = () => this.forceUpdate();
+    window.addEventListener('licchange', this._on);
+  }
+  componentWillUnmount() { window.removeEventListener('licchange', this._on); clearTimeout(this._t); }
+  showToast(m) { clearTimeout(this._t); this.setState({ toast: m }); this._t = setTimeout(() => this.setState({ toast: '' }), 2400); }
+  changeStage(p, idx, value) {
+    const L = window.DALic;
+    if (value === 'refazer') { this.setState({ just: { pid: p.id, idx: idx, label: 'Etapa ' + (idx + 1) + ' — ' + L.STAGES[idx].label + ' (' + p.interno + ')' }, justText: '' }); return; }
+    if (L.setStage(p.id, idx, value, '', this.state.actor)) this.showToast(L.STAGES[idx].label + ' atualizada');
+  }
+  _resolveAdd(v) {
+    const L = window.DALic; if (!L) return ''; const q = String(v || '').trim().toLowerCase(); if (!q) return '';
+    const ma = this.state.manageAgent, cand = L.get().processes.filter(p => p.agente !== ma);
+    const exact = cand.find(p => this._addLabel(p).toLowerCase() === q); if (exact) return exact.id;
+    const hits = cand.filter(p => (p.interno + ' ' + (p.externo || '') + ' ' + p.objeto).toLowerCase().includes(q));
+    return hits.length === 1 ? hits[0].id : '';
+  }
+  _addLabel(p) { return p.interno + ' — ' + p.objeto + (p.agente ? ' (' + p.agente + ')' : ' (sem agente)'); }
+  renderVals() {
+    const L = window.DALic;
+    const base = { manageList: [], addOptions: [], actorOptions: [], loads: [], agents: [], procs: [], agentLoadOptions: [], shown: 0, isEmpty: false, modos: [], setores: [], etapaOptions: [] };
+    const st = this.state;
+    const common = {
+      actor: st.actor, q: st.q, agentFilter: st.agentFilter, statusFilter: st.statusFilter, toast: st.toast,
+      setActor: e => this.setState({ actor: e.target.value }), setQ: e => this.setState({ q: e.target.value }),
+      setAgentFilter: e => this.setState({ agentFilter: e.target.value }), setStatusFilter: e => this.setState({ statusFilter: e.target.value }),
+      stop: e => e.stopPropagation(),
+      justOpen: !!st.just, justLabel: st.just ? st.just.label : '', justText: st.justText, setJust: e => this.setState({ justText: e.target.value }),
+      closeJust: () => this.setState({ just: null }), justDisabled: !st.justText.trim(), justBtnBg: st.justText.trim() ? '#B45309' : '#D9C7A8',
+      confirmJust: () => { if (!st.justText.trim()) return; L.setStage(st.just.pid, st.just.idx, 'refazer', st.justText.trim(), st.actor); this.setState({ just: null }); this.showToast('Etapa marcada para refazer — alerta enviado ao Painel'); },
+      newOpen: st.newOpen, nf: st.nf, closeNew: () => this.setState({ newOpen: false }),
+      setNfInterno: e => { const v = e.target.value; this.setState(s => ({ nf: { ...s.nf, interno: v } })); },
+      setNfObjeto: e => { const v = e.target.value; this.setState(s => ({ nf: { ...s.nf, objeto: v } })); },
+      setNfModo: e => { const v = e.target.value; this.setState(s => ({ nf: { ...s.nf, modo: v } })); },
+      setNfSetor: e => { const v = e.target.value; this.setState(s => ({ nf: { ...s.nf, setor: v } })); },
+      setNfValor: e => { const v = e.target.value; this.setState(s => ({ nf: { ...s.nf, valor: v } })); },
+      modoFilter: st.modoFilter, etapaFilter: st.etapaFilter,
+      setModoFilter: e => this.setState({ modoFilter: e.target.value }), setEtapaFilter: e => this.setState({ etapaFilter: e.target.value }),
+      setNfAgente: e => { const v = e.target.value; this.setState(s => ({ nf: { ...s.nf, agente: v } })); }
+    };
+    if (!L) return { ...base, ...common };
+    const db = L.get();
+    const loads = L.loads(); const max = Math.max(1, ...loads.map(l => l.ativos)); const sug = L.suggestAgent();
+    const q = st.q.trim().toLowerCase();
+    const selOnly = st.openId && db.processes.some(x => x.id === st.openId);
+    const list = db.processes.map(p => ({ p, info: L.procInfo(p) })).filter(({ p, info }) => {
+      if (selOnly) return p.id === st.openId;
+      if (st.agentFilter !== 'todos' && (st.agentFilter === '__none' ? !!p.agente : p.agente !== st.agentFilter)) return false;
+      if (q && !(p.interno + ' ' + p.externo + ' ' + p.objeto + ' ' + (p.setor || '')).toLowerCase().includes(q)) return false;
+      if (st.modoFilter !== 'todos' && p.modo !== st.modoFilter) return false;
+      if (st.etapaFilter !== 'todas' && String(info.concluido ? 'fim' : info.current) !== st.etapaFilter) return false;
+      const f = st.statusFilter;
+      return f === 'todos' || (f === 'ativos' && !info.concluido) || (f === 'atrasados' && info.atrasado) || (f === 'refazer' && info.refazer) || (f === 'concluidos' && info.concluido);
+    });
+    const COLOR = { ok: '#1C543A', na: '#B8C7BF', refazer: '#D97706', pend: '#E0E0DE' };
+    const STBG = { ok: '#F4F9F6', na: '#F7F7F6', refazer: '#FDF8EC', pend: '#FFFFFF' };
+    const isEdit = !!st.editId;
+    const canNew = (isEdit || st.actor === L.CHEFIA) && st.nf.interno.trim() && st.nf.objeto.trim() && st.nf.agente && st.nf.setor;
+    const MB = { 'Dispensa': ['#EEF4FD', '#1E40AF'], 'Inexigibilidade': ['#F3EEFD', '#5B21B6'], 'Licitação': ['#EAF3EE', '#1C543A'] };
+    return {
+      ...base, ...common,
+      ...(() => { const ma = st.manageAgent; const own = ma ? db.processes.filter(p => p.agente === ma) : []; const others = ma ? db.processes.filter(p => p.agente !== ma) : [];
+        const un = db.processes.filter(p => !p.agente).length;
+        return { manageOpen: !!ma, manageAgent: ma || '', manageCount: own.length, manageEmpty: !own.length,
+          hasUnassigned: un > 0, unassignedLabel: un + ' processo(s) sem agente', filterUnassigned: () => this.setState({ agentFilter: '__none', statusFilter: 'todos' }),
+          closeManage: () => this.setState({ manageAgent: null, addPick: '', addQuery: '' }), addPick: st.addPick, addQuery: st.addQuery,
+      setAddQuery: e => { const v = e.target.value; this.setState({ addQuery: v, addPick: this._resolveAdd(v) }); },
+          addDisabled: !st.addPick, addBtnBg: st.addPick ? '#1C543A' : '#B8C7BF',
+          addOptions: others.map(p => ({ value: p.id, label: this._addLabel(p) })), addHint: st.addQuery && !st.addPick ? 'Refine a busca até restar um único processo' : '',
+          addToAgent: () => { if (!st.addPick) return; const p = db.processes.find(x => x.id === st.addPick); if (L.transferProcess(st.addPick, ma, st.actor)) { this.setState({ addPick: '', addQuery: '' }); this.showToast((p ? p.interno : 'Processo') + ' adicionado a ' + ma); } },
+          newForAgent: () => this.setState({ manageAgent: null, newOpen: true, editId: null, nf: { interno: '', objeto: '', agente: ma, modo: 'Dispensa', setor: (window.DASectors ? window.DASectors.get() : L.SETORES)[0], valor: '' } }),
+          manageList: own.map(p => ({ id: p.id, interno: p.interno, objeto: p.objeto, modo: p.modo || '—', etapa: L.procInfo(p).currentLabel,
+            unassign: () => { if (L.transferProcess(p.id, '', st.actor)) this.showToast(p.interno + ' retirado de ' + ma); } })) }; })(),
+      chefia: L.CHEFIA, suggested: sug, notChefia: st.actor !== L.CHEFIA, isChefia: st.actor === L.CHEFIA,
+      modos: L.MODOS, setores: (window.DASectors ? window.DASectors.get() : L.SETORES),
+      etapaOptions: L.STAGES.map(s => ({ value: String(s.idx), label: (s.idx + 1) + '. ' + s.label + (s.idx < 6 ? ' (interna)' : '') })).concat([{ value: 'fim', label: 'Concluídos' }]),
+      formTitle: isEdit ? 'Editar processo' : 'Novo processo', isNewForm: !isEdit, showChefiaNote: !isEdit && st.actor !== L.CHEFIA, submitLabel: isEdit ? 'Salvar alterações' : 'Confirmar atribuição',
+      actorOptions: [{ value: L.CHEFIA, label: L.CHEFIA + ' (Chefia)' }].concat(L.AGENTS.map(a => ({ value: a, label: a + ' (Agente)' }))),
+      agents: L.AGENTS,
+      agentLoadOptions: loads.map(l => ({ value: l.agente, label: l.agente + ' — ' + l.ativos + ' ativos' })),
+      loads: loads.map(l => ({ ...l, suggested: l.agente === sug, barPct: Math.round(l.ativos / max * 100) + '%', lateLabel: l.atrasados ? l.atrasados + ' com etapa atrasada' : 'Sem atrasos', lateColor: l.atrasados ? '#B91C1C' : '#1C543A',
+        bg: st.agentFilter === l.agente ? '#F4F9F6' : '#FFFFFF', border: st.agentFilter === l.agente ? '#1C543A' : '#E8E8E8',
+        isFiltered: st.agentFilter === l.agente, manage: () => this.setState({ manageAgent: l.agente, addPick: '', addQuery: '' }),
+        filter: () => this.setState(s => ({ agentFilter: s.agentFilter === l.agente ? 'todos' : l.agente })) })),
+      openNew: () => this.setState({ newOpen: true, editId: null, nf: { interno: '', objeto: '', agente: sug, modo: 'Dispensa', setor: (window.DASectors ? window.DASectors.get() : L.SETORES)[0], valor: '' } }),
+      newDisabled: !canNew, newBtnBg: canNew ? '#1C543A' : '#B8C7BF',
+      submitNew: () => { if (!canNew) return;
+        if (isEdit) { L.updateProcess(st.editId, { interno: st.nf.interno.trim(), objeto: st.nf.objeto.trim(), modo: st.nf.modo, setor: st.nf.setor, valor: +st.nf.valor || 0 }, st.actor); this.setState({ newOpen: false, editId: null }); this.showToast('Processo atualizado'); return; }
+        L.addProcess({ modo: st.nf.modo, setor: st.nf.setor, valor: st.nf.valor, interno: st.nf.interno.trim(), objeto: st.nf.objeto.trim(), agente: st.nf.agente, by: st.actor }); this.setState({ newOpen: false, statusFilter: 'ativos' }); this.showToast('Processo atribuído a ' + st.nf.agente); },
+      hasSel: !!selOnly, selOnlyLabel: selOnly ? 'Exibindo só ' + (db.processes.find(x => x.id === st.openId) || {}).interno : '', clearSel: () => this.setState({ openId: null }),
+      shown: list.length, isEmpty: list.length === 0,
+      procs: list.map(({ p, info }) => {
+        const open = st.openId === p.id; const readOnly = !L.canEdit(p, st.actor);
+        const mk = (s, i) => ({ n: i + 1, label: L.STAGES[i].label, s: s.s, border: s.s === 'refazer' ? '#F3D9A4' : '#E8E8E8', bg: STBG[s.s],
+          meta: s.date ? L.fmt(s.date) : (s.since ? 'desde ' + L.fmt(s.since) : (s.note || '')), hasJust: !!s.just, just: s.just || '',
+          change: e => this.changeStage(p, i, e.target.value) });
+        const mb = MB[p.modo] || MB['Dispensa'];
+        return { ...p, ...info, open, readOnly, canEditInfo: !readOnly, agenteLabel: p.agente || 'Sem agente', agBg: p.agente ? '#F0F0F0' : '#FDF8EC', agColor: p.agente ? '#444444' : '#92400E', modoBg: mb[0], modoColor: mb[1], valorFmt: L.brl(p.valor || 0),
+          edit: () => this.setState({ newOpen: true, editId: p.id, nf: { interno: p.interno, objeto: p.objeto, agente: p.agente, modo: p.modo, setor: p.setor, valor: String(p.valor || '') } }),
+          transfer: e => { const ag = e.target.value; if (L.transferProcess(p.id, ag, st.actor)) this.showToast(ag ? p.interno + ' transferido para ' + ag : p.interno + ' ficou sem agente'); },
+          remove: () => { if (window.confirm('Remover o processo ' + p.interno + '? Esta ação fica registrada na auditoria.')) { L.removeProcess(p.id, st.actor); this.setState({ openId: null }); this.showToast('Processo removido'); } },
+          faseLabel: info.concluido ? 'Concluído' : (info.fase === 'interna' ? 'Fase interna' : 'Fase externa'),
+          border: info.atrasado ? '#F5C2C2' : (info.refazer ? '#F3D9A4' : '#E8E8E8'),
+          toggle: () => this.setState(s => ({ openId: s.openId === p.id ? null : p.id })),
+          ticks: p.stages.map((s, i) => ({ title: (i + 1) + '. ' + L.STAGES[i].label, color: COLOR[s.s], h: i === info.current ? '22px' : '16px', gap: i === 6 ? '8px' : '0px' })),
+          groups: open ? [
+            { title: 'Fase interna', stages: p.stages.slice(0, 6).map((s, i) => mk(s, i)) },
+            { title: 'Fase externa', stages: p.stages.slice(6).map((s, i) => mk(s, i + 6)) }
+          ] : [] };
+      })
+    };
+  }
+}
+</script>
+</body>
+</html>

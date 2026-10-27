@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <script src="./theme.js"></script>
+  <script src="./session.js"></script>
+</helmet>
+<div style="display: flex; flex-direction: column; gap: 16px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #1D1D1B;">
+  <div style="display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; align-items: center;">
+    <div>
+      <h2 style="font-size: 18px; font-weight: 700;">Controle de Bandeiras</h2>
+      <p style="font-size: 12.5px; color: #666666; margin-top: 2px; max-width: 640px;">Empréstimo de bandeiras, mastros e suportes a empresas e entidades: solicitação, retirada, devolução e conferência.</p>
+    </div>
+    <button onClick="{{ openNew }}" style="height: 44px; padding: 0 16px; background-color: #1C543A; color: #FFFFFF; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer;" style-hover="background-color: #153A2E;">+ Nova solicitação</button>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px;">
+    <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="4">
+      <button onClick="{{ k.filter }}" style="text-align: left; background-color: #FFFFFF; border: 1px solid {{ k.border }}; border-radius: 8px; padding: 14px; cursor: pointer; font-family: inherit;" style-hover="border-color: #1C543A;">
+        <span style="display: block; font-size: 11px; font-weight: 700; color: #666666; text-transform: uppercase; letter-spacing: 0.3px;">{{ k.label }}</span>
+        <span style="display: block; font-size: 24px; font-weight: 800; color: {{ k.color }}; margin-top: 4px;">{{ k.value }}</span>
+      </button>
+    </sc-for>
+  </div>
+
+  <div style="background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 8px; padding: 14px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+    <input type="search" value="{{ q }}" onInput="{{ setQ }}" placeholder="Buscar entidade, CPF/CNPJ ou protocolo 1Doc" aria-label="Buscar empréstimo" style="flex: 1; min-width: 220px; height: 44px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px;" style-focus="border-color: #1C543A; outline: none;"/>
+    <select value="{{ filter }}" onChange="{{ setFilter }}" aria-label="Filtrar por situação" style="height: 44px; padding: 0 10px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; background-color: #FFFFFF;">
+      <option value="todos">Todas as situações</option>
+      <option value="aguardando">Aguardando retirada</option>
+      <option value="naoRetirado">Retirada não realizada</option>
+      <option value="emprestado">Emprestado</option>
+      <option value="atrasado">Devolução atrasada</option>
+      <option value="devolvido">Devolvido</option>
+      <option value="pendencia">Devolvido com pendência</option>
+    </select>
+    <span style="font-size: 12px; color: #666666;">{{ shown }} registro(s)</span>
+  </div>
+
+  <div style="background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 8px; overflow-x: auto;">
+    <table style="width: 100%; min-width: 1060px; border-collapse: collapse; font-size: 12.5px;">
+      <thead>
+        <tr style="background-color: #F9F9F9; border-bottom: 2px solid #E8E8E8;">
+          <th style="padding: 12px; text-align: left; font-size: 11px; font-weight: 600; color: #999999; text-transform: uppercase; letter-spacing: 0.5px;">Solicitação</th>
+          <th style="padding: 12px; text-align: left; font-size: 11px; font-weight: 600; color: #999999; text-transform: uppercase; letter-spacing: 0.5px;">Empresa / Entidade</th>
+          <th style="padding: 12px; text-align: left; font-size: 11px; font-weight: 600; color: #999999; text-transform: uppercase; letter-spacing: 0.5px;">Protocolo 1Doc</th>
+          <th style="padding: 12px; text-align: left; font-size: 11px; font-weight: 600; color: #999999; text-transform: uppercase; letter-spacing: 0.5px;">Itens</th>
+          <th style="padding: 12px; text-align: left; font-size: 11px; font-weight: 600; color: #999999; text-transform: uppercase; letter-spacing: 0.5px;">Retirada</th>
+          <th style="padding: 12px; text-align: left; font-size: 11px; font-weight: 600; color: #999999; text-transform: uppercase; letter-spacing: 0.5px;">Devolução</th>
+          <th style="padding: 12px; text-align: left; font-size: 11px; font-weight: 600; color: #999999; text-transform: uppercase; letter-spacing: 0.5px;">Situação</th>
+          <th style="padding: 12px; text-align: right; font-size: 11px; font-weight: 600; color: #999999; text-transform: uppercase; letter-spacing: 0.5px;">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <sc-for list="{{ rows }}" as="r" hint-placeholder-count="3">
+          <tr style="border-bottom: 1px solid #F0F0F0;" style-hover="background-color: #FAFAF9;">
+            <td style="padding: 12px; color: #666666; white-space: nowrap;">{{ r.solFmt }}</td>
+            <td style="padding: 12px;">
+              <span style="display: block; font-weight: 700; color: #1D1D1B;">{{ r.entidade }}</span>
+              <span style="display: block; font-size: 11.5px; color: #666666; margin-top: 2px;">{{ r.docFmt }} · {{ r.telFmt }}</span>
+            </td>
+            <td style="padding: 12px; font-weight: 700; color: #1C543A; white-space: nowrap;">{{ r.protocoloFmt }}</td>
+            <td style="padding: 12px;">
+              <div style="display: flex; flex-wrap: wrap; gap: 4px; max-width: 260px;">
+                <sc-for list="{{ r.itens }}" as="it" hint-placeholder-count="3"><span style="font-size: 10.5px; font-weight: 700; padding: 3px 8px; border-radius: 999px; background-color: #EAF3EE; color: #1C543A; white-space: nowrap;">{{ it }}</span></sc-for>
+              </div>
+            </td>
+            <td style="padding: 12px; white-space: nowrap; color: {{ r.retColor }};">{{ r.retFmt }}</td>
+            <td style="padding: 12px; white-space: nowrap;"><span style="color: {{ r.devColor }}; font-weight: {{ r.devWeight }};">{{ r.devFmt }}</span></td>
+            <td style="padding: 12px;"><span style="font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 999px; background-color: {{ r.stBg }}; color: {{ r.stColor }}; white-space: nowrap;">{{ r.stLabel }}</span></td>
+            <td style="padding: 12px;">
+              <div style="display: flex; gap: 6px; justify-content: flex-end;">
+                <sc-if value="{{ r.canRetirar }}" hint-placeholder-val="{{ false }}"><button onClick="{{ r.retirar }}" style="height: 34px; padding: 0 10px; border: 1px solid #1C543A; border-radius: 6px; background-color: #FFFFFF; color: #1C543A; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap;">Registrar retirada</button></sc-if>
+                <sc-if value="{{ r.canDevolver }}" hint-placeholder-val="{{ false }}"><button onClick="{{ r.devolver }}" style="height: 34px; padding: 0 10px; border: 1px solid #1C543A; border-radius: 6px; background-color: #FFFFFF; color: #1C543A; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap;">Registrar devolução</button></sc-if>
+                <button onClick="{{ r.edit }}" aria-label="Editar registro" style="height: 34px; padding: 0 10px; border: 1px solid #E0E0E0; border-radius: 6px; background-color: #FFFFFF; color: #444444; font-size: 12px; font-weight: 600; cursor: pointer;">Editar</button>
+              </div>
+            </td>
+          </tr>
+        </sc-for>
+      </tbody>
+    </table>
+    <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}"><p style="padding: 28px; text-align: center; font-size: 13px; color: #666666;">Nenhum registro encontrado.</p></sc-if>
+  </div>
+
+  <sc-if value="{{ formOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ close }}" style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 95;">
+      <div role="dialog" aria-modal="true" aria-labelledby="band-title" onClick="{{ stop }}" style="background-color: #FFFFFF; border-radius: 12px; width: 100%; max-width: 640px; max-height: 92vh; display: flex; flex-direction: column; box-shadow: 0 20px 60px rgba(0,0,0,0.25);">
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 20px 24px; border-bottom: 1px solid #F0F0EE;">
+          <h3 id="band-title" style="font-size: 16px; font-weight: 700;">{{ formTitle }}</h3>
+          <button onClick="{{ close }}" aria-label="Fechar" style="width: 36px; height: 36px; border-radius: 8px; border: none; background-color: #F4F4F2; font-size: 15px; color: #666666; cursor: pointer;">✕</button>
+        </div>
+        <div style="overflow-y: auto; padding: 20px 24px; display: flex; flex-direction: column; gap: 18px;">
+          <div>
+            <p style="font-size: 12px; font-weight: 700; color: #1C543A; text-transform: uppercase; letter-spacing: 0.4px; padding-bottom: 8px; margin-bottom: 12px; border-bottom: 1px solid #1C543A;">Solicitante</p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;">
+              <div style="grid-column: 1 / -1;"><label for="b-ent" style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 6px;">Empresa / Entidade</label><input id="b-ent" type="text" value="{{ form.entidade }}" onInput="{{ setEntidade }}" style="width: 100%; height: 44px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px;" style-focus="border-color: #1C543A; outline: none;"/></div>
+              <div><label for="b-doc" style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 6px;">CPF / CNPJ</label><input id="b-doc" type="text" inputmode="numeric" value="{{ form.documento }}" onInput="{{ setDocumento }}" placeholder="000.000.000-00" style="width: 100%; height: 44px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px;" style-focus="border-color: #1C543A; outline: none;"/></div>
+              <div><label for="b-tel" style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 6px;">Telefone</label><input id="b-tel" type="tel" value="{{ form.telefone }}" onInput="{{ setTelefone }}" placeholder="(14) 99999-9999" style="width: 100%; height: 44px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px;" style-focus="border-color: #1C543A; outline: none;"/></div>
+              <div><label for="b-sol" style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 6px;">Data da solicitação</label><input id="b-sol" type="date" value="{{ form.solicitacao }}" onInput="{{ setSolicitacao }}" style="width: 100%; height: 44px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px;" style-focus="border-color: #1C543A; outline: none;"/></div>
+              <div><label for="b-prot" style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 6px;">Protocolo 1Doc</label><input id="b-prot" type="text" value="{{ form.protocolo }}" onInput="{{ setProtocolo }}" placeholder="1633/2026" style="width: 100%; height: 44px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px;" style-focus="border-color: #1C543A; outline: none;"/></div>
+            </div>
+          </div>
+          <div>
+            <p style="font-size: 12px; font-weight: 700; color: #1C543A; text-transform: uppercase; letter-spacing: 0.4px; padding-bottom: 8px; margin-bottom: 12px; border-bottom: 1px solid #1C543A;">Itens emprestados</p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 8px;">
+              <sc-for list="{{ itemToggles }}" as="t" hint-placeholder-count="5">
+                <button onClick="{{ t.toggle }}" role="switch" aria-checked="{{ t.on }}" style="display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 44px; padding: 0 12px; border: 1px solid {{ t.border }}; border-radius: 8px; background-color: {{ t.bg }}; cursor: pointer; font-family: inherit; font-size: 13px; font-weight: 600; color: #1D1D1B; text-align: left;">
+                  {{ t.label }}
+                  <span style="width: 40px; height: 22px; border-radius: 999px; background-color: {{ t.track }}; position: relative; flex-shrink: 0; transition: background-color 0.2s;"><span style="position: absolute; top: 3px; left: {{ t.knob }}; width: 16px; height: 16px; border-radius: 50%; background-color: #FFFFFF; box-shadow: 0 1px 3px rgba(0,0,0,0.25); transition: left 0.2s;"></span></span>
+                </button>
+              </sc-for>
+            </div>
+          </div>
+          <div>
+            <p style="font-size: 12px; font-weight: 700; color: #1C543A; text-transform: uppercase; letter-spacing: 0.4px; padding-bottom: 8px; margin-bottom: 12px; border-bottom: 1px solid #1C543A;">Retirada e devolução</p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;">
+              <div><label for="b-retq" style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 6px;">Foi retirado?</label>
+                <select id="b-retq" value="{{ form.retirado }}" onChange="{{ setRetirado }}" style="width: 100%; height: 44px; padding: 0 10px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; background-color: #FFFFFF;"><option value="Não">Não</option><option value="Sim">Sim</option></select></div>
+              <div><label for="b-ret" style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 6px;">{{ retiradaLabel }}</label><input id="b-ret" type="date" value="{{ form.retirada }}" onInput="{{ setRetirada }}" style="width: 100%; height: 44px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px;" style-focus="border-color: #1C543A; outline: none;"/></div>
+              <div><label for="b-dev" style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 6px;">Data da devolução</label><input id="b-dev" type="date" value="{{ form.devolucao }}" onInput="{{ setDevolucao }}" style="width: 100%; height: 44px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px;" style-focus="border-color: #1C543A; outline: none;"/></div>
+              <div><label for="b-conf" style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 6px;">Devolvido em conformidade</label>
+                <select id="b-conf" value="{{ form.conformidade }}" onChange="{{ setConformidade }}" disabled="{{ notRetirado }}" style="width: 100%; height: 44px; padding: 0 10px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; background-color: #FFFFFF;"><option value="">Ainda não devolvido</option><option value="Sim">Sim</option><option value="Não">Não</option></select></div>
+              <sc-if value="{{ showObs }}" hint-placeholder-val="{{ false }}">
+                <div style="grid-column: 1 / -1;"><label for="b-obs" style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 6px;">O que não está em conformidade?</label><input id="b-obs" type="text" value="{{ form.obs }}" onInput="{{ setObs }}" placeholder="Ex.: mastro danificado, bandeira de SP não devolvida" style="width: 100%; height: 44px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px;" style-focus="border-color: #1C543A; outline: none;"/></div>
+              </sc-if>
+            </div>
+            <p style="font-size: 11.5px; color: #666666; margin-top: 8px;">Enquanto "Foi retirado?" estiver como Não, a data da retirada é o agendamento. Antes da devolução, a data de devolução é a prevista e indica atraso.</p>
+          </div>
+          <sc-if value="{{ formError }}" hint-placeholder-val="{{ false }}"><p role="alert" style="font-size: 12.5px; color: #B91C1C;">{{ formError }}</p></sc-if>
+        </div>
+        <div style="display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; padding: 16px 24px; border-top: 1px solid #F0F0EE;">
+          <sc-if value="{{ canDelete }}" hint-placeholder-val="{{ false }}"><button onClick="{{ remove }}" style="height: 44px; padding: 0 16px; border: 1px solid #F5C2C2; border-radius: 8px; background-color: #FFFFFF; color: #B91C1C; font-size: 13px; font-weight: 600; cursor: pointer; margin-right: auto;">Excluir</button></sc-if>
+          <button onClick="{{ close }}" style="height: 44px; padding: 0 18px; border: 1px solid #E0E0E0; border-radius: 8px; background-color: #FFFFFF; font-size: 13px; cursor: pointer;">Cancelar</button>
+          <button onClick="{{ submit }}" style="height: 44px; padding: 0 18px; border: none; border-radius: 8px; background-color: #1C543A; color: #FFFFFF; font-size: 13px; font-weight: 700; cursor: pointer;" style-hover="background-color: #153A2E;">Salvar</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+    <div role="status" style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background-color: #1C543A; color: #FFFFFF; padding: 12px 22px; border-radius: 999px; font-size: 13px; font-weight: 600; z-index: 100;">✓ {{ toast }}</div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: &quot;1100px&quot;, &quot;height&quot;: &quot;800px&quot;}}">
+class Component extends DCLogic {
+  KEY = 'DA_bandeiras_v1';
+  ITEMS = [['bauru', 'Bandeira de Bauru', 'Bauru'], ['sp', 'Bandeira de São Paulo', 'São Paulo'], ['brasil', 'Bandeira do Brasil', 'Brasil'], ['mastros', 'Mastros', 'Mastros'], ['suporte', 'Suporte', 'Suporte']];
+  SEED = [
+    { id: 'B1', solicitacao: '2026-05-25', retirado: 'Sim', entidade: 'Igreja ADBrasBauru Cong-Tangarás', documento: '45.030.566/0001-02', telefone: '(14) 99143-3817', retirada: '2026-08-14', devolucao: '2026-08-18', conformidade: 'Sim', protocolo: '1633/2026', itens: { bauru: true, sp: true, brasil: true, mastros: true, suporte: true }, obs: '' },
+    { id: 'B2', solicitacao: '2026-09-03', retirado: 'Sim', entidade: 'Agro Sem Limites 2026', documento: '', telefone: '', retirada: '2026-09-03', devolucao: '2026-09-08', conformidade: 'Sim', protocolo: '2882/2026', itens: { bauru: true, sp: true, brasil: true, mastros: true, suporte: true }, obs: '' },
+    { id: 'B3', solicitacao: '2026-10-16', retirado: 'Sim', entidade: 'Assembleia de Deus Ministério Santo Fogo', documento: '798.733.408-15', telefone: '(14) 98804-5019', retirada: '2026-10-16', devolucao: '2026-10-19', conformidade: 'Sim', protocolo: '2627/2026', itens: { bauru: true, sp: false, brasil: false, mastros: true, suporte: true }, obs: '' }
+  ];
+  state = { list: this.load(), q: '', filter: 'todos', form: null, formError: '', toast: '' };
+  load() { try { const s = JSON.parse(localStorage.getItem(this.KEY)); if (Array.isArray(s)) return s; } catch (e) {} return this.SEED.map(x => ({ ...x, itens: { ...x.itens } })); }
+  persist(list) { try { localStorage.setItem(this.KEY, JSON.stringify(list)); } catch (e) {} this.setState({ list }); }
+  componentWillUnmount() { clearTimeout(this._t); }
+  showToast(m) { clearTimeout(this._t); this.setState({ toast: m }); this._t = setTimeout(() => this.setState({ toast: '' }), 2600); }
+  audit(a, d) { if (window.DAAudit) window.DAAudit.log(a, 'mocoes', d); }
+  today() { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+  fmt(iso) { return iso ? iso.split('-').reverse().join('/') : '—'; }
+  maskDoc(v) { const d = String(v).replace(/\D/g, '').slice(0, 14);
+    if (d.length <= 11) return d.replace(/(\d{3})(\d)/, '$1.$2').replace(/(\d{3})\.(\d{3})(\d)/, '$1.$2.$3').replace(/\.(\d{3})(\d{1,2})$/, '.$1-$2');
+    return d.replace(/^(\d{2})(\d)/, '$1.$2').replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3').replace(/\.(\d{3})(\d)/, '.$1/$2').replace(/(\d{4})(\d{1,2})$/, '$1-$2'); }
+  maskTel(v) { const d = String(v).replace(/\D/g, '').slice(0, 11); if (d.length <= 2) return d ? '(' + d : ''; if (d.length <= 6) return '(' + d.slice(0, 2) + ') ' + d.slice(2);
+    return d.length <= 10 ? '(' + d.slice(0, 2) + ') ' + d.slice(2, 6) + '-' + d.slice(6) : '(' + d.slice(0, 2) + ') ' + d.slice(2, 7) + '-' + d.slice(7); }
+  status(r) { const hoje = this.today();
+    if (r.retirado !== 'Sim') return r.retirada && r.retirada < hoje ? 'naoRetirado' : 'aguardando';
+    if (r.conformidade === 'Sim') return 'devolvido';
+    if (r.conformidade === 'Não') return 'pendencia';
+    return r.devolucao && r.devolucao < hoje ? 'atrasado' : 'emprestado'; }
+  ST = { aguardando: ['Aguardando retirada', '#EEF4FD', '#1E40AF'], naoRetirado: ['Retirada não realizada', '#FDF8EC', '#92400E'], emprestado: ['Emprestado', '#FDF8EC', '#92400E'], atrasado: ['Devolução atrasada', '#FDF3F2', '#B91C1C'], devolvido: ['Devolvido', '#EAF3EE', '#1C543A'], pendencia: ['Devolvido com pendência', '#FDF3F2', '#B91C1C'] };
+  setF(k, mask) { return e => { const v = mask ? mask(e.target.value) : e.target.value; this.setState(s => ({ form: { ...s.form, [k]: v }, formError: '' })); }; }
+  quick(r, patch, msg) { const list = this.state.list.map(x => x.id === r.id ? { ...x, ...patch } : x); this.persist(list); this.audit(msg, r.entidade + ' · ' + (r.protocolo || 's/ protocolo')); this.showToast(msg + ' — ' + r.entidade); }
+  submit = () => {
+    const f = this.state.form;
+    if (!String(f.entidade).trim()) return this.setState({ formError: 'Informe a empresa ou entidade.' });
+    if (!f.solicitacao) return this.setState({ formError: 'Informe a data da solicitação.' });
+    const dd = String(f.documento).replace(/\D/g, ''); if (dd && dd.length !== 11 && dd.length !== 14) return this.setState({ formError: 'CPF deve ter 11 dígitos e CNPJ 14.' });
+    if (!this.ITEMS.some(([k]) => f.itens[k])) return this.setState({ formError: 'Selecione ao menos um item emprestado.' });
+    if (f.retirado === 'Sim' && !f.retirada) return this.setState({ formError: 'Informe a data da retirada.' });
+    if (f.retirado === 'Sim' && f.retirada > this.today()) return this.setState({ formError: 'Retirada marcada como feita não pode ter data futura. Use "Não" para agendar.' });
+    if (f.retirada && f.devolucao && f.devolucao < f.retirada) return this.setState({ formError: 'A devolução não pode ser antes da retirada.' });
+    const rec = { ...f, entidade: f.entidade.trim(), protocolo: String(f.protocolo || '').trim(), retirada: f.retirada || '', conformidade: f.retirado === 'Sim' ? f.conformidade : '' };
+    const isNew = !rec.id; if (isNew) rec.id = 'B' + Date.now();
+    const list = isNew ? [rec, ...this.state.list] : this.state.list.map(x => x.id === rec.id ? rec : x);
+    this.persist(list); this.setState({ form: null });
+    this.audit(isNew ? 'Empréstimo de bandeiras registrado' : 'Empréstimo de bandeiras editado', rec.entidade + ' · ' + (rec.protocolo || 's/ protocolo'));
+    this.showToast(isNew ? 'Solicitação registrada' : 'Registro atualizado');
+  };
+  renderVals() {
+    const st = this.state, f = st.form || { itens: {} };
+    const all = st.list.map(r => ({ r, s: this.status(r) })).sort((a, b) => (b.r.solicitacao || '').localeCompare(a.r.solicitacao || ''));
+    const q = st.q.trim().toLowerCase();
+    const list = all.filter(({ r, s }) => (st.filter === 'todos' || s === st.filter) && (!q || (r.entidade + ' ' + r.documento + ' ' + r.protocolo).toLowerCase().includes(q)));
+    const count = k => all.filter(x => x.s === k).length;
+    const kpi = (label, key, color) => ({ label, value: String(key === 'fora' ? count('emprestado') + count('atrasado') : count(key)), color, border: st.filter === key ? '#1C543A' : '#E8E8E8', filter: () => this.setState(s => ({ filter: key === 'fora' ? 'emprestado' : (s.filter === key ? 'todos' : key) })) });
+    const hoje = this.today();
+    return {
+      q: st.q, filter: st.filter, setQ: e => this.setState({ q: e.target.value }), setFilter: e => this.setState({ filter: e.target.value }),
+      shown: list.length, isEmpty: list.length === 0, toast: st.toast,
+      kpis: [kpi('Aguardando retirada', 'aguardando', '#1E40AF'), kpi('Retirada não realizada', 'naoRetirado', count('naoRetirado') ? '#92400E' : '#1C543A'), kpi('Fora da Câmara', 'fora', '#92400E'), kpi('Devolução atrasada', 'atrasado', count('atrasado') ? '#B91C1C' : '#1C543A'), kpi('Devolvidos com pendência', 'pendencia', count('pendencia') ? '#B91C1C' : '#1C543A')],
+      rows: list.map(({ r, s }) => { const S = this.ST[s];
+        return { ...r, solFmt: this.fmt(r.solicitacao), docFmt: r.documento ? this.maskDoc(r.documento) : 'Sem CPF/CNPJ', telFmt: r.telefone || 'sem telefone', protocoloFmt: r.protocolo || '—',
+          itens: this.ITEMS.filter(([k]) => r.itens && r.itens[k]).map(([, , s]) => s),
+          retFmt: r.retirado === 'Sim' ? this.fmt(r.retirada) : (r.retirada ? 'Agendada ' + this.fmt(r.retirada) : 'Não agendada'),
+          retColor: r.retirado === 'Sim' ? '#1D1D1B' : (s === 'naoRetirado' ? '#92400E' : '#1E40AF'),
+          devFmt: r.devolucao ? this.fmt(r.devolucao) + (r.retirado === 'Sim' && !r.conformidade ? ' (prevista)' : '') : '—',
+          devColor: s === 'atrasado' ? '#B91C1C' : '#1D1D1B', devWeight: s === 'atrasado' ? '700' : '400',
+          stLabel: S[0], stBg: S[1], stColor: S[2],
+          canRetirar: s === 'aguardando' || s === 'naoRetirado', canDevolver: s === 'emprestado' || s === 'atrasado',
+          retirar: () => this.quick(r, { retirado: 'Sim', retirada: r.retirada && r.retirada <= hoje ? r.retirada : hoje }, 'Retirada registrada'),
+          devolver: () => this.setState({ form: { ...r, itens: { ...r.itens }, devolucao: r.devolucao && r.devolucao <= hoje ? r.devolucao : hoje, conformidade: 'Sim' }, formError: '' }),
+          edit: () => this.setState({ form: { ...r, documento: this.maskDoc(r.documento || ''), itens: { ...r.itens } }, formError: '' }) }; }),
+      openNew: () => this.setState({ form: { entidade: '', documento: '', telefone: '', solicitacao: hoje, protocolo: '', retirado: 'Não', retirada: '', devolucao: '', conformidade: '', obs: '', itens: { bauru: true, sp: true, brasil: true, mastros: true, suporte: true } }, formError: '' }),
+      formOpen: !!st.form, form: f, formError: st.formError, formTitle: f.id ? 'Editar empréstimo — ' + f.entidade : 'Nova solicitação de bandeiras',
+      close: () => this.setState({ form: null }), stop: e => e.stopPropagation(), submit: this.submit,
+      setEntidade: this.setF('entidade'), setDocumento: this.setF('documento', v => this.maskDoc(v)), setTelefone: this.setF('telefone', v => this.maskTel(v)),
+      setSolicitacao: this.setF('solicitacao'), setProtocolo: this.setF('protocolo'), setRetirada: this.setF('retirada'), setDevolucao: this.setF('devolucao'), setObs: this.setF('obs'),
+      setConformidade: this.setF('conformidade'),
+      setRetirado: e => { const v = e.target.value; this.setState(s => ({ form: { ...s.form, retirado: v, retirada: v === 'Sim' ? (s.form.retirada || hoje) : s.form.retirada, conformidade: v === 'Sim' ? s.form.conformidade : '' }, formError: '' })); },
+      notRetirado: f.retirado !== 'Sim', retiradaLabel: f.retirado === 'Sim' ? 'Data da retirada' : 'Retirada agendada para', showObs: f.conformidade === 'Não',
+      itemToggles: this.ITEMS.map(([k, label]) => { const on = !!(f.itens && f.itens[k]);
+        return { label, on, bg: on ? '#F4F9F6' : '#FFFFFF', border: on ? '#B8D3C4' : '#E0E0E0', track: on ? '#1C543A' : '#D9D9D9', knob: on ? '21px' : '3px',
+          toggle: () => this.setState(s => ({ form: { ...s.form, itens: { ...s.form.itens, [k]: !on } }, formError: '' })) }; }),
+      canDelete: !!f.id,
+      remove: () => { if (!window.confirm('Excluir o registro de ' + f.entidade + '?')) return; this.persist(st.list.filter(x => x.id !== f.id)); this.audit('Empréstimo de bandeiras excluído', f.entidade); this.setState({ form: null }); this.showToast('Registro excluído'); }
+    };
+  }
+}
+</script>
+</body>
+</html>

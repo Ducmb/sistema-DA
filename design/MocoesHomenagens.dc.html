@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+  <script src="./theme.js"></script>
+  <script src="./config.js"></script>
+  <script src="./session.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema DA - Moções &amp; Homenagens</title>
+  <script src="./liccont.js"></script>
+  <script src="./vereadores.js"></script>
+  <script src="./calendar-feed.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #FFFFFF; color: #1D1D1B; }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes pulseAlert { 0%, 100% { box-shadow: 0 0 0 0 rgba(220,38,38,0.35); } 50% { box-shadow: 0 0 0 6px rgba(220,38,38,0.08); } }
+  </style>
+</helmet>
+
+<div style="display: flex; min-height: 100vh; background-color: #FFFFFF; position: relative;">
+
+  <sc-if value="{{ navOverlayVisible }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ navClose }}" style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); z-index: 40;"></div>
+  </sc-if>
+
+  <!-- Sidebar -->
+  <aside style="background-color: #1C543A; color: #FFFFFF; width: 250px; flex-shrink: 0; display: flex; flex-direction: column; padding: 22px 16px; gap: 22px; position: {{ navSidebarPosition }}; top: 0; left: 0; height: 100vh; overflow-y: auto; z-index: 50; transform: {{ navSidebarTransform }}; transition: transform 0.3s cubic-bezier(0.34, 1.25, 0.64, 1);">
+      <a href="Dashboard.dc.html" title="Voltar ao Painel de Controle" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: #FFFFFF; padding: 0 4px;">
+        <div style="width: 36px; height: 36px; background-color: #FFFFFF; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; color: #1C543A; flex-shrink: 0;">DA</div>
+        <div>
+          <p style="font-size: 12.5px; font-weight: 700; line-height: 1.3; color: #FFFFFF;">CÂMARA MUNICIPAL</p>
+          <p style="font-size: 9.5px; letter-spacing: 0.4px; color: rgba(255,255,255,0.65); text-transform: uppercase;">Diretoria Administrativa</p>
+        </div>
+      </a>
+      <nav style="display: flex; flex-direction: column; gap: 2px;">
+        <p style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: rgba(255,255,255,0.5); padding: 0 12px; margin-bottom: 6px;">Sistemas &amp; Gestão</p>
+        <a href="Dashboard.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 13px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">▦</span>Painel de Controle</a>
+        <a href="AlmoxarifadoAmostragem.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 13px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">📦</span>Almoxarifado</a>
+        <a href="ComprasModule.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 13px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">🛒</span>Compras &amp; Licitações</a>
+        <a href="MocoesHomenagens.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 13px; transition: background-color 0.2s; background-color: #FFFFFF; color: #1C543A; font-weight: 700;"><span style="width: 18px; text-align: center; flex-shrink: 0;">🎗</span>Moções &amp; Homenagens</a>
+        <a href="PatrimonioModule.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 13px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">🏛</span>Patrimônio</a>
+      </nav>
+      <nav style="display: flex; flex-direction: column; gap: 2px;">
+        <p style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: rgba(255,255,255,0.5); padding: 0 12px; margin-bottom: 6px;">Módulos Complementares</p>
+        <a href="AnalyticsModule.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">📈</span>Analytics &amp; Relatórios</a>
+        <a href="RHModule.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">🧑‍💼</span>Gestão de Pessoal</a>
+        <a href="Legislacoes.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">⚖</span>Legislações</a>
+        <a href="AuditLog.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">🛡</span>Log e Auditoria</a>
+        <a href="Configuracoes.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">⚙</span>Configurações do Sistema</a>
+      <a href="ProtocoloModule.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">📋</span>Protocolo</a>
+      </nav>
+      <div style="margin-top: auto; display: flex; flex-direction: column; gap: 4px; padding-top: 8px;">
+        <a href="UserProfile.dc.html" style="display: flex; align-items: center; gap: 10px; background-color: rgba(255,255,255,0.08); border-radius: 10px; padding: 12px; text-decoration: none; color: #FFFFFF;" style-hover="background-color: rgba(255,255,255,0.14);">
+          <div style="width: 34px; height: 34px; border-radius: 50%; background-color: #F0B429; color: #1C543A; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; flex-shrink: 0;">RA</div>
+          <div style="min-width: 0;">
+            <p style="font-size: 12.5px; font-weight: 700; color: #FFFFFF;">Dr. Roberto Alencar</p>
+            <p style="font-size: 10.5px; color: rgba(255,255,255,0.6);">DA-2026-948 · Diretoria</p>
+          </div>
+        </a>
+        <div role="group" aria-label="Aparência" style="display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 40px; padding: 0 12px;">
+          <span style="font-size: 11px; font-weight: 600; letter-spacing: 0.3px; color: rgba(255,255,255,0.6);">Aparência</span>
+          <div style="display: flex; padding: 2px; border-radius: 999px; background-color: rgba(0,0,0,0.22);">
+            <button onClick="{{ navThemeLight }}" aria-pressed="{{ navThemeIsLight }}" aria-label="Modo padrão" title="Modo padrão" style="width: 30px; height: 26px; border: none; border-radius: 999px; background-color: {{ navThemeLightBg }}; color: {{ navThemeLightFg }}; font-size: 13px; line-height: 1; cursor: pointer; transition: background-color 0.2s;">☀</button>
+            <button onClick="{{ navThemeDarkSet }}" aria-pressed="{{ navThemeDark }}" aria-label="Modo escuro" title="Modo escuro" style="width: 30px; height: 26px; border: none; border-radius: 999px; background-color: {{ navThemeDarkBg }}; color: {{ navThemeDarkFg }}; font-size: 13px; line-height: 1; cursor: pointer; transition: background-color 0.2s;">☾</button>
+          </div>
+        </div>
+        <a href="Login.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; color: rgba(255,255,255,0.7); text-decoration: none; font-size: 12.5px; font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1); color: #FFFFFF;"><span style="width: 18px; text-align: center; flex-shrink: 0;">⎋</span>Sair do sistema</a>
+      </div>
+    </aside>
+
+  <!-- Main -->
+  <div style="flex: 1; min-width: 0; display: flex; flex-direction: column;">
+    <div style="position: sticky; top: 0; z-index: 30; background-color: rgba(255,255,255,0.96); backdrop-filter: blur(6px); border-bottom: 1px solid #E8E8E8; min-height: 64px; padding: 10px {{ navGutter }}; display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+      <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
+        <sc-if value="{{ navIsMobile }}" hint-placeholder-val="{{ false }}">
+          <button onClick="{{ navOpen }}" aria-label="Abrir menu" style="width: 44px; height: 44px; border-radius: 8px; border: 1px solid #E0E0E0; background-color: #FFFFFF; font-size: 18px; color: #1D1D1B; cursor: pointer; flex-shrink: 0;">☰</button>
+          <a href="Dashboard.dc.html" title="Painel de Controle" style="width: 36px; height: 36px; background-color: #1C543A; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 12px; color: #FFFFFF; text-decoration: none; flex-shrink: 0;">DA</a>
+        </sc-if>
+        <sc-if value="{{ navShowBreadcrumb }}" hint-placeholder-val="{{ true }}">
+          <div style="display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: #666666; white-space: nowrap;">
+            <a href="Dashboard.dc.html" style="color: #666666; text-decoration: none;" style-hover="color: #1C543A;">Painel de Controle</a>
+            <span style="color: #CCCCCC;">›</span>
+            <span style="color: #1D1D1B; font-weight: 600;">Moções &amp; Homenagens</span>
+          </div>
+        </sc-if>
+      </div>
+      <div style="display: flex; align-items: center; gap: 10px; flex: 1; justify-content: flex-end; min-width: 0;">
+        <div style="position: relative; flex: 1; max-width: 340px; min-width: 0;">
+          <input type="search" placeholder="Buscar módulos e telas…" aria-label="Busca global" value="{{ navSearch }}" onInput="{{ navSearchInput }}" onFocus="{{ navSearchFocus }}" onBlur="{{ navSearchBlur }}" onKeyDown="{{ navSearchKey }}" style="width: 100%; height: 44px; padding: 0 12px 0 34px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; color: #1D1D1B; background-color: #F9F9F9;" style-focus="border-color: #1C543A; background-color: #FFFFFF; outline: none;"/>
+          <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 14px; color: #999999; pointer-events: none;">⌕</span>
+          <sc-if value="{{ navSearchOpen }}" hint-placeholder-val="{{ false }}">
+            <div style="position: absolute; top: 50px; right: 0; left: 0; min-width: 240px; background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 8px; box-shadow: 0 12px 32px rgba(0,0,0,0.12); padding: 6px; z-index: 60;">
+              <sc-for list="{{ navSearchResults }}" as="r" hint-placeholder-count="3">
+                <a href="{{ r.href }}" onMouseDown="{{ r.go }}" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 10px; border-radius: 6px; text-decoration: none; color: #1D1D1B; font-size: 13px;" style-hover="background-color: #F2F7F4;">
+                  <span style="width: 20px; text-align: center; flex-shrink: 0;">{{ r.icon }}</span>
+                  <span style="flex: 1; font-weight: 600;">{{ r.label }}</span>
+                  <span style="font-size: 11px; color: #999999;">{{ r.group }}</span>
+                </a>
+              </sc-for>
+              <sc-if value="{{ navSearchEmpty }}" hint-placeholder-val="{{ false }}">
+                <p style="padding: 12px 10px; font-size: 12.5px; color: #999999;">Nenhum resultado para “{{ navSearch }}”</p>
+              </sc-if>
+            </div>
+          </sc-if>
+        </div>
+        <a href="NotificationsModule.dc.html" title="Notificações" style="position: relative; width: 44px; height: 44px; border-radius: 8px; border: 1px solid #E0E0E0; background-color: #FFFFFF; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 16px; flex-shrink: 0;" style-hover="border-color: #1C543A;">🔔<span style="position: absolute; top: 9px; right: 10px; width: 7px; height: 7px; border-radius: 50%; background-color: #DC2626; border: 1.5px solid #FFFFFF;"></span></a>
+      </div>
+    </div>
+    <main style="flex: 1; padding: {{ mainPadding }}; display: flex; flex-direction: column; gap: 20px; min-width: 0;">
+
+    
+
+    <div>
+      <p style="font-size: 11px; font-weight: 700; letter-spacing: 0.6px; color: #1C543A; text-transform: uppercase;">Sistema de Gestão Integrada &nbsp;•&nbsp; Moções &amp; Homenagens</p>
+      <h1 style="font-size: {{ titleFontSize }}; font-weight: 800; color: #1D1D1B; margin-top: 6px;">Módulo de Moções &amp; Homenagens</h1>
+    </div>
+
+    <!-- Tabs -->
+    <div style="display: flex; gap: 6px; border-bottom: 2px solid #1C543A; padding-bottom: 0; overflow-x: auto;">
+      <button onClick="{{ selectTabMocoes }}" style="padding: 12px 18px; border: none; background: none; font-size: 13.5px; font-weight: 700; cursor: pointer; border-radius: 8px 8px 0 0; background-color: {{ tab.mocoesBg }}; color: {{ tab.mocoesColor }};">Controle de Moções <span style="font-weight: 500; opacity: 0.7;">— Portaria DA 01/2026</span></button>
+      <button onClick="{{ selectTabGaleria }}" style="padding: 12px 18px; border: none; background: none; font-size: 13.5px; font-weight: 700; cursor: pointer; border-radius: 8px 8px 0 0; background-color: {{ tab.galeriaBg }}; color: {{ tab.galeriaColor }};">Galeria de Homenageados <span style="font-weight: 500; opacity: 0.7;">— Portaria DA 03/2023</span></button>
+      <button onClick="{{ selectTabArranjos }}" style="padding: 12px 18px; border: none; background: none; font-size: 13.5px; font-weight: 700; cursor: pointer; border-radius: 8px 8px 0 0; background-color: {{ tab.arranjosBg }}; color: {{ tab.arranjosColor }};">Arranjos e Placas</button>
+      <button onClick="{{ selectTabBandeiras }}" style="padding: 12px 18px; border: none; background: none; font-size: 13.5px; font-weight: 700; cursor: pointer; border-radius: 8px 8px 0 0; background-color: {{ tab.bandeirasBg }}; color: {{ tab.bandeirasColor }};">Bandeiras</button>
+    </div>
+
+    <!-- Aba: Controle de Moções -->
+    <sc-if value="{{ isMocoesTab }}" hint-placeholder-val="{{ true }}">
+      <div style="display: flex; flex-direction: column; gap: 18px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+          <input type="search" value="{{ mocaoSearch }}" onInput="{{ handleMocaoSearch }}" placeholder="Buscar moção por número, assunto ou autor..." style="height: 44px; padding: 0 14px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; flex: 1; max-width: 360px; min-width: 0;" style-focus="border-color: #1C543A; outline: none;"/>
+          <button onClick="{{ openNewMocao }}" style="height: 44px; padding: 0 16px; background-color: #1C543A; color: #FFFFFF; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap;" style-hover="background-color: #164530;">+ Registrar Moção</button>
+        </div>
+
+        <div style="background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 12px; overflow-x: auto; animation: fadeInUp 0.5s ease-out both;">
+          <div style="display: grid; grid-template-columns: 80px minmax(0,1fr) 160px 100px 120px 80px; gap: 16px; padding: 12px 18px; background-color: #F9F9F9; font-size: 11px; font-weight: 700; color: #666666; text-transform: uppercase; letter-spacing: 0.3px; min-width: 740px;">
+            <span>Nº</span><span>Assunto</span><span>Autor</span><span>Data</span><span>Status</span><span>Ações</span>
+          </div>
+          <sc-for list="{{ mocoes }}" as="m" hint-placeholder-count="5">
+            <div style="display: grid; grid-template-columns: 80px minmax(0,1fr) 160px 100px 120px 80px; gap: 16px; padding: 10px 18px; border-top: 1px solid #F0F0F0; align-items: center; min-width: 740px;" style-hover="background-color: #F9F9F9;">
+              <span style="font-size: 12.5px; font-weight: 700; color: #1D1D1B;">{{ m.number }}</span>
+              <span style="font-size: 12.5px; color: #1D1D1B;">{{ m.subject }}</span>
+              <span style="font-size: 12.5px; color: #666666;">{{ m.author }}</span>
+              <span style="font-size: 12px; color: #666666; display: flex; flex-direction: column;"><span>{{ m.date }}</span><span style="font-size: 11px; color: #1C543A;">{{ m.sessaoLabel }}</span></span>
+              <span style="font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 999px; background-color: {{ m.statusBg }}; color: {{ m.statusColor }}; width: fit-content;">{{ m.status }}</span>
+              <button onClick="{{ m.edit }}" style="height: 36px; padding: 0 12px; background-color: #FFFFFF; border: 1px solid #E0E0E0; border-radius: 6px; font-size: 12px; font-weight: 600; color: #1C543A; cursor: pointer;" style-hover="border-color: #1C543A;">✎ Editar</button>
+            </div>
+          </sc-for>
+          <sc-if value="{{ mocoesEmpty }}" hint-placeholder-val="{{ false }}">
+            <p style="padding: 32px 18px; text-align: center; font-size: 13px; color: #666666;">Nenhuma moção encontrada.</p>
+          </sc-if>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isBandeirasTab }}" hint-placeholder-val="{{ false }}">
+      <dc-import name="HomenagensBandeiras" hint-size="100%,800px"></dc-import>
+    </sc-if>
+
+    <sc-if value="{{ isArranjosTab }}" hint-placeholder-val="{{ false }}">
+      <dc-import name="HomenagensArranjos" hint-size="100%,800px"></dc-import>
+    </sc-if>
+
+    <!-- Aba: Galeria de Homenageados -->
+    <sc-if value="{{ isGaleriaTab }}" hint-placeholder-val="{{ false }}">
+      <div style="display: grid; grid-template-columns: {{ galeriaColumns }}; gap: 20px; align-items: start;">
+
+        <div style="background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 12px; overflow: hidden; animation: fadeInUp 0.5s ease-out both;">
+          <div style="display: grid; grid-template-columns: minmax(0,1fr) 100px 80px 80px; gap: 12px; padding: 12px 18px; background-color: #F9F9F9; font-size: 11px; font-weight: 700; color: #666666; text-transform: uppercase; letter-spacing: 0.3px;">
+            <span>Homenageado / Vereador Autor</span><span>Legislatura</span><span>Quadro</span><span>Ações</span>
+          </div>
+          <sc-for list="{{ gallery }}" as="g" hint-placeholder-count="3">
+            <div style="display: grid; grid-template-columns: minmax(0,1fr) 100px 80px 80px; gap: 12px; padding: 10px 18px; border-top: 1px solid #F0F0F0; align-items: center;" style-hover="background-color: #F9F9F9;">
+              <div>
+                <p style="font-size: 12.5px; font-weight: 700; color: #1D1D1B;">{{ g.honoree }}</p>
+                <p style="font-size: 11.5px; color: #999999; margin-top: 2px;">Vereador: {{ g.councilor }}</p>
+              </div>
+              <span style="font-size: 12.5px; color: #666666;">{{ g.legislature }}</span>
+              <span style="font-size: 12.5px; font-weight: 700; color: #1C543A;">{{ g.frameNumber }}</span>
+              <button onClick="{{ g.edit }}" style="height: 36px; padding: 0 10px; background-color: #FFFFFF; border: 1px solid #E0E0E0; border-radius: 6px; font-size: 12px; font-weight: 600; color: #1C543A; cursor: pointer;" style-hover="border-color: #1C543A;">✎ Editar</button>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 12px; padding: 22px; animation: fadeInUp 0.5s ease-out 0.1s both;">
+          <h3 style="font-size: 15px; font-weight: 700; margin-bottom: 4px;">Registrar Homenagem</h3>
+          <p style="font-size: 12px; color: #999999; margin-bottom: 16px;">Cota: 1 quadro por vereador / legislatura</p>
+
+          <div style="display: flex; flex-direction: column; gap: 14px;">
+            <div>
+              <label style="font-size: 11.5px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">Vereador Autor</label>
+              <select onChange="{{ handleCouncilorChange }}" value="{{ selectedCouncilor }}" style="width: 100%; padding: 10px 12px; border: 1px solid #E0E0E0; border-radius: 6px; font-size: 13px; background-color: #FFFFFF;">
+                <sc-for list="{{ councilors }}" as="c" hint-placeholder-count="4">
+                  <option value="{{ c.name }}">{{ c.name }} {{ c.quotaLabel }}</option>
+                </sc-for>
+              </select>
+            </div>
+
+            <sc-if value="{{ quotaExceeded }}" hint-placeholder-val="{{ false }}">
+              <div style="border: 1px solid #DC2626; border-radius: 8px; padding: 14px; background-color: #FEF2F2; animation: pulseAlert 1.6s infinite;">
+                <p style="font-size: 12.5px; font-weight: 700; color: #991B1B;">⚠ Limite de Cota Atingido</p>
+                <p style="font-size: 11.5px; color: #7F1D1D; margin-top: 4px; line-height: 1.4;">Este vereador já possui 1 quadro oficial registrado na legislatura vigente (Portaria DA 03/2023). O registro está bloqueado.</p>
+              </div>
+            </sc-if>
+
+            <div>
+              <label style="font-size: 11.5px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">Nome do Homenageado</label>
+              <input type="text" value="{{ newHonoree }}" onInput="{{ handleNewHonoree }}" placeholder="Nome completo" disabled="{{ quotaExceeded }}" style="width: 100%; height: 44px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px;" style-focus="border-color: #1C543A; outline: none;" style-disabled="background-color: #F5F5F5; color: #999999;"/>
+            </div>
+
+            <sc-if value="{{ honoreeError }}" hint-placeholder-val="{{ false }}"><p style="font-size: 12.5px; color: #DC2626; font-weight: 600;">{{ honoreeError }}</p></sc-if>
+            <button onClick="{{ registerHonoree }}" disabled="{{ registerDisabled }}" style="height: 44px; background-color: {{ registerButtonBg }}; color: #FFFFFF; border: none; border-radius: 8px; font-size: 13.5px; font-weight: 700; cursor: {{ registerButtonCursor }};">Registrar Homenagem</button>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+  </main>
+  </div>
+  <sc-if value="{{ mocaoOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeMocao }}" style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 90;">
+      <div onClick="{{ stopProp }}" style="background-color: #FFFFFF; border-radius: 12px; width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.25); animation: fadeInUp 0.3s ease-out;">
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 22px; border-bottom: 1px solid #1C543A;">
+          <div>
+            <h3 style="font-size: 16px; font-weight: 700; color: #1D1D1B;">{{ mocaoModalTitle }}</h3>
+            <p style="font-size: 12px; color: #666666; margin-top: 2px;">Portaria DA 01/2026 — numeração sequencial automática</p>
+          </div>
+          <button onClick="{{ closeMocao }}" aria-label="Fechar" style="width: 44px; height: 44px; border-radius: 8px; border: none; background-color: #F5F5F5; font-size: 15px; color: #666666; cursor: pointer; flex-shrink: 0;" style-hover="background-color: #E8E8E8;">✕</button>
+        </div>
+        <div style="padding: 20px 22px; display: flex; flex-direction: column; gap: 14px;">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;">
+          <div><label style="font-size: 12px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">Tipo de moção</label><select value="{{ mocaoForm.type }}" onChange="{{ mocaoType }}" style="width: 100%; height: 44px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; color: #1D1D1B; background-color: #FFFFFF; cursor: pointer;" style-focus="border-color: #1C543A; outline: none;"><option value="Aplauso">Aplauso</option><option value="Congratulação">Congratulação</option><option value="Pesar">Pesar</option><option value="Apoio">Apoio</option><option value="Repúdio">Repúdio</option><option value="Reconhecimento">Reconhecimento</option></select></div>
+          <div><label style="font-size: 12px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">Vereador autor</label><select value="{{ mocaoForm.author }}" onChange="{{ mocaoAuthor }}" style="width: 100%; height: 44px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; color: #1D1D1B; background-color: #FFFFFF; cursor: pointer;" style-focus="border-color: #1C543A; outline: none;"><sc-for list="{{ councilorNames }}" as="cn" hint-placeholder-count="3"><option value="{{ cn }}">{{ cn }}</option></sc-for></select></div>
+          </div>
+          <div><label style="font-size: 12px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">Assunto / Ementa</label><input type="text" value="{{ mocaoForm.subject }}" onInput="{{ mocaoSubject }}" placeholder="Ex: Moção de Aplauso à Escola Municipal..." style="width: 100%; height: 44px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; color: #1D1D1B; background-color: #FFFFFF;" style-focus="border-color: #1C543A; outline: none;"/></div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;">
+          <div><label style="font-size: 12px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">Data de protocolo</label><input type="date" value="{{ mocaoForm.date }}" onInput="{{ mocaoDate }}" placeholder="" style="width: 100%; height: 44px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; color: #1D1D1B; background-color: #FFFFFF;" style-focus="border-color: #1C543A; outline: none;"/></div>
+          <div><label for="moc-sessao" style="font-size: 12px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">Data da sessão</label><input id="moc-sessao" type="date" value="{{ mocaoForm.sessao }}" onInput="{{ mocaoSessao }}" style="width: 100%; height: 44px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; color: #1D1D1B; background-color: #FFFFFF;" style-focus="border-color: #1C543A; outline: none;"/></div>
+          <div><label style="font-size: 12px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">Status</label><select value="{{ mocaoForm.status }}" onChange="{{ mocaoStatus }}" style="width: 100%; height: 44px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; color: #1D1D1B; background-color: #FFFFFF; cursor: pointer;" style-focus="border-color: #1C543A; outline: none;"><option value="Em Análise">Em Análise</option><option value="Aprovada">Aprovada</option><option value="Rejeitada">Rejeitada</option><option value="Arquivada">Arquivada</option></select></div>
+          </div>
+          <sc-if value="{{ mocaoError }}" hint-placeholder-val="{{ false }}"><p style="font-size: 12.5px; color: #DC2626; font-weight: 600;">{{ mocaoError }}</p></sc-if>
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 10px; padding: 14px 22px 20px; flex-wrap: wrap;">
+          <button onClick="{{ closeMocao }}" style="height: 44px; padding: 0 16px; border: 1px solid #E0E0E0; border-radius: 8px; background-color: #FFFFFF; font-size: 13px; font-weight: 600; color: #1D1D1B; cursor: pointer;" style-hover="background-color: #F5F5F5;">Cancelar</button>
+          <button onClick="{{ saveMocao }}" style="height: 44px; padding: 0 18px; background-color: #1C543A; color: #FFFFFF; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer;" style-hover="background-color: #164530;" style-disabled="background-color: #CCCCCC; cursor: not-allowed;">{{ mocaoSaveLabel }}</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+  <sc-if value="{{ honOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeHon }}" style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 90;">
+      <div onClick="{{ stopProp }}" style="background-color: #FFFFFF; border-radius: 12px; width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.25); animation: fadeInUp 0.3s ease-out;">
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 22px; border-bottom: 1px solid #1C543A;">
+          <div>
+            <h3 style="font-size: 16px; font-weight: 700; color: #1D1D1B;">Editar Homenageado</h3>
+            <p style="font-size: 12px; color: #666666; margin-top: 2px;">Portaria DA 03/2023 — cota de 1 quadro por vereador/legislatura</p>
+          </div>
+          <button onClick="{{ closeHon }}" aria-label="Fechar" style="width: 44px; height: 44px; border-radius: 8px; border: none; background-color: #F5F5F5; font-size: 15px; color: #666666; cursor: pointer; flex-shrink: 0;" style-hover="background-color: #E8E8E8;">✕</button>
+        </div>
+        <div style="padding: 20px 22px; display: flex; flex-direction: column; gap: 14px;">
+          <div><label style="font-size: 12px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">Nome do homenageado</label><input type="text" value="{{ honForm.honoree }}" onInput="{{ honHonoree }}" placeholder="Nome completo" style="width: 100%; height: 44px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; color: #1D1D1B; background-color: #FFFFFF;" style-focus="border-color: #1C543A; outline: none;"/></div>
+          <div><label style="font-size: 12px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">Vereador autor</label><select value="{{ honForm.councilor }}" onChange="{{ honCouncilor }}" style="width: 100%; height: 44px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; color: #1D1D1B; background-color: #FFFFFF; cursor: pointer;" style-focus="border-color: #1C543A; outline: none;"><sc-for list="{{ councilorNames }}" as="cn" hint-placeholder-count="3"><option value="{{ cn }}">{{ cn }}</option></sc-for></select></div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;">
+          <div><label style="font-size: 12px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">Legislatura</label><select value="{{ honForm.legislature }}" onChange="{{ honLegislature }}" style="width: 100%; height: 44px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; color: #1D1D1B; background-color: #FFFFFF; cursor: pointer;" style-focus="border-color: #1C543A; outline: none;"><option value="2025-2028">2025-2028</option><option value="2021-2024">2021-2024</option></select></div>
+          <div><label style="font-size: 12px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">Nº do quadro</label><input type="text" value="{{ honForm.frameNumber }}" onInput="{{ honFrame }}" placeholder="Q-000" style="width: 100%; height: 44px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; color: #1D1D1B; background-color: #FFFFFF;" style-focus="border-color: #1C543A; outline: none;"/></div>
+          </div>
+          <sc-if value="{{ honError }}" hint-placeholder-val="{{ false }}"><p style="font-size: 12.5px; color: #DC2626; font-weight: 600;">{{ honError }}</p></sc-if>
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 10px; padding: 14px 22px 20px; flex-wrap: wrap;">
+          <button onClick="{{ closeHon }}" style="height: 44px; padding: 0 16px; border: 1px solid #E0E0E0; border-radius: 8px; background-color: #FFFFFF; font-size: 13px; font-weight: 600; color: #1D1D1B; cursor: pointer;" style-hover="background-color: #F5F5F5;">Cancelar</button>
+          <button onClick="{{ saveHon }}" style="height: 44px; padding: 0 18px; background-color: #1C543A; color: #FFFFFF; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer;" style-hover="background-color: #164530;" style-disabled="background-color: #CCCCCC; cursor: not-allowed;">Salvar alterações</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+  <sc-if value="{{ toastVisible }}" hint-placeholder-val="{{ false }}">
+    <div style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background-color: #1C543A; color: #FFFFFF; padding: 12px 22px; border-radius: 999px; font-size: 13px; font-weight: 600; z-index: 100; box-shadow: 0 8px 24px rgba(28,84,58,0.35);">✓ {{ toastMessage }}</div>
+  </sc-if>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: &quot;100%&quot;, &quot;height&quot;: &quot;900px&quot;}}">
+class Component extends DCLogic {
+  state = {
+    isMobile: typeof window !== 'undefined' ? window.innerWidth < 900 : false,
+    mobileMenuOpen: false,
+    activeTab: (/[?&]tab=bandeiras/.test(window.location.search) ? 'bandeiras' : 'mocoes'),
+    selectedCouncilor: 'Fernando Souza',
+    mocaoSearch: '',
+    mocaoOpen: false, mocaoEditIdx: -1, mocaoError: '',
+    mocaoForm: { type: 'Aplauso', author: '', subject: '', date: '', sessao: '', status: 'Em Análise' },
+    newHonoree: '', honoreeError: '',
+    honOpen: false, honEditIdx: -1, honError: '',
+    honForm: { honoree: '', councilor: '', legislature: '2025-2028', frameNumber: '' },
+    toastVisible: false, toastMessage: '',
+    councilors: [
+      { name: 'Márcio Teixeira', hasQuota: false },
+      { name: 'Beatriz Lopes', hasQuota: true },
+      { name: 'Fernando Souza', hasQuota: false },
+      { name: 'Helena Duarte', hasQuota: true }
+    ],
+    mocoes: [
+      { number: '040/2026', sessao: '14/07/2026', subject: 'Moção de Aplauso - Req. 274/2026', author: 'Márcio Teixeira', date: '10/07/2026', status: 'Aprovada', statusBg: '#EAF3EE', statusColor: '#1C543A' },
+      { number: '039/2026', sessao: '14/07/2026', subject: 'Moção de Pesar - Servidor Público', author: 'Helena Duarte', date: '08/07/2026', status: 'Aprovada', statusBg: '#EAF3EE', statusColor: '#1C543A' },
+      { number: '038/2026', sessao: '27/10/2026', subject: 'Moção de Congratulação - Escola Municipal', author: 'Beatriz Lopes', date: '05/07/2026', status: 'Em Análise', statusBg: '#FEF3C7', statusColor: '#92400E' },
+      { number: '037/2026', sessao: '07/07/2026', subject: 'Moção de Apoio - Campanha de Saúde', author: 'Fernando Souza', date: '01/07/2026', status: 'Aprovada', statusBg: '#EAF3EE', statusColor: '#1C543A' },
+      { number: '036/2026', sessao: '30/06/2026', subject: 'Moção de Repúdio - Ato de Vandalismo', author: 'Márcio Teixeira', date: '28/06/2026', status: 'Arquivada', statusBg: '#F0F0F0', statusColor: '#666666' }
+    ],
+    gallery: [
+      { honoree: 'Maria das Graças Ferreira', councilor: 'Beatriz Lopes', legislature: '2025-2028', frameNumber: 'Q-014' },
+      { honoree: 'José Antônio Ribeiro', councilor: 'Helena Duarte', legislature: '2025-2028', frameNumber: 'Q-015' },
+      { honoree: 'Comunidade do Bairro Vila Nova', councilor: 'Márcio Teixeira', legislature: '2025-2028', frameNumber: 'Q-016' }
+    ]
+  };
+
+  componentDidMount() {
+    const wv = () => { if (window.DAVereadores) { window.DAVereadores.merge(this.state.councilors.map(x => x.name)); this.forceUpdate(); } else setTimeout(wv, 150); }; wv();
+    this._onVer = () => this.forceUpdate(); window.addEventListener('vereadoreschange', this._onVer);
+    setTimeout(() => this._publishCal(), 300);
+    this.handleResize = () => { this.setState({ isMobile: window.innerWidth < 900 }); };
+    window.addEventListener('resize', this.handleResize);
+  }
+  componentWillUnmount() {
+    window.removeEventListener('resize', this.handleResize);
+  }
+  openMobileMenu = () => { this.setState({ mobileMenuOpen: true }); };
+  closeMobileMenu = () => { this.setState({ mobileMenuOpen: false }); };
+  selectTabMocoes = () => { this.setState({ activeTab: 'mocoes' }); };
+  selectTabGaleria = () => { this.setState({ activeTab: 'galeria' }); };
+  selectTabArranjos = () => { this.setState({ activeTab: 'arranjos' }); };
+  selectTabBandeiras = () => { this.setState({ activeTab: 'bandeiras' }); };
+  handleCouncilorChange = (e) => { this.setState({ selectedCouncilor: e.target.value }); };
+
+  showToast = (msg) => {
+    clearTimeout(this._toastTimer);
+    this.setState({ toastVisible: true, toastMessage: msg });
+    this._toastTimer = setTimeout(() => this.setState({ toastVisible: false }), 2500);
+  };
+  stopProp = (e) => { e.stopPropagation(); };
+  CURRENT_LEG = '2025-2028';
+  STATUS_STYLE = { 'Aprovada': ['#EAF3EE','#1C543A'], 'Em Análise': ['#FEF3C7','#92400E'], 'Rejeitada': ['#FDECEC','#B91C1C'], 'Arquivada': ['#F0F0F0','#666666'] };
+  handleMocaoSearch = (e) => { this.setState({ mocaoSearch: e.target.value }); };
+  openNewMocao = () => { this.setState({ mocaoOpen: true, mocaoEditIdx: -1, mocaoError: '', mocaoForm: { type: 'Aplauso', author: this.state.councilors[0].name, subject: '', date: new Date().toISOString().slice(0, 10), sessao: '', status: 'Em Análise' } }); };
+  openEditMocao = (idx) => {
+    const toISO = (br) => { if (!br) return ''; const p = br.split('/'); return p.length === 3 ? p[2] + '-' + p[1] + '-' + p[0] : br; };
+    const m = this.state.mocoes[idx];
+    const type = (m.subject.match(/Moção de ([^\s-]+)/) || [])[1] || 'Aplauso';
+    this.setState({ mocaoOpen: true, mocaoEditIdx: idx, mocaoError: '', mocaoForm: { type: type, author: m.author, subject: m.subject, date: toISO(m.date), sessao: m.sessao ? toISO(m.sessao) : '', status: m.status } });
+  };
+  closeMocao = () => { this.setState({ mocaoOpen: false }); };
+  mocaoType = (e) => { const v = e.target.value; this.setState(s => ({ mocaoForm: { ...s.mocaoForm, type: v } })); };
+  mocaoAuthor = (e) => { const v = e.target.value; this.setState(s => ({ mocaoForm: { ...s.mocaoForm, author: v } })); };
+  mocaoSubject = (e) => { const v = e.target.value; this.setState(s => ({ mocaoForm: { ...s.mocaoForm, subject: v } })); };
+  mocaoDate = (e) => { const v = e.target.value; this.setState(s => ({ mocaoForm: { ...s.mocaoForm, date: v } })); };
+  mocaoSessao = (e) => { const v = e.target.value; this.setState(s => ({ mocaoForm: { ...s.mocaoForm, sessao: v } })); };
+  mocaoStatus = (e) => { const v = e.target.value; this.setState(s => ({ mocaoForm: { ...s.mocaoForm, status: v } })); };
+  saveMocao = () => {
+    const toBR = (iso) => { if (!iso) return ''; const p = iso.split('-'); return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : iso; };
+    const f = this.state.mocaoForm;
+    if (!f.subject.trim() || !f.date) { this.setState({ mocaoError: 'Preencha assunto e data.' }); return; }
+    let subject = f.subject.trim();
+    if (!/^Moção de /i.test(subject)) subject = 'Moção de ' + f.type + ' - ' + subject;
+    const idx = this.state.mocaoEditIdx;
+    if (idx >= 0) {
+      this.setState(s => ({ mocoes: s.mocoes.map((m, i) => i === idx ? { ...m, subject: subject, author: f.author, date: toBR(f.date), sessao: toBR(f.sessao), status: f.status } : m), mocaoOpen: false }));
+      this.showToast('Moção ' + this.state.mocoes[idx].number + ' atualizada');
+    } else {
+      const year = f.date.slice(0, 4);
+      const max = this.state.mocoes.filter(m => m.number.endsWith('/' + year)).reduce((a, m) => Math.max(a, parseInt(m.number, 10)), 0);
+      const number = String(max + 1).padStart(3, '0') + '/' + year;
+      this.setState(s => ({ mocoes: [{ number: number, subject: subject, author: f.author, date: toBR(f.date), sessao: toBR(f.sessao), status: f.status }, ...s.mocoes], mocaoOpen: false }));
+      this.showToast('Moção ' + number + ' registrada');
+    }
+  };
+  _hasQuota(name, leg, excludeIdx) { return this.state.gallery.some((g, i) => i !== excludeIdx && g.councilor === name && g.legislature === leg); }
+  handleNewHonoree = (e) => { this.setState({ newHonoree: e.target.value, honoreeError: '' }); };
+  registerHonoree = () => {
+    const name = this.state.newHonoree.trim();
+    const councilor = this.state.selectedCouncilor;
+    if (!name) { this.setState({ honoreeError: 'Informe o nome do homenageado.' }); return; }
+    if (this._hasQuota(councilor, this.CURRENT_LEG, -1)) return;
+    const max = this.state.gallery.reduce((a, g) => Math.max(a, parseInt(g.frameNumber.replace(/\D/g, ''), 10) || 0), 0);
+    const frame = 'Q-' + String(max + 1).padStart(3, '0');
+    this.setState(s => ({ gallery: [...s.gallery, { honoree: name, councilor: councilor, legislature: this.CURRENT_LEG, frameNumber: frame }], newHonoree: '' }));
+    this.showToast('Homenagem registrada — quadro ' + frame);
+  };
+  openEditHon = (idx) => { this.setState({ honOpen: true, honEditIdx: idx, honError: '', honForm: { ...this.state.gallery[idx] } }); };
+  closeHon = () => { this.setState({ honOpen: false }); };
+  honHonoree = (e) => { const v = e.target.value; this.setState(s => ({ honForm: { ...s.honForm, honoree: v } })); };
+  honCouncilor = (e) => { const v = e.target.value; this.setState(s => ({ honForm: { ...s.honForm, councilor: v } })); };
+  honLegislature = (e) => { const v = e.target.value; this.setState(s => ({ honForm: { ...s.honForm, legislature: v } })); };
+  honFrame = (e) => { const v = e.target.value; this.setState(s => ({ honForm: { ...s.honForm, frameNumber: v } })); };
+  saveHon = () => {
+    const f = this.state.honForm, idx = this.state.honEditIdx;
+    if (!f.honoree.trim() || !f.frameNumber.trim()) { this.setState({ honError: 'Preencha homenageado e nº do quadro.' }); return; }
+    if (this._hasQuota(f.councilor, f.legislature, idx)) { this.setState({ honError: 'Este vereador já possui quadro registrado nesta legislatura (Portaria DA 03/2023).' }); return; }
+    this.setState(s => ({ gallery: s.gallery.map((g, i) => i === idx ? { ...f, honoree: f.honoree.trim() } : g), honOpen: false }));
+    this.showToast('Homenageado atualizado');
+  };
+
+  _publishCal() {
+    const iso = (br) => { const p = String(br || '').split('/'); return p.length === 3 ? p[2] + '-' + p[1] + '-' + p[0] : br; };
+    if (window.DACalendar) window.DACalendar.publish('mocoes', this.state.mocoes.filter(m => m.sessao).map(m => ({ title: 'Sessão — moção ' + m.number + ' · ' + m.subject, start: iso(m.sessao), end: iso(m.sessao), level: m.status === 'Em Análise' ? 'warning' : 'info', deadline: m.status === 'Em Análise', href: 'MocoesHomenagens.dc.html' })));
+  }
+  componentDidUpdate() { this._publishCal(); }
+
+  _shellVals() {
+    if (!this._navBound) {
+      this._navBound = true;
+      window.addEventListener('resize', () => this.forceUpdate());
+      window.addEventListener('themechange', () => this.forceUpdate());
+    }
+    const st = this.state || {};
+    const isMobile = window.innerWidth < 900;
+    const open = !!st.navMenuOpen && isMobile;
+    const norm = s => String(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    const q = norm((st.navSearch || '').trim());
+    const INDEX = [["Dashboard.dc.html","▦","Painel de Controle","Sistemas & Gestão","painel dashboard indicadores alertas prazos fluxo"],["AlmoxarifadoAmostragem.dc.html","📦","Almoxarifado","Sistemas & Gestão","almoxarifado estoque amostragem materiais contagem"],["MocoesHomenagens.dc.html","🎗","Moções & Homenagens","Sistemas & Gestão","mocoes homenagens galeria vereador portaria"],["PatrimonioModule.dc.html","🏛","Patrimônio","Sistemas & Gestão","patrimonio bens tombamento transferencias ativos"],["UserProfile.dc.html","👤","Meus Dados (Perfil)","Sistemas & Gestão","perfil meus dados telefone email aniversario"],["ComprasModule.dc.html","🛒","Compras & Licitações","Sistemas & Gestão","compras licitacoes requisicoes fornecedores pregao"],["ProtocoloModule.dc.html","📋","Protocolo","Complementares","protocolo documentos processos prazos"],["RHModule.dc.html","🧑‍💼","Gestão de Pessoal","Complementares","rh recursos humanos servidores ferias"],["AnalyticsModule.dc.html","📈","Analytics & Relatórios","Complementares","analytics relatorios metricas indicadores"],["AuditLog.dc.html","🛡","Log e Auditoria","Administração","log auditoria seguranca acessos lgpd logins"],["Configuracoes.dc.html","⚙","Configurações do Sistema","Administração","configuracoes parametros parametrizacao ajustes alertas limites acessos perfis"],["Legislacoes.dc.html","⚖","Legislações","Administração","legislacao leis decretos portarias resolucoes recomendacoes normas"]];
+    const results = q ? INDEX.filter(i => norm(i[2] + ' ' + i[4]).includes(q)).slice(0, 6).map(i => ({ href: i[0], icon: i[1], label: i[2], group: i[3], go: () => { window.location.href = i[0]; } })) : [];
+    return {
+      navIsMobile: isMobile,
+      navOverlayVisible: open,
+      navSidebarPosition: isMobile ? 'fixed' : 'sticky',
+      navSidebarTransform: isMobile ? (open ? 'translateX(0)' : 'translateX(-100%)') : 'translateX(0)',
+      navOpen: () => this.setState({ navMenuOpen: true }),
+      navClose: () => this.setState({ navMenuOpen: false }),
+      navGutter: isMobile ? '16px' : '36px',
+      navHeaderPad: isMobile ? '18px 16px 12px' : '28px 36px 16px',
+      navTitleSize: isMobile ? '24px' : '30px',
+      navShowBreadcrumb: !isMobile,
+      navSearch: st.navSearch || '',
+      navSearchInput: (e) => this.setState({ navSearch: e.target.value, navSearchFocused: true }),
+      navSearchFocus: () => this.setState({ navSearchFocused: true }),
+      navSearchBlur: () => setTimeout(() => this.setState({ navSearchFocused: false }), 150),
+      navSearchKey: (e) => {
+        if (e.key === 'Enter' && results.length) window.location.href = results[0].href;
+        if (e.key === 'Escape') this.setState({ navSearch: '', navSearchFocused: false });
+      },
+      navSearchResults: results,
+      navSearchOpen: !!(st.navSearchFocused && q),
+      navSearchEmpty: !!q && results.length === 0,
+      ...(() => { const dk = !!(window.theme && window.theme.isDark && window.theme.isDark()); return { navThemeDark: dk, navThemeIsLight: !dk, navThemeLightBg: dk ? 'transparent' : 'rgba(255,255,255,0.9)', navThemeLightFg: dk ? 'rgba(255,255,255,0.6)' : '#1C543A', navThemeDarkBg: dk ? 'rgba(255,255,255,0.18)' : 'transparent', navThemeDarkFg: dk ? '#FFFFFF' : 'rgba(255,255,255,0.6)', navThemeLight: () => { if (window.theme) window.theme.set('light'); }, navThemeDarkSet: () => { if (window.theme) window.theme.set('dark'); } }; })()
+    };
+  }
+
+  _auditWrap = (() => {
+    if (this.saveMocao) { const o = this.saveMocao; this.saveMocao = (...x) => { const r = o(...x); if (window.DAAudit) window.DAAudit.log('Moção salva', 'mocoes', ''); return r; }; }
+    if (this.saveHon) { const o = this.saveHon; this.saveHon = (...x) => { const r = o(...x); if (window.DAAudit) window.DAAudit.log('Homenageado salvo', 'mocoes', ''); return r; }; }
+    if (this.registerHonoree) { const o = this.registerHonoree; this.registerHonoree = (...x) => { const r = o(...x); if (window.DAAudit) window.DAAudit.log('Homenageado registrado', 'mocoes', ''); return r; }; }
+  })();
+
+  renderVals() {
+    const isMocoesTab = this.state.activeTab === 'mocoes';
+    const isGaleriaTab = this.state.activeTab === 'galeria';
+    const isArranjosTab = this.state.activeTab === 'arranjos';
+    const isBandeirasTab = this.state.activeTab === 'bandeiras';
+    const councilorsWithLabel = this.state.councilors.map(c => ({
+      ...c,
+      quotaLabel: this._hasQuota(c.name, this.CURRENT_LEG, -1) ? '(cota atingida)' : ''
+    }));
+    const quotaExceeded = this._hasQuota(this.state.selectedCouncilor, this.CURRENT_LEG, -1);
+    const q = this.state.mocaoSearch.trim().toLowerCase();
+    const mocoesView = this.state.mocoes.map((m, i) => ({ ...m, idx: i })).filter(m => !q || (m.number + ' ' + m.subject + ' ' + m.author).toLowerCase().includes(q)).map(m => {
+      const st = this.STATUS_STYLE[m.status] || this.STATUS_STYLE['Arquivada'];
+      return { ...m, statusBg: st[0], statusColor: st[1], sessaoLabel: m.sessao ? 'Sessão ' + m.sessao : 'Sessão a definir', edit: () => this.openEditMocao(m.idx) };
+    });
+
+    const isMobile = this.state.isMobile;
+    return {
+      ...this._shellVals(),
+      isMobile: isMobile,
+      mobileMenuOpen: this.state.mobileMenuOpen,
+      openMobileMenu: this.openMobileMenu,
+      closeMobileMenu: this.closeMobileMenu,
+      sidebarPosition: isMobile ? 'fixed' : 'sticky',
+      sidebarTransform: isMobile ? (this.state.mobileMenuOpen ? 'translateX(0)' : 'translateX(-100%)') : 'translateX(0)',
+      mainPadding: isMobile ? '18px 16px 32px' : '28px 36px 40px',
+      titleFontSize: isMobile ? '22px' : '28px',
+      galeriaColumns: isMobile ? '1fr' : '1.4fr 1fr',
+      tab: {
+        mocoesBg: isMocoesTab ? '#1C543A' : 'transparent',
+        mocoesColor: isMocoesTab ? '#FFFFFF' : '#666666',
+        galeriaBg: isGaleriaTab ? '#1C543A' : 'transparent',
+        galeriaColor: isGaleriaTab ? '#FFFFFF' : '#666666',
+        arranjosBg: isArranjosTab ? '#1C543A' : 'transparent',
+        arranjosColor: isArranjosTab ? '#FFFFFF' : '#666666',
+        bandeirasBg: isBandeirasTab ? '#1C543A' : 'transparent',
+        bandeirasColor: isBandeirasTab ? '#FFFFFF' : '#666666'
+      },
+      isBandeirasTab,
+      selectTabBandeiras: this.selectTabBandeiras,
+      isArranjosTab,
+      selectTabArranjos: this.selectTabArranjos,
+      isMocoesTab,
+      isGaleriaTab,
+      selectTabMocoes: this.selectTabMocoes,
+      selectTabGaleria: this.selectTabGaleria,
+      mocoes: mocoesView,
+      mocoesEmpty: mocoesView.length === 0,
+      gallery: this.state.gallery.map((g, i) => ({ ...g, edit: () => this.openEditHon(i) })),
+      councilors: councilorsWithLabel,
+      selectedCouncilor: this.state.selectedCouncilor,
+      handleCouncilorChange: this.handleCouncilorChange,
+      quotaExceeded: quotaExceeded,
+      registerButtonBg: quotaExceeded ? '#CCCCCC' : '#1C543A',
+      registerButtonCursor: quotaExceeded ? 'not-allowed' : 'pointer',
+      registerDisabled: quotaExceeded,
+      newHonoree: this.state.newHonoree, handleNewHonoree: this.handleNewHonoree, registerHonoree: this.registerHonoree, honoreeError: this.state.honoreeError,
+      mocaoSearch: this.state.mocaoSearch, handleMocaoSearch: this.handleMocaoSearch, openNewMocao: this.openNewMocao,
+      mocaoOpen: this.state.mocaoOpen, closeMocao: this.closeMocao, saveMocao: this.saveMocao, mocaoForm: this.state.mocaoForm, mocaoError: this.state.mocaoError,
+      mocaoType: this.mocaoType, mocaoAuthor: this.mocaoAuthor, mocaoSubject: this.mocaoSubject, mocaoDate: this.mocaoDate, mocaoSessao: this.mocaoSessao, mocaoStatus: this.mocaoStatus,
+      mocaoModalTitle: this.state.mocaoEditIdx >= 0 ? 'Editar Moção ' + (this.state.mocoes[this.state.mocaoEditIdx] || {}).number : 'Registrar Moção',
+      mocaoSaveLabel: this.state.mocaoEditIdx >= 0 ? 'Salvar alterações' : 'Registrar moção',
+      councilorNames: (window.DAVereadores ? window.DAVereadores.all() : this.state.councilors.map(c => c.name)),
+      honOpen: this.state.honOpen, closeHon: this.closeHon, saveHon: this.saveHon, honForm: this.state.honForm, honError: this.state.honError,
+      honHonoree: this.honHonoree, honCouncilor: this.honCouncilor, honLegislature: this.honLegislature, honFrame: this.honFrame,
+      stopProp: this.stopProp, toastVisible: this.state.toastVisible, toastMessage: this.state.toastMessage
+    };
+  }
+}
+
+</script>
+</body>
+</html>

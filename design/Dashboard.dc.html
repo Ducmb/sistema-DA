@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+  <script src="./theme.js"></script>
+  <script src="./exercicio.js"></script>
+  <script src="./config.js"></script>
+  <script src="./session.js"></script>
+  <script src="./liccont.js"></script>
+  <script src="./estoque.js"></script>
+  <script src="./calendar-feed.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema DA - Dashboard</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #FFFFFF;
+      color: #1D1D1B;
+    }
+    @keyframes feedIn2 { from { opacity: 0; transform: translateY(-14px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes feedIn3 { from { opacity: 0; transform: translateY(-14px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes feedIn { from { opacity: 0; transform: translateX(18px) scale(0.98); } to { opacity: 1; transform: translateX(0) scale(1); } }
+    @keyframes feedPulse { 0% { box-shadow: 0 0 0 0 rgba(28,84,58,0.35); } 100% { box-shadow: 0 0 0 10px rgba(28,84,58,0); } }
+    @keyframes numRoll { from { transform: translateY(-100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    @keyframes liveDot { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</helmet>
+
+<div style="display: flex; min-height: 100vh; background-color: #FFFFFF; position: relative;">
+
+  <sc-if value="{{ navOverlayVisible }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ navClose }}" style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); z-index: 40;"></div>
+  </sc-if>
+
+  <!-- Sidebar -->
+  <aside style="background-color: #1C543A; color: #FFFFFF; width: 250px; flex-shrink: 0; display: flex; flex-direction: column; padding: 22px 16px; gap: 22px; position: {{ navSidebarPosition }}; top: 0; left: 0; height: 100vh; overflow-y: auto; z-index: 50; transform: {{ navSidebarTransform }}; transition: transform 0.3s cubic-bezier(0.34, 1.25, 0.64, 1);">
+      <a href="Dashboard.dc.html" title="Voltar ao Painel de Controle" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: #FFFFFF; padding: 0 4px;">
+        <div style="width: 36px; height: 36px; background-color: #FFFFFF; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; color: #1C543A; flex-shrink: 0;">DA</div>
+        <div>
+          <p style="font-size: 12.5px; font-weight: 700; line-height: 1.3; color: #FFFFFF;">CÂMARA MUNICIPAL</p>
+          <p style="font-size: 9.5px; letter-spacing: 0.4px; color: rgba(255,255,255,0.65); text-transform: uppercase;">Diretoria Administrativa</p>
+        </div>
+      </a>
+      <nav style="display: flex; flex-direction: column; gap: 2px;">
+        <p style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: rgba(255,255,255,0.5); padding: 0 12px; margin-bottom: 6px;">Sistemas &amp; Gestão</p>
+        <a href="Dashboard.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 13px; transition: background-color 0.2s; background-color: #FFFFFF; color: #1C543A; font-weight: 700;"><span style="width: 18px; text-align: center; flex-shrink: 0;">▦</span>Painel de Controle</a>
+        <sc-for list="{{ navLinks }}" as="link" hint-placeholder-count="4">
+          <a href="{{ link.href }}" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 13px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">{{ link.icon }}</span>{{ link.label }}</a>
+        </sc-for>
+      </nav>
+      <nav style="display: flex; flex-direction: column; gap: 2px;">
+        <p style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: rgba(255,255,255,0.5); padding: 0 12px; margin-bottom: 6px;">Módulos Complementares</p>
+        <a href="AnalyticsModule.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">📈</span>Analytics &amp; Relatórios</a>
+        <a href="RHModule.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">🧑‍💼</span>Gestão de Pessoal</a>
+        <a href="Legislacoes.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">⚖</span>Legislações</a>
+        <a href="AuditLog.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">🛡</span>Log e Auditoria</a>
+        <a href="Configuracoes.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">⚙</span>Configurações do Sistema</a>
+      <a href="ProtocoloModule.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">📋</span>Protocolo</a>
+      </nav>
+      <div style="margin-top: auto; display: flex; flex-direction: column; gap: 4px; padding-top: 8px;">
+        <a href="UserProfile.dc.html" style="display: flex; align-items: center; gap: 10px; background-color: rgba(255,255,255,0.08); border-radius: 10px; padding: 12px; text-decoration: none; color: #FFFFFF;" style-hover="background-color: rgba(255,255,255,0.14);">
+          <div style="width: 34px; height: 34px; border-radius: 50%; background-color: #F0B429; color: #1C543A; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; flex-shrink: 0;">RA</div>
+          <div style="min-width: 0;">
+            <p style="font-size: 12.5px; font-weight: 700; color: #FFFFFF;">Dr. Roberto Alencar</p>
+            <p style="font-size: 10.5px; color: rgba(255,255,255,0.6);">DA-2026-948 · Diretoria</p>
+          </div>
+        </a>
+        <div role="group" aria-label="Aparência" style="display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 40px; padding: 0 12px;">
+          <span style="font-size: 11px; font-weight: 600; letter-spacing: 0.3px; color: rgba(255,255,255,0.6);">Aparência</span>
+          <div style="display: flex; padding: 2px; border-radius: 999px; background-color: rgba(0,0,0,0.22);">
+            <button onClick="{{ navThemeLight }}" aria-pressed="{{ navThemeIsLight }}" aria-label="Modo padrão" title="Modo padrão" style="width: 30px; height: 26px; border: none; border-radius: 999px; background-color: {{ navThemeLightBg }}; color: {{ navThemeLightFg }}; font-size: 13px; line-height: 1; cursor: pointer; transition: background-color 0.2s;">☀</button>
+            <button onClick="{{ navThemeDarkSet }}" aria-pressed="{{ navThemeDark }}" aria-label="Modo escuro" title="Modo escuro" style="width: 30px; height: 26px; border: none; border-radius: 999px; background-color: {{ navThemeDarkBg }}; color: {{ navThemeDarkFg }}; font-size: 13px; line-height: 1; cursor: pointer; transition: background-color 0.2s;">☾</button>
+          </div>
+        </div>
+        <a href="Login.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; color: rgba(255,255,255,0.7); text-decoration: none; font-size: 12.5px; font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1); color: #FFFFFF;"><span style="width: 18px; text-align: center; flex-shrink: 0;">⎋</span>Sair do sistema</a>
+      </div>
+    </aside>
+
+  <!-- Main -->
+  <div style="flex: 1; min-width: 0; display: flex; flex-direction: column;">
+    <div style="position: sticky; top: 0; z-index: 30; background-color: rgba(255,255,255,0.96); backdrop-filter: blur(6px); border-bottom: 1px solid #E8E8E8; min-height: 64px; padding: 10px {{ navGutter }}; display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+      <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
+        <sc-if value="{{ navIsMobile }}" hint-placeholder-val="{{ false }}">
+          <button onClick="{{ navOpen }}" aria-label="Abrir menu" style="width: 44px; height: 44px; border-radius: 8px; border: 1px solid #E0E0E0; background-color: #FFFFFF; font-size: 18px; color: #1D1D1B; cursor: pointer; flex-shrink: 0;">☰</button>
+          <a href="Dashboard.dc.html" title="Painel de Controle" style="width: 36px; height: 36px; background-color: #1C543A; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 12px; color: #FFFFFF; text-decoration: none; flex-shrink: 0;">DA</a>
+        </sc-if>
+        <sc-if value="{{ navShowBreadcrumb }}" hint-placeholder-val="{{ true }}">
+          <div style="display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: #666666; white-space: nowrap;">
+            <a href="Dashboard.dc.html" style="color: #666666; text-decoration: none;" style-hover="color: #1C543A;">Painel de Controle</a>
+            <span style="color: #CCCCCC;">›</span>
+            <span style="color: #1D1D1B; font-weight: 600;">Visão Geral</span>
+          </div>
+        </sc-if>
+      </div>
+      <div style="display: flex; align-items: center; gap: 10px; flex: 1; justify-content: flex-end; min-width: 0;">
+        <div style="position: relative; flex: 1; max-width: 340px; min-width: 0;">
+          <input type="search" placeholder="Buscar módulos e telas…" aria-label="Busca global" value="{{ navSearch }}" onInput="{{ navSearchInput }}" onFocus="{{ navSearchFocus }}" onBlur="{{ navSearchBlur }}" onKeyDown="{{ navSearchKey }}" style="width: 100%; height: 44px; padding: 0 12px 0 34px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; color: #1D1D1B; background-color: #F9F9F9;" style-focus="border-color: #1C543A; background-color: #FFFFFF; outline: none;"/>
+          <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 14px; color: #999999; pointer-events: none;">⌕</span>
+          <sc-if value="{{ navSearchOpen }}" hint-placeholder-val="{{ false }}">
+            <div style="position: absolute; top: 50px; right: 0; left: 0; min-width: 240px; background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 8px; box-shadow: 0 12px 32px rgba(0,0,0,0.12); padding: 6px; z-index: 60;">
+              <sc-for list="{{ navSearchResults }}" as="r" hint-placeholder-count="3">
+                <a href="{{ r.href }}" onMouseDown="{{ r.go }}" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 10px; border-radius: 6px; text-decoration: none; color: #1D1D1B; font-size: 13px;" style-hover="background-color: #F2F7F4;">
+                  <span style="width: 20px; text-align: center; flex-shrink: 0;">{{ r.icon }}</span>
+                  <span style="flex: 1; font-weight: 600;">{{ r.label }}</span>
+                  <span style="font-size: 11px; color: #999999;">{{ r.group }}</span>
+                </a>
+              </sc-for>
+              <sc-if value="{{ navSearchEmpty }}" hint-placeholder-val="{{ false }}">
+                <p style="padding: 12px 10px; font-size: 12.5px; color: #999999;">Nenhum resultado para “{{ navSearch }}”</p>
+              </sc-if>
+            </div>
+          </sc-if>
+        </div>
+        <a href="NotificationsModule.dc.html" title="Notificações" style="position: relative; width: 44px; height: 44px; border-radius: 8px; border: 1px solid #E0E0E0; background-color: #FFFFFF; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 16px; flex-shrink: 0;" style-hover="border-color: #1C543A;">🔔<span style="position: absolute; top: 9px; right: 10px; width: 7px; height: 7px; border-radius: 50%; background-color: #DC2626; border: 1.5px solid #FFFFFF;"></span></a>
+      </div>
+    </div>
+    <main style="flex: 1; padding: {{ mainPadding }}; display: flex; flex-direction: column; gap: 22px; background-color: #FFFFFF; min-width: 0;">
+
+    
+
+    <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+      <div>
+        <p style="font-size: 11px; font-weight: 700; letter-spacing: 0.6px; color: #1C543A; text-transform: uppercase;">Sistema de Gestão Integrada &nbsp;•&nbsp; Dashboard</p>
+        <div style="display: flex; align-items: baseline; gap: 10px; margin-top: 6px;">
+          <h1 style="font-size: {{ titleFontSize }}; font-weight: 800; color: #1D1D1B;">Painel Administrativo Geral</h1>
+          <span style="font-size: 12px; font-weight: 700; color: #1C543A; background-color: #EAF3EE; border-radius: 999px; padding: 6px 12px; white-space: nowrap;">Perfil: {{ userRole }}</span>
+        </div>
+      </div>
+      <label style="display: inline-flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; color: #1D1D1B; background-color: #FFFFFF; border: 1px solid #E0E0E0; border-radius: 8px; padding: 0 6px 0 14px; min-height: 44px; white-space: nowrap;">Exercício Fiscal:
+        <select value="{{ exercicio }}" onChange="{{ setExercicio }}" aria-label="Selecionar exercício fiscal" style="height: 34px; padding: 0 8px; border: 1px solid #E0E0E0; border-radius: 6px; font-size: 12.5px; font-weight: 700; color: #1C543A; background-color: #FFFFFF; cursor: pointer;" style-focus="border-color: #1C543A; outline: none;">
+          <sc-for list="{{ exercicioAnos }}" as="ano" hint-placeholder-count="3"><option value="{{ ano }}">{{ ano }}</option></sc-for>
+        </select>
+      </label>
+    </div>
+
+    <!-- Top Stat Cards -->
+    <div style="display: grid; grid-template-columns: {{ topCardsColumns }}; gap: 16px;">
+      <sc-for list="{{ topCards }}" as="card" hint-placeholder-count="3">
+        <div style="background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 12px; padding: 18px; display: flex; gap: 14px; align-items: flex-start; animation: fadeInUp 0.5s ease-out both;">
+          <div style="width: 42px; height: 42px; border-radius: 10px; background-color: {{ card.iconBg }}; color: {{ card.iconColor }}; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0;">{{ card.icon }}</div>
+          <div style="min-width: 0;">
+            <p style="font-size: 10.5px; font-weight: 700; letter-spacing: 0.4px; color: #999999; text-transform: uppercase;">{{ card.label }}</p>
+            <p style="font-size: 22px; font-weight: 800; color: #1D1D1B; margin-top: 4px;">{{ card.value }}</p>
+            <sc-if value="{{ card.sub }}" hint-placeholder-val="{{ false }}">
+              <p style="font-size: 11.5px; color: #999999; margin-top: 4px;">{{ card.sub }}</p>
+            </sc-if>
+            <sc-if value="{{ card.badge }}" hint-placeholder-val="{{ false }}">
+              <span style="display: inline-block; margin-top: 6px; font-size: 10.5px; font-weight: 600; padding: 3px 8px; border-radius: 5px; background-color: {{ card.badgeBg }}; color: {{ card.badgeColor }};">{{ card.badge }}</span>
+            </sc-if>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+
+    <!-- Body Grid -->
+    <div style="display: grid; grid-template-columns: {{ bodyColumns }}; gap: 20px; align-items: start;">
+
+      <!-- Left column -->
+      <div style="display: flex; flex-direction: column; gap: 20px; min-width: 0; order: {{ leftColumnOrder }};">
+
+        <sc-if value="{{ showAudit }}" hint-placeholder-val="{{ true }}">
+          <div style="background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 12px; padding: 22px; animation: fadeInUp 0.5s ease-out 0.1s both;">
+            <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 18px;">
+              <div>
+                <h3 style="font-size: 15.5px; font-weight: 700; color: #1D1D1B;">Fluxo de Processos</h3>
+                <p style="font-size: 12px; color: #999999; margin-top: 3px;">Média histórica de fluxo na Diretoria Administrativa</p>
+              </div>
+              <span style="font-size: 11.5px; font-weight: 700; color: #1C543A; background-color: #EAF3EE; border-radius: 6px; padding: 5px 10px; white-space: nowrap;">↗ +12.4% este mês</span>
+            </div>
+          <svg viewBox="0 0 400 150" style="width: 100%; height: 170px; display: block;">
+            <line x1="0" y1="120" x2="400" y2="120" stroke="#E8E8E8" stroke-width="1"/>
+            <defs>
+              <linearGradient id="areaGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" style="stop-color:#1C543A;stop-opacity:0.3"/>
+                <stop offset="100%" style="stop-color:#1C543A;stop-opacity:0"/>
+              </linearGradient>
+            </defs>
+            <path d="M 0 100 Q 66 80 133 70 T 266 50 T 400 40 L 400 150 L 0 150 Z" fill="url(#areaGradient)"/>
+            <polyline points="0,100 66,80 133,70 200,50 266,50 333,40 400,40" stroke="#1C543A" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="0" cy="100" r="3.5" fill="#1C543A"/>
+            <circle cx="66" cy="80" r="3.5" fill="#1C543A"/>
+            <circle cx="133" cy="70" r="3.5" fill="#1C543A"/>
+            <circle cx="200" cy="50" r="3.5" fill="#1C543A"/>
+            <circle cx="266" cy="50" r="3.5" fill="#1C543A"/>
+            <circle cx="333" cy="40" r="3.5" fill="#1C543A"/>
+            <circle cx="400" cy="40" r="3.5" fill="#1C543A"/>
+          </svg>
+          <div style="display: flex; justify-content: space-between; margin-top: 6px; padding: 0 2px;">
+            <sc-for list="{{ chartMonths }}" as="m" hint-placeholder-count="6">
+              <span style="font-size: 11px; font-weight: 600; color: #999999;">{{ m }}</span>
+            </sc-for>
+          </div>
+        </div>
+        </sc-if>
+
+        <div style="display: grid; grid-template-columns: {{ threeColColumns }}; gap: 20px;">
+          <sc-if value="{{ showAudit }}" hint-placeholder-val="{{ true }}">
+          <div style="background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 12px; padding: 20px; animation: fadeInUp 0.5s ease-out 0.18s both;">
+            <h3 style="font-size: 14.5px; font-weight: 700; color: #1D1D1B; margin-bottom: 4px;">Auditoria de Almoxarifado</h3>
+            <p style="font-size: 11.5px; color: #999999; margin-bottom: 14px;">Auditorias da Semana: {{ auditCount }} de {{ auditTotal }} itens contados</p>
+            <div style="display: flex; gap: 4px; align-items: flex-end; height: 46px;">
+              <sc-for list="{{ auditColumns }}" as="col" hint-placeholder-count="12">
+                <div style="flex: 1; height: {{ col.heightPct }}%; background-color: {{ col.color }}; border-radius: 2px 2px 0 0; min-height: 4px;"></div>
+              </sc-for>
+            </div>
+          </div>
+          </sc-if>
+
+          <sc-if value="{{ showCapacity }}" hint-placeholder-val="{{ true }}">
+          <div style="background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 12px; padding: 20px; animation: fadeInUp 0.5s ease-out 0.2s both;">
+            <h3 style="font-size: 14.5px; font-weight: 700; color: #1D1D1B; margin-bottom: 4px;">Capacidade Operacional de Contagem</h3>
+            <p style="font-size: 11.5px; color: #999999; margin-bottom: 16px;">Parâmetros calibrados de pessoal ativo</p>
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+              <sc-for list="{{ capacityRows }}" as="row" hint-placeholder-count="3">
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; border-top: 1px solid #F0F0F0; padding-top: 12px;">
+                  <span style="font-size: 12.5px; color: #1D1D1B;">{{ row.label }}</span>
+                  <sc-if value="{{ row.isBadge }}" hint-placeholder-val="{{ false }}">
+                    <span style="font-size: 11.5px; font-weight: 700; color: #92400E; background-color: #FEF3C7; border-radius: 5px; padding: 4px 9px; white-space: nowrap;">{{ row.value }}</span>
+                  </sc-if>
+                  <sc-if value="{{ row.isBadge }}" hint-placeholder-val="{{ true }}">
+                    <span style="font-size: 13px; font-weight: 700; color: #1D1D1B;">{{ row.value }}</span>
+                  </sc-if>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+          </sc-if>
+          <sc-if value="{{ showCapacity }}" hint-placeholder-val="{{ true }}">
+          <a href="ComprasModule.dc.html" style="display: block; text-decoration: none; background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 12px; padding: 20px; animation: fadeInUp 0.5s ease-out 0.25s both;">
+            <h3 style="font-size: 14.5px; font-weight: 700; color: #1D1D1B; margin-bottom: 4px;">Carga por Agente de Contratação</h3>
+            <p style="font-size: 11.5px; color: #666666; margin-bottom: 14px;">Processos ativos em Compras &amp; Licitações</p>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+              <sc-for list="{{ agentLoads }}" as="al" hint-placeholder-count="4">
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                  <div style="display: flex; justify-content: space-between; gap: 8px; font-size: 12.5px;"><span style="color: #1D1D1B; font-weight: 600;">{{ al.agente }}</span><span style="color: {{ al.color }}; font-weight: 600;">{{ al.label }}</span></div>
+                  <div style="height: 6px; border-radius: 999px; background-color: #EDEDEB;"><div style="height: 6px; border-radius: 999px; background-color: #1C543A; width: {{ al.bar }};"></div></div>
+                </div>
+              </sc-for>
+            </div>
+          </a>
+          </sc-if>
+
+          <sc-if value="{{ showLegislative }}" hint-placeholder-val="{{ true }}">
+          <div style="background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 12px; padding: 20px; animation: fadeInUp 0.5s ease-out 0.25s both;">
+            <h3 style="font-size: 14.5px; font-weight: 700; color: #1D1D1B; margin-bottom: 4px;">Indicador Metas Legislativas (DA)</h3>
+            <p style="font-size: 11.5px; color: #999999; margin-bottom: 18px;">Progresso de atividades regulatórias</p>
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; align-items: end; height: 90px;">
+              <sc-for list="{{ legislativeStages }}" as="stage" hint-placeholder-count="4">
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; height: 100%; justify-content: flex-end;">
+                  <div style="width: 100%; max-width: 34px; height: {{ stage.heightPx }}px; background-color: {{ stage.color }}; border-radius: 4px 4px 0 0; min-height: 6px;"></div>
+                </div>
+              </sc-for>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 8px;">
+              <sc-for list="{{ legislativeStages }}" as="stage" hint-placeholder-count="4">
+                <p style="font-size: 10.5px; font-weight: 600; color: #999999; text-align: center;">{{ stage.name }}</p>
+              </sc-for>
+            </div>
+          </div>
+          </sc-if>
+        </div>
+      </div>
+
+      <!-- Right column -->
+      <div style="display: flex; flex-direction: column; gap: 20px; min-width: 0; order: {{ rightColumnOrder }};">
+
+        <sc-if value="{{ showAlerts }}" hint-placeholder-val="{{ true }}">
+        <div style="background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 12px; padding: 20px; animation: fadeInUp 0.5s ease-out 0.15s both;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 15px;">🔔</span>
+              <h3 style="font-size: 14px; font-weight: 700; color: #1D1D1B;">Alertas em Tempo Real</h3>
+            </div>
+            <span style="display: inline-flex; align-items: center; gap: 5px; font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; background-color: #EAF3EE; color: #1C543A; padding: 3px 8px; border-radius: 4px;"><span style="width: 6px; height: 6px; border-radius: 50%; background-color: #1C543A; animation: liveDot 1.6s ease-in-out infinite;"></span>Ao vivo</span>
+          </div>
+          <p style="font-size: 11px; color: #666666; margin-bottom: 14px; line-height: 1.4;">{{ feedStatus }}</p>
+          <div style="display: flex; flex-direction: column; gap: 10px; max-height: 420px; overflow-y: auto; opacity: {{ alertOpacity }}; transition: opacity 0.3s ease;" onMouseEnter="{{ handleAlertsHover }}" onMouseLeave="{{ handleAlertsLeave }}">
+            <sc-for list="{{ alerts }}" as="alert" hint-placeholder-count="3">
+              <div data-alert-id="{{ alert.id }}" data-href="{{ alert.href }}" role="link" tabindex="0" title="Abrir a origem do alerta" style="position: relative; background-color: {{ alert.bgColor }}; border-radius: 8px; padding: 12px 40px 12px 14px; cursor: pointer; transition: transform 0.2s ease; animation: {{ alert.anim }}; outline: {{ alert.outline }}; outline-offset: -1px;" style-hover="transform: translateX(2px);" onClick="{{ handleAlertClick }}">
+                <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+                  <span style="width: 6px; height: 6px; border-radius: 50%; background-color: {{ alert.color }}; flex-shrink: 0;"></span>
+                  <span style="font-size: 9.5px; font-weight: 700; letter-spacing: 0.4px; color: {{ alert.color }}; text-transform: uppercase;">{{ alert.category }}</span>
+                  <sc-if value="{{ alert.hasCount }}" hint-placeholder-val="{{ false }}"><span style="display: inline-flex; overflow: hidden; font-size: 9.5px; font-weight: 700; padding: 1px 6px; border-radius: 999px; background-color: #FFFFFF; color: {{ alert.color }}; border: 1px solid {{ alert.color }};"><span style="display: inline-block; animation: {{ alert.countAnim }};">+{{ alert.count }} atualização(ões)</span></span></sc-if>
+                  <sc-if value="{{ alert.isNew }}" hint-placeholder-val="{{ false }}"><span style="font-size: 9.5px; font-weight: 700; padding: 1px 6px; border-radius: 999px; background-color: {{ alert.color }}; color: #FFFFFF;">Novo</span></sc-if>
+                </div>
+                <p style="font-size: 12.5px; font-weight: 700; color: {{ alert.titleColor }}; line-height: 1.3;">{{ alert.title }}</p>
+                <p style="font-size: 11.5px; color: {{ alert.descColor }}; margin-top: 3px; line-height: 1.35;">{{ alert.description }}</p>
+                <p style="font-size: 11px; font-weight: 700; color: {{ alert.color }}; margin-top: 6px;">Abrir →</p>
+                <button data-dismiss="1" aria-label="Dispensar alerta" title="Dispensar" style="position: absolute; top: 6px; right: 6px; width: 30px; height: 30px; border: none; border-radius: 6px; background-color: transparent; color: {{ alert.color }}; font-size: 13px; cursor: pointer;">✕</button>
+              </div>
+            </sc-for>
+            <a href="NotificationsModule.dc.html" style="display: flex; align-items: center; justify-content: center; min-height: 44px; border: 1px dashed #B8C7BF; border-radius: 10px; color: #1C543A; font-size: 12.5px; font-weight: 700; text-decoration: none;" style-hover="background-color: #F4F9F6;">{{ feedLinkLabel }}</a>
+          </div>
+        </div>
+        </sc-if>
+
+      </div>
+    </div>
+  </main>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: &quot;100%&quot;, &quot;height&quot;: &quot;900px&quot;}}">
+class Component extends DCLogic {
+  state = {
+    exercicio: (window.DAExercicio ? window.DAExercicio.get() : 2026),
+    isMobile: typeof window !== 'undefined' ? window.innerWidth < 900 : false,
+    mobileMenuOpen: false,
+    userRole: 'Visualizador',
+    alertsHover: false,
+    dismissedLic: (() => { try { return JSON.parse(sessionStorage.getItem('DA_feed_dismissed')) || []; } catch (e) { return []; } })(),
+    feedMeta: {}, feedHidden: [], feedTick: 0, feedLast: 0, feedRot: 0, feedRotAt: Date.now(),
+    licTick: 0,
+    alerts: [
+      { id: 1, category: 'COMPRAS', title: 'Licitação 12/2026 vence hoje', description: 'Pregão eletrônico com prazo de julgamento expirando às 18h.', level: 'critical' },
+      { id: 2, category: 'RH', title: '4 férias aguardando aprovação', description: 'Solicitações paradas há mais de 5 dias úteis.', level: 'warning' },
+      { id: 3, category: 'PROTOCOLO', title: '3 novos processos autuados', description: 'Distribuídos automaticamente aos subsetores.', level: 'info' },
+      { id: 4, category: 'ALMOXARIFADO', title: 'Estoque de toner crítico', description: 'Apenas 3 unidades restantes — abaixo do mínimo.', level: 'critical' }
+    ],
+    auditLog: [
+      { admin: 'Dr. Roberto Alencar', timestamp: '17/07/2026 09:12', action: 'Acesso Concedido', user: 'Carlos Eduardo Costa', module: 'Módulo de RH' },
+      { admin: 'Dr. Roberto Alencar', timestamp: '16/07/2026 16:40', action: 'Usuário Criado', user: 'Patricia de Souza', module: 'Perfil: Usuário' },
+      { admin: 'Dr. Roberto Alencar', timestamp: '16/07/2026 11:05', action: 'Acesso Revogado', user: 'Ana Beatriz Silva', module: 'Módulo de Compras' }
+    ]
+  };
+
+  _feedRaw() {
+    const out = window.DALic ? window.DALic.alerts().slice() : [];
+    const CAT = { protocolo: 'PROTOCOLO', rh: 'PESSOAL', mocoes: 'MOÇÕES', almoxarifado: 'ALMOXARIFADO', patrimonio: 'PATRIMÔNIO' };
+    if (window.DACalendar && window.DACalendar.critical) window.DACalendar.critical().filter(r => r.module !== 'compras' && (r.bucket === 'vencido' || r.bucket === 'urgente')).forEach(r => out.push({ id: 'cal-' + r.module + '-' + r.title + '-' + r.date, category: CAT[r.module] || r.moduleLabel, level: r.bucket === 'vencido' ? 'critical' : (r.level === 'critical' ? 'critical' : 'warning'), title: r.title, description: (r.bucket === 'vencido' ? 'Venceu em ' : 'Até ') + r.date.split('-').reverse().join('/') + ' · ' + r.moduleLabel, href: r.href }));
+    try { (JSON.parse(localStorage.getItem('DA_patrimonio_transf_v1')) || []).filter(t => t.status === 'Pendente' || t.status === 'Verificar transferência').forEach(t => out.push({ id: 'pat-' + t.id, category: 'PATRIMÔNIO', level: 'info', title: 'Transferência ' + t.code + ' — ' + t.status, description: t.description + ' · ' + t.fromUser + ' → ' + t.toUser, href: 'PatrimonioModule.dc.html' })); } catch (e) {}
+    try { if (window.DAEstoque) window.DAEstoque.get().items.filter(i => (+i.avgConsumption || 0) > 0 && (+i.stock || 0) < (+i.avgConsumption || 0) * (window.DAConfig ? +window.DAConfig.get('almox.critico') : 1)).forEach(i => out.push({ id: 'est-' + i.code, category: 'ALMOXARIFADO', level: 'critical', title: 'Estoque crítico — ' + i.name, description: 'Saldo ' + i.stock + ' ' + i.unit + ' · consumo médio ' + i.avgConsumption + '/mês', href: 'AlmoxarifadoAmostragem.dc.html?view=estoque' })); } catch (e) {}
+    try { const cnt = JSON.parse(localStorage.getItem('DA_almox_contagens_v1')) || {}; Object.keys(cnt).forEach(code => { const x = cnt[code]; if (x.status === 'divergente') out.push({ id: 'cnt-' + code + '-' + x.at, category: 'ALMOXARIFADO', level: 'warning', title: 'Corrigir estoque — ' + (x.name || code), description: 'Contado ' + x.counted + ' · sistema ' + x.stock + ' (' + (x.diff > 0 ? '+' : '') + x.diff + ') · ' + x.by, href: 'AlmoxarifadoAmostragem.dc.html?view=inventario' }); }); } catch (e) {}
+    return out;
+  }
+  _feedOrdered() {
+    const ORD = { critical: 0, warning: 1, info: 2, success: 3 }, meta = this.state.feedMeta;
+    const base = this._feedRaw().filter(a => !this.state.dismissedLic.includes(a.id) && !this.state.feedHidden.includes(a.id)).sort((a, b) => (ORD[a.level] ?? 2) - (ORD[b.level] ?? 2) || ((meta[b.id] || {}).first || 0) - ((meta[a.id] || {}).first || 0));
+    const n = base.length; if (!n) return base; const r = this.state.feedRot % n; return base.slice(r).concat(base.slice(0, r));
+  }
+  _feedRefresh = () => {
+    const now = Date.now(), meta = { ...this.state.feedMeta }, hidden = this.state.feedHidden.slice();
+    const auto = (window.DAConfig ? +window.DAConfig.get('painel.autoDismiss') : 5) * 1000, group = window.DAConfig ? window.DAConfig.get('painel.agrupar') !== false : true;
+    const firstRun = !this.state.feedLast;
+    this._feedRaw().forEach(a => { const sig = a.title + '|' + a.description + '|' + a.level, m = meta[a.id];
+      if (!m) meta[a.id] = { first: firstRun ? now - 2000 : now, sig, count: 0, pulse: 0 };
+      else if (m.sig !== sig) meta[a.id] = group ? { ...m, sig, count: m.count + 1, pulse: now } : { first: now, sig, count: 0, pulse: 0 };
+      const mm = meta[a.id];
+    });
+    this.setState({ feedMeta: meta, feedHidden: hidden, feedLast: now });
+    clearTimeout(this._feedAnimT); this._feedAnimT = setTimeout(() => this.setState(s => ({ feedTick: s.feedTick + 1 })), 1300);
+  };
+  componentDidMount() {
+    const startFeed = () => { if (window.DALic) this._feedRefresh(); else setTimeout(startFeed, 200); }; startFeed();
+    this._feedEv = () => this._feedRefresh();
+    ['licchange', 'calendarchange', 'estoquechange', 'storage', 'configchange'].forEach(ev => window.addEventListener(ev, this._feedEv));
+    const restartInt = () => { clearInterval(this._feedInt); this._feedInt = setInterval(() => this._feedRefresh(), Math.max(5, window.DAConfig ? +window.DAConfig.get('painel.refresh') : 30) * 1000); };
+    restartInt(); window.addEventListener('configchange', restartInt);
+    this._autoInt = setInterval(() => {
+      const auto = Math.max(2, window.DAConfig ? +window.DAConfig.get('painel.autoDismiss') : 5) * 1000, now = Date.now();
+      if (this.state.alertsHover || now - this.state.feedRotAt < auto) { this.setState(s => ({ feedTick: s.feedTick + 1 })); return; }
+      const list = this._feedOrdered(); if (list.length < 1) { this.setState({ feedRotAt: now }); return; }
+      const top = list[0];
+      if (top.level === 'info' || top.level === 'success') this.setState(s => ({ feedHidden: [...s.feedHidden, top.id], feedRotAt: now, feedTick: s.feedTick + 1 }));
+      else this.setState(s => ({ feedRot: s.feedRot + 1, feedRotAt: now, feedTick: s.feedTick + 1 }));
+    }, 500);
+    this._onEx = e => this.setState({ exercicio: e.detail.ano });
+    window.addEventListener('exerciciochange', this._onEx);
+    const waitEx = () => { if (window.DAExercicio) this.setState({ exercicio: window.DAExercicio.get() }); else setTimeout(waitEx, 150); };
+    waitEx();
+    this._onLic = () => this.setState(s => ({ licTick: s.licTick + 1 }));
+    window.addEventListener('licchange', this._onLic);
+    const waitLic = () => { if (window.DALic) this._onLic(); else setTimeout(waitLic, 200); };
+    waitLic();
+    this.handleResize = () => { this.setState({ isMobile: window.innerWidth < 900 }); };
+    window.addEventListener('resize', this.handleResize);
+  }
+  componentWillUnmount() {
+    clearInterval(this._feedInt); clearInterval(this._autoInt); clearTimeout(this._feedAnimT);
+    if (this._feedEv) ['licchange', 'calendarchange', 'estoquechange', 'storage', 'configchange'].forEach(ev => window.removeEventListener(ev, this._feedEv)); window.removeEventListener('resize', this.handleResize); }
+
+  ROLE_SECTIONS = {
+    'Administrativo': { audit: true, capacity: true, legislative: true, alerts: true },
+    'Vereador': { audit: false, capacity: false, legislative: true, alerts: true },
+    'Operacional': { audit: true, capacity: true, legislative: false, alerts: true },
+    'Visualizador': { audit: true, capacity: true, legislative: true, alerts: false }
+  };
+
+  getNavLinksForRole = (role) => {
+    const can = m => !window.DASession || !window.DASession.get() || window.DASession.can(m);
+    const access = { compras: can('compras'), motions: can('mocoes'), almoxarifado: can('almoxarifado'), patrimonio: can('patrimonio'), users: can('rh') };
+    return [
+      { label: 'Almoxarifado', href: 'AlmoxarifadoAmostragem.dc.html', icon: '📦', key: 'almoxarifado' },
+      { label: 'Compras & Licitações', href: 'ComprasModule.dc.html', icon: '🛒', key: 'compras' },
+      { label: 'Moções & Homenagens', href: 'MocoesHomenagens.dc.html', icon: '🎗', key: 'motions' },
+      { label: 'Patrimônio', href: 'PatrimonioModule.dc.html', icon: '🏛', key: 'patrimonio' }
+    ].filter(l => access[l.key]).sort((a, b) => a.label.localeCompare(b.label, 'pt-BR', { sensitivity: 'base' }));
+  };
+
+  handleRoleChange = (e) => { this.setState({ userRole: e.target.value }); };
+  openMobileMenu = () => { this.setState({ mobileMenuOpen: true }); };
+  closeMobileMenu = () => { this.setState({ mobileMenuOpen: false }); };
+  handleAlertsHover = () => { this.setState({ alertsHover: true }); };
+  handleAlertsLeave = () => { this.setState({ alertsHover: false }); };
+  handleAlertClick = (e) => {
+    const el = e.target.closest('[data-alert-id]');
+    if (!el) return;
+    if (!e.target.closest('[data-dismiss]')) { const href = el.getAttribute('data-href'); if (href) { window.location.href = href; return; } }
+    const raw = el.getAttribute('data-alert-id');
+    if (isNaN(Number(raw))) { this.setState(s => { const l = [...s.dismissedLic, raw]; try { sessionStorage.setItem('DA_feed_dismissed', JSON.stringify(l)); } catch (e) {} return { dismissedLic: l }; }); return; }
+    const id = Number(raw);
+    this.setState(s => ({ alerts: s.alerts.filter(a => a.id !== id) }));
+  };
+
+
+  _shellVals() {
+    if (!this._navBound) {
+      this._navBound = true;
+      window.addEventListener('resize', () => this.forceUpdate());
+      window.addEventListener('themechange', () => this.forceUpdate());
+    }
+    const st = this.state || {};
+    const isMobile = window.innerWidth < 900;
+    const open = !!st.navMenuOpen && isMobile;
+    const norm = s => String(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    const q = norm((st.navSearch || '').trim());
+    const INDEX = [["Dashboard.dc.html","▦","Painel de Controle","Sistemas & Gestão","painel dashboard indicadores alertas prazos fluxo"],["AlmoxarifadoAmostragem.dc.html","📦","Almoxarifado","Sistemas & Gestão","almoxarifado estoque amostragem materiais contagem"],["MocoesHomenagens.dc.html","🎗","Moções & Homenagens","Sistemas & Gestão","mocoes homenagens galeria vereador portaria"],["PatrimonioModule.dc.html","🏛","Patrimônio","Sistemas & Gestão","patrimonio bens tombamento transferencias ativos"],["UserProfile.dc.html","👤","Meus Dados (Perfil)","Sistemas & Gestão","perfil meus dados telefone email aniversario"],["ComprasModule.dc.html","🛒","Compras & Licitações","Sistemas & Gestão","compras licitacoes requisicoes fornecedores pregao"],["ProtocoloModule.dc.html","📋","Protocolo","Complementares","protocolo documentos processos prazos"],["RHModule.dc.html","🧑‍💼","Gestão de Pessoal","Complementares","rh recursos humanos servidores ferias"],["AnalyticsModule.dc.html","📈","Analytics & Relatórios","Complementares","analytics relatorios metricas indicadores"],["AuditLog.dc.html","🛡","Log e Auditoria","Administração","log auditoria seguranca acessos lgpd logins"],["Configuracoes.dc.html","⚙","Configurações do Sistema","Administração","configuracoes parametros parametrizacao ajustes alertas limites acessos perfis"],["Legislacoes.dc.html","⚖","Legislações","Administração","legislacao leis decretos portarias resolucoes recomendacoes normas"]];
+    const results = q ? INDEX.filter(i => norm(i[2] + ' ' + i[4]).includes(q)).slice(0, 6).map(i => ({ href: i[0], icon: i[1], label: i[2], group: i[3], go: () => { window.location.href = i[0]; } })) : [];
+    return {
+      navIsMobile: isMobile,
+      navOverlayVisible: open,
+      navSidebarPosition: isMobile ? 'fixed' : 'sticky',
+      navSidebarTransform: isMobile ? (open ? 'translateX(0)' : 'translateX(-100%)') : 'translateX(0)',
+      navOpen: () => this.setState({ navMenuOpen: true }),
+      navClose: () => this.setState({ navMenuOpen: false }),
+      navGutter: isMobile ? '16px' : '36px',
+      navHeaderPad: isMobile ? '18px 16px 12px' : '28px 36px 16px',
+      navTitleSize: isMobile ? '24px' : '30px',
+      navShowBreadcrumb: !isMobile,
+      navSearch: st.navSearch || '',
+      navSearchInput: (e) => this.setState({ navSearch: e.target.value, navSearchFocused: true }),
+      navSearchFocus: () => this.setState({ navSearchFocused: true }),
+      navSearchBlur: () => setTimeout(() => this.setState({ navSearchFocused: false }), 150),
+      navSearchKey: (e) => {
+        if (e.key === 'Enter' && results.length) window.location.href = results[0].href;
+        if (e.key === 'Escape') this.setState({ navSearch: '', navSearchFocused: false });
+      },
+      navSearchResults: results,
+      navSearchOpen: !!(st.navSearchFocused && q),
+      navSearchEmpty: !!q && results.length === 0,
+      ...(() => { const dk = !!(window.theme && window.theme.isDark && window.theme.isDark()); return { navThemeDark: dk, navThemeIsLight: !dk, navThemeLightBg: dk ? 'transparent' : 'rgba(255,255,255,0.9)', navThemeLightFg: dk ? 'rgba(255,255,255,0.6)' : '#1C543A', navThemeDarkBg: dk ? 'rgba(255,255,255,0.18)' : 'transparent', navThemeDarkFg: dk ? '#FFFFFF' : 'rgba(255,255,255,0.6)', navThemeLight: () => { if (window.theme) window.theme.set('light'); }, navThemeDarkSet: () => { if (window.theme) window.theme.set('dark'); } }; })()
+    };
+  }
+
+  renderVals() {
+    const { isMobile, alertsHover } = this.state;
+    const sess = window.DASession && window.DASession.get();
+    const userRole = (sess && window.DASession.role && window.DASession.role()) || (sess && sess.role) || this.state.userRole;
+    const sections = this.ROLE_SECTIONS[userRole] || this.ROLE_SECTIONS['Visualizador'];
+    const LEVEL = {
+      critical: { bgColor: '#FDF3F2', color: '#DC2626', titleColor: '#7F1D1D', descColor: '#B45454' },
+      warning: { bgColor: '#FDF8EC', color: '#B45309', titleColor: '#78350F', descColor: '#A8834B' },
+      info: { bgColor: '#F0F6FD', color: '#2563EB', titleColor: '#1E3A8A', descColor: '#6484B8' }
+    };
+    return {
+      exercicio: String(this.state.exercicio), exercicioAnos: (window.DAExercicio ? window.DAExercicio.anos : [2026, 2025, 2024]).map(String),
+      setExercicio: e => { if (window.DAExercicio) window.DAExercicio.set(e.target.value); else this.setState({ exercicio: +e.target.value }); },
+      ...this._shellVals(),
+      isMobile: isMobile,
+      mobileMenuOpen: this.state.mobileMenuOpen,
+      sidebarPosition: isMobile ? 'fixed' : 'sticky',
+      sidebarTransform: isMobile ? (this.state.mobileMenuOpen ? 'translateX(0)' : 'translateX(-100%)') : 'translateX(0)',
+      openMobileMenu: this.openMobileMenu,
+      closeMobileMenu: this.closeMobileMenu,
+      mainPadding: isMobile ? '18px 16px 32px' : '28px 36px 40px',
+      titleFontSize: isMobile ? '24px' : '30px',
+      topCardsColumns: isMobile ? '1fr' : 'repeat(3, 1fr)',
+      bodyColumns: isMobile ? '1fr' : '1.6fr 1fr',
+      threeColColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(220px, 1fr))',
+      leftColumnOrder: 1,
+      rightColumnOrder: isMobile ? 0 : 2,
+      userRole: userRole,
+      handleRoleChange: this.handleRoleChange,
+      navLinks: this.getNavLinksForRole(userRole),
+      showAudit: sections.audit,
+      showCapacity: sections.capacity,
+      showLegislative: sections.legislative,
+      showAlerts: sections.alerts,
+      topCards: [
+        { label: 'Processos Concluídos', value: '68%', icon: '✔', iconBg: '#EAF3EE', iconColor: '#1C543A', sub: '142 de 209 processos no exercício', badge: '', badgeBg: '', badgeColor: '' },
+        { label: 'Em Andamento', value: '24%', icon: '⏱', iconBg: '#F0F6FD', iconColor: '#2563EB', sub: '50 processos ativos nos subsetores', badge: '', badgeBg: '', badgeColor: '' },
+        { label: 'Aguardando Assinatura', value: '8%', icon: '✍', iconBg: '#FDF8EC', iconColor: '#B45309', sub: '', badge: '17 pendentes', badgeBg: '#FDF8EC', badgeColor: '#B45309' }
+      ],
+      chartMonths: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul'],
+      auditColumns: [
+        { color: '#1C543A', heightPct: 62 },
+        { color: '#2E6B4E', heightPct: 45 },
+        { color: '#1C543A', heightPct: 88 },
+        { color: '#2E6B4E', heightPct: 54 },
+        { color: '#1C543A', heightPct: 70 },
+        { color: '#2E6B4E', heightPct: 40 },
+        { color: '#1C543A', heightPct: 76 }
+      ],
+      capacityRows: [
+        { label: 'Compras & Licitações', value: '32 demandas', isBadge: false },
+        { label: 'Gestão de Pessoal', value: '21 demandas', isBadge: false },
+        { label: 'Protocolo', value: '44 demandas', isBadge: true }
+      ],
+      legislativeStages: [
+        { name: 'Autuação', color: '#1C543A', heightPx: 46 },
+        { name: 'Análise', color: '#2E6B4E', heightPx: 64 },
+        { name: 'Parecer', color: '#4E8A6C', heightPx: 38 },
+        { name: 'Arquivamento', color: '#9DBFAD', heightPx: 26 }
+      ],
+      alertOpacity: alertsHover ? '1' : String((window.DAConfig ? +window.DAConfig.get('painel.opacidade') : 40) / 100),
+      handleAlertsHover: this.handleAlertsHover,
+      handleAlertsLeave: this.handleAlertsLeave,
+      handleAlertClick: this.handleAlertClick,
+      ...(() => { const now = Date.now(), ORD = { critical: 0, warning: 1, info: 2, success: 3 }, meta = this.state.feedMeta;
+        const autoMs = Math.max(2, window.DAConfig ? +window.DAConfig.get('painel.autoDismiss') : 5) * 1000, rotName = this.state.feedRot % 2 ? 'feedIn3' : 'feedIn2', hidN = this.state.feedHidden.length;
+        const all0n = this._feedOrdered().length; const all = this._feedOrdered().map((a, idx) => { const m = meta[a.id] || { first: now, count: 0, pulse: 0 }; const isNew = now - m.first < 1200, pulsing = now - m.pulse < 1200;
+          return { ...a, ...(LEVEL[a.level] || LEVEL.info), isNew, hasCount: m.count > 0, count: m.count, countAnim: pulsing ? 'numRoll 0.4s ease-out' : 'none', anim: isNew ? 'feedIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both' : (idx === 0 ? ((((this.state.feedRot + hidN) % 2) ? 'feedIn3' : 'feedIn2') + ' 0.45s ease-out both') : (pulsing ? 'feedPulse 1s ease-out' : 'none')), isCurrent: idx === 0, outline: idx === 0 && all0n > 1 ? '2px solid ' + ((LEVEL[a.level] || LEVEL.info).color || '#1C543A') : 'none' }; });
+        const left = Math.max(0, Math.ceil((autoMs - (now - this.state.feedRotAt)) / 1000));
+        const ago = this.state.feedLast ? Math.max(0, Math.round((now - this.state.feedLast) / 1000)) : 0;
+        const op = window.DAConfig ? +window.DAConfig.get('painel.opacidade') : 40;
+        return { feedStatus: all.length + ' alerta(s) ativos · ' + (this.state.alertsHover ? 'pausado enquanto o cursor está no feed' : (all.length > 1 ? 'próximo aviso em ' + left + 's' : 'atualizado ' + (ago < 2 ? 'agora' : 'há ' + ago + 's'))) + '. Avisos azuis saem do feed após serem exibidos; amarelos e vermelhos voltam ao fim da fila.', alerts: all.slice(0, 5), alertsTotal: all.length, alertsMore: all.length > 5, alertsMoreLabel: '', feedLinkLabel: all.length > 5 ? 'Ver todos os ' + all.length + ' alertas na Central →' : 'Abrir Central de Notificações (histórico completo) →' }; })(),
+      agentLoads: window.DALic ? (() => { const ls = window.DALic.loads(); const mx = Math.max(1, ...ls.map(l => l.ativos)); return ls.map(l => ({ agente: l.agente, bar: Math.round(l.ativos / mx * 100) + '%', label: l.ativos + ' ativos' + (l.atrasados ? ' · ' + l.atrasados + ' atrasado(s)' : ''), color: l.atrasados ? '#B91C1C' : '#666666' })); })() : [],
+      auditCount: this.state.auditLog.length,
+      auditTotal: this.state.auditLog.length
+    };
+  }
+}
+</script>
+</body>
+</html>

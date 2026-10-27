@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <script src="./theme.js"></script>
+  <script src="./estoque.js"></script>
+  <style>@keyframes colPulse { 0%, 100% { transform: scaleY(0.35); opacity: 0.4; } 50% { transform: scaleY(1); opacity: 1; } }</style>
+</helmet>
+<div style="display: flex; flex-direction: column; gap: 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #1D1D1B;">
+
+  <div style="background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 8px; padding: 20px; display: flex; flex-direction: column; gap: 16px;">
+    <div style="display: flex; flex-wrap: wrap; gap: 14px; justify-content: space-between; align-items: flex-start;">
+      <div style="min-width: 0; max-width: 640px;">
+        <h3 style="font-size: 15px; font-weight: 700;">Atualização de estoque por RME e BRM</h3>
+        <p style="font-size: 12.5px; color: #666666; margin-top: 4px; line-height: 1.5;">A rotina lê os PDFs de <strong>RME</strong> (saídas) e <strong>BRM</strong> (entradas) da pasta, identifica os documentos ainda não computados e atualiza o saldo dos materiais pelo código cadastrado. Até a integração com o Google Drive, selecione uma pasta do computador para testar.</p>
+      </div>
+      <button onClick="{{ runSync }}" disabled="{{ syncing }}" style="height: 44px; padding: 0 20px; border: none; border-radius: 8px; background-color: {{ syncBg }}; color: #FFFFFF; font-size: 14px; font-weight: 700; cursor: {{ syncCursor }}; white-space: nowrap; flex-shrink: 0;" style-hover="background-color: #153A2E;">{{ syncLabel }}</button>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 12px; align-items: stretch;">
+      <div style="grid-column: span 2; min-width: 0; display: flex; flex-direction: column; gap: 10px; padding: 14px; border: 1px solid #E8E8E8; border-radius: 8px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;">
+          <p style="font-size: 11px; font-weight: 700; color: #666666; text-transform: uppercase; letter-spacing: 0.4px;">Pastas monitoradas · modo de teste</p>
+          <sc-if value="{{ isLocal }}" hint-placeholder-val="{{ false }}"><button onClick="{{ useSample }}" style="min-height: 32px; padding: 0 10px; border: 1px solid #E0E0E0; border-radius: 6px; background-color: #FFFFFF; font-size: 12px; cursor: pointer;">Usar pastas de exemplo</button></sc-if>
+        </div>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <div style="flex: 1; min-width: 220px; display: flex; flex-direction: column; gap: 8px; padding: 14px; border: 1px solid #E8E8E8; border-radius: 8px; background-color: #FFFBF3;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span aria-hidden="true" style="width: 34px; height: 34px; border-radius: 8px; background-color: #FFFFFF; border: 1px solid #E8E8E8; display: flex; align-items: center; justify-content: center; font-size: 16px; color: #B45309; font-weight: 800; flex-shrink: 0;">−</span>
+            <div style="min-width: 0;"><p style="font-size: 13px; font-weight: 700; color: #1D1D1B;">Saídas — RMEs</p><p style="font-size: 11.5px; color: #666666;">Requisições de material</p></div>
+          </div>
+          <div style="border-top: 1px solid #E8E8E8; padding-top: 8px; min-width: 0;">
+            <p style="font-size: 13px; font-weight: 600; color: #1D1D1B; word-break: break-word;">📁 {{ folderRME.name }}</p>
+            <p style="font-size: 11.5px; color: #666666; margin-top: 2px;">{{ folderRME.hint }}</p>
+          </div>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: auto;">
+            <label style="display: inline-flex; align-items: center; min-height: 36px; padding: 0 12px; border: 1px solid #1C543A; border-radius: 6px; color: #1C543A; font-size: 12.5px; font-weight: 600; cursor: pointer; position: relative; overflow: hidden;" style-hover="background-color: #F4F9F6;">
+              Selecionar pasta
+              <input type="file" ref="{{ folderRefRME }}" multiple="{{ true }}" accept="application/pdf,.pdf" onChange="{{ pickRME }}" aria-label="Selecionar pasta de RMEs" style="position: absolute; inset: 0; opacity: 0; cursor: pointer;"/>
+            </label>
+            <sc-if value="{{ folderRME.set }}" hint-placeholder-val="{{ false }}"><button onClick="{{ clearRME }}" style="min-height: 36px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 6px; background-color: #FFFFFF; font-size: 12.5px; cursor: pointer;">Remover</button></sc-if>
+          </div>
+        </div>
+          <div style="flex: 1; min-width: 220px; display: flex; flex-direction: column; gap: 8px; padding: 14px; border: 1px solid #E8E8E8; border-radius: 8px; background-color: #F7FBF9;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span aria-hidden="true" style="width: 34px; height: 34px; border-radius: 8px; background-color: #FFFFFF; border: 1px solid #E8E8E8; display: flex; align-items: center; justify-content: center; font-size: 16px; color: #1C543A; font-weight: 800; flex-shrink: 0;">+</span>
+            <div style="min-width: 0;"><p style="font-size: 13px; font-weight: 700; color: #1D1D1B;">Entradas — BRMs</p><p style="font-size: 11.5px; color: #666666;">Boletins de recebimento</p></div>
+          </div>
+          <div style="border-top: 1px solid #E8E8E8; padding-top: 8px; min-width: 0;">
+            <p style="font-size: 13px; font-weight: 600; color: #1D1D1B; word-break: break-word;">📁 {{ folderBRM.name }}</p>
+            <p style="font-size: 11.5px; color: #666666; margin-top: 2px;">{{ folderBRM.hint }}</p>
+          </div>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: auto;">
+            <label style="display: inline-flex; align-items: center; min-height: 36px; padding: 0 12px; border: 1px solid #1C543A; border-radius: 6px; color: #1C543A; font-size: 12.5px; font-weight: 600; cursor: pointer; position: relative; overflow: hidden;" style-hover="background-color: #F4F9F6;">
+              Selecionar pasta
+              <input type="file" ref="{{ folderRefBRM }}" multiple="{{ true }}" accept="application/pdf,.pdf" onChange="{{ pickBRM }}" aria-label="Selecionar pasta de BRMs" style="position: absolute; inset: 0; opacity: 0; cursor: pointer;"/>
+            </label>
+            <sc-if value="{{ folderBRM.set }}" hint-placeholder-val="{{ false }}"><button onClick="{{ clearBRM }}" style="min-height: 36px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 6px; background-color: #FFFFFF; font-size: 12.5px; cursor: pointer;">Remover</button></sc-if>
+          </div>
+        </div>
+        </div>
+        <sc-if value="{{ folderError }}" hint-placeholder-val="{{ false }}"><p role="alert" style="font-size: 12px; color: #B91C1C;">{{ folderError }}</p></sc-if>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 12px; min-width: 0;">
+        <div style="border: 1px solid #E8E8E8; border-radius: 8px; padding: 14px;">
+          <p style="font-size: 11px; font-weight: 700; color: #666666; text-transform: uppercase; letter-spacing: 0.4px;">Última atualização</p>
+          <p style="font-size: 17px; font-weight: 800; margin-top: 6px; color: #1D1D1B;">{{ lastSync }}</p>
+          <p style="font-size: 12px; color: #666666; margin-top: 2px;">{{ docsCount }} documento(s) computado(s)</p>
+        </div>
+        <button onClick="{{ openReview }}" disabled="{{ noPending }}" aria-label="Revisar códigos não cadastrados" style="text-align: left; border: 1px solid {{ pendBorder }}; border-radius: 8px; padding: 12px 14px; background-color: {{ pendBg }}; cursor: {{ pendCursor }}; font-family: inherit; display: flex; flex-direction: column; gap: 2px;" style-hover="box-shadow: 0 2px 8px rgba(146,64,14,0.12);">
+        <span style="font-size: 11px; font-weight: 700; color: #666666; text-transform: uppercase; letter-spacing: 0.3px;">Códigos não cadastrados</span>
+        <span style="font-size: 15px; font-weight: 700; margin-top: 2px; color: {{ pendColor }};">{{ pendCount }} item(ns)</span>
+        <span style="font-size: 12px; color: #666666;">Aguardando cadastro para entrar no saldo</span>
+        <sc-if value="{{ hasPending }}" hint-placeholder-val="{{ false }}"><span style="font-size: 12.5px; font-weight: 700; color: #92400E; margin-top: 6px;">Revisar e cadastrar →</span></sc-if>
+      </button>
+      </div>
+    </div>
+
+    <div>
+      <p style="font-size: 12px; font-weight: 700; color: #1C543A; text-transform: uppercase; letter-spacing: 0.4px; padding-bottom: 8px; margin-bottom: 8px; border-bottom: 1px solid #1C543A;">PDFs na pasta ({{ filesCount }})</p>
+      <sc-if value="{{ noFiles }}" hint-placeholder-val="{{ false }}"><p style="font-size: 12.5px; color: #666666; padding: 10px 4px;">Nenhum PDF encontrado nesta pasta.</p></sc-if>
+      <div style="display: flex; flex-direction: column;">
+        <sc-for list="{{ files }}" as="f" hint-placeholder-count="4">
+          <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center; padding: 9px 4px; border-bottom: 1px solid #F0F0F0;">
+            <span style="font-size: 13px; color: #1D1D1B; display: flex; gap: 8px; align-items: center; min-width: 0;"><span aria-hidden="true">📄</span><span style="overflow-wrap: anywhere;">{{ f.name }}</span><span style="font-size: 11.5px; color: #666666;">· {{ f.modFmt }}</span></span>
+            <span style="font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 999px; background-color: {{ f.bg }}; color: {{ f.color }};">{{ f.label }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <sc-if value="{{ syncing }}" hint-placeholder-val="{{ false }}">
+      <div role="status" style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 8px; background-color: #F4F9F6;">
+        <div aria-hidden="true" style="display: flex; gap: 4px; height: 22px; align-items: flex-end;">
+          <span style="width: 4px; height: 22px; background-color: #1C543A; border-radius: 2px; transform-origin: bottom; animation: colPulse 0.9s ease-in-out infinite;"></span>
+          <span style="width: 4px; height: 22px; background-color: #1C543A; border-radius: 2px; transform-origin: bottom; animation: colPulse 0.9s ease-in-out 0.15s infinite;"></span>
+          <span style="width: 4px; height: 22px; background-color: #1C543A; border-radius: 2px; transform-origin: bottom; animation: colPulse 0.9s ease-in-out 0.3s infinite;"></span>
+          <span style="width: 4px; height: 22px; background-color: #1C543A; border-radius: 2px; transform-origin: bottom; animation: colPulse 0.9s ease-in-out 0.45s infinite;"></span>
+        </div>
+        <p style="font-size: 13px; color: #1C543A; font-weight: 600;">Lendo os PDFs novos e conferindo os códigos…</p>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ hasReport }}" hint-placeholder-val="{{ false }}">
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <p style="font-size: 13px; font-weight: 700; color: #1D1D1B;">{{ reportTitle }}</p>
+        <sc-for list="{{ reportDocs }}" as="d" hint-placeholder-count="2">
+          <div style="border: 1px solid #E8E8E8; border-radius: 8px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px;">
+            <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
+              <span style="font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 999px; background-color: {{ d.badgeBg }}; color: {{ d.badgeColor }};">{{ d.badge }}</span>
+              <span style="font-size: 14px; font-weight: 700;">{{ d.key }}</span>
+              <span style="font-size: 12px; color: #666666;">{{ d.meta }}</span>
+            </div>
+            <sc-for list="{{ d.lines }}" as="l" hint-placeholder-count="1">
+              <div style="display: grid; grid-template-columns: minmax(120px, auto) minmax(0, 1fr) auto; gap: 10px; align-items: center; font-size: 12.5px; padding: 6px 0; border-top: 1px solid #F5F5F5;">
+                <span style="font-family: ui-monospace, monospace; font-size: 11.5px; color: #666666;">{{ l.code }}</span>
+                <span style="min-width: 0; overflow-wrap: anywhere;">{{ l.desc }}</span>
+                <span style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: flex-end;">
+                  <span style="font-weight: 700; color: {{ l.qtdColor }}; white-space: nowrap;">{{ l.qtdFmt }}</span>
+                  <sc-if value="{{ l.aplicado }}" hint-placeholder-val="{{ true }}"><span style="font-size: 11.5px; color: #666666; white-space: nowrap;">saldo {{ l.antes }} → <strong style="color: #1D1D1B;">{{ l.depois }}</strong></span></sc-if>
+                  <sc-if value="{{ l.pendente }}" hint-placeholder-val="{{ false }}"><button onClick="{{ l.register }}" style="height: 32px; padding: 0 10px; border: 1px solid #F3D9A4; border-radius: 6px; background-color: #FDF8EC; color: #92400E; font-size: 11.5px; font-weight: 700; cursor: pointer; white-space: nowrap;">Código não cadastrado · Cadastrar</button></sc-if>
+                </span>
+              </div>
+            </sc-for>
+          </div>
+        </sc-for>
+        <sc-for list="{{ reportNotes }}" as="n" hint-placeholder-count="0">
+          <p style="font-size: 12px; color: {{ n.color }};">{{ n.text }}</p>
+        </sc-for>
+      </div>
+    </sc-if>
+  </div>
+
+  <div style="background-color: #FFFFFF; padding: 20px; border-radius: 8px; border: 1px solid #E8E8E8;">
+    <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+      <h2 style="font-size: 16px; font-weight: 600;">Materiais em Estoque ({{ itemsCount }} itens)</h2>
+      <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
+        <input type="search" value="{{ q }}" onInput="{{ setQ }}" placeholder="Buscar por código ou descrição" aria-label="Buscar material" style="min-width: 220px; height: 40px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px;" style-focus="border-color: #1C543A; outline: none;"/>
+        <button onClick="{{ openNew }}" style="height: 40px; padding: 0 16px; border: none; border-radius: 8px; background-color: #1C543A; color: #FFFFFF; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap;" style-hover="background-color: #153A2E;">+ Novo item</button>
+      </div>
+    </div>
+    <div style="overflow-x: auto;">
+      <table style="width: 100%; min-width: 820px; font-size: 12px; border-collapse: collapse;">
+        <thead>
+          <tr style="background-color: #F9F9F9; border-bottom: 2px solid #E8E8E8;">
+            <th style="padding: 12px; text-align: left; font-weight: 600; color: #999999; text-transform: uppercase; letter-spacing: 0.5px;">Código</th>
+            <th style="padding: 12px; text-align: left; font-weight: 600; color: #999999; text-transform: uppercase; letter-spacing: 0.5px;">Descrição</th>
+            <th style="padding: 12px; text-align: center; font-weight: 600; color: #999999; text-transform: uppercase; letter-spacing: 0.5px;">Unid.</th>
+            <th style="padding: 12px; text-align: center; font-weight: 600; color: #999999; text-transform: uppercase; letter-spacing: 0.5px;">Estoque</th>
+            <th style="padding: 12px; text-align: center; font-weight: 600; color: #999999; text-transform: uppercase; letter-spacing: 0.5px;">Consumo</th>
+            <th style="padding: 12px; text-align: center; font-weight: 600; color: #999999; text-transform: uppercase; letter-spacing: 0.5px;">Prioridade</th>
+            <th style="padding: 12px; text-align: left; font-weight: 600; color: #999999; text-transform: uppercase; letter-spacing: 0.5px;">Último movimento</th>
+          </tr>
+        </thead>
+        <tbody>
+          <sc-for list="{{ rows }}" as="r" hint-placeholder-count="6">
+            <tr style="border-bottom: 1px solid #E8E8E8; background-color: {{ r.rowBg }};" style-hover="background-color: #F9F9F9;">
+              <td style="padding: 12px; font-family: monospace; font-size: 11px; color: #999999; white-space: nowrap;">{{ r.code }}</td>
+              <td style="padding: 12px;">{{ r.name }}</td>
+              <td style="padding: 12px; text-align: center; color: #666666;">{{ r.unit }}</td>
+              <td style="padding: 12px; text-align: center; font-weight: 600;">{{ r.stock }}</td>
+              <td style="padding: 12px; text-align: center; font-size: 11px; color: #666666;">{{ r.avgFmt }}</td>
+              <td style="padding: 12px; text-align: center;"><span style="display: inline-block; white-space: nowrap; font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 3px; {{ r.priorityStyle }}">{{ r.priority }}</span></td>
+              <td style="padding: 12px; font-size: 11.5px; color: {{ r.moveColor }}; white-space: nowrap;">{{ r.moveLabel }}</td>
+            </tr>
+          </sc-for>
+        </tbody>
+      </table>
+      <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}"><p style="padding: 24px; text-align: center; font-size: 13px; color: #666666;">Nenhum material encontrado.</p></sc-if>
+    </div>
+  </div>
+
+  <div style="background-color: #FFFFFF; padding: 20px; border-radius: 8px; border: 1px solid #E8E8E8;">
+    <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+      <h2 style="font-size: 16px; font-weight: 600;">Documentos computados ({{ docsTotal }})</h2>
+      <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
+        <input type="search" value="{{ docQ }}" onInput="{{ setDocQ }}" placeholder="Buscar nº, setor, fornecedor, NF ou código" aria-label="Buscar documento" style="min-width: 240px; height: 40px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px;" style-focus="border-color: #1C543A; outline: none;"/>
+        <select value="{{ docTipo }}" onChange="{{ setDocTipo }}" aria-label="Filtrar por tipo" style="height: 40px; padding: 0 10px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; background-color: #FFFFFF;">
+          <option value="todos">RME e BRM</option>
+          <option value="RME">Somente RME (saídas)</option>
+          <option value="BRM">Somente BRM (entradas)</option>
+        </select>
+      </div>
+    </div>
+    <div style="overflow-x: auto;">
+      <table style="width: 100%; min-width: 720px; font-size: 12px; border-collapse: collapse;">
+        <thead>
+          <tr style="background-color: #F9F9F9; border-bottom: 2px solid #E8E8E8;">
+            <th style="padding: 10px 12px; text-align: left; font-weight: 600; color: #999999; text-transform: uppercase; letter-spacing: 0.5px;">Documento</th>
+            <th style="padding: 10px 12px; text-align: left; font-weight: 600; color: #999999; text-transform: uppercase; letter-spacing: 0.5px;">Tipo</th>
+            <th style="padding: 10px 12px; text-align: left; font-weight: 600; color: #999999; text-transform: uppercase; letter-spacing: 0.5px;">Data</th>
+            <th style="padding: 10px 12px; text-align: left; font-weight: 600; color: #999999; text-transform: uppercase; letter-spacing: 0.5px;">Origem / Destino</th>
+            <th style="padding: 10px 12px; text-align: center; font-weight: 600; color: #999999; text-transform: uppercase; letter-spacing: 0.5px;">Itens</th>
+            <th style="padding: 10px 12px; text-align: left; font-weight: 600; color: #999999; text-transform: uppercase; letter-spacing: 0.5px;">Computado em</th>
+          </tr>
+        </thead>
+        <tbody>
+          <sc-for list="{{ docs }}" as="d" hint-placeholder-count="3">
+            <tr style="border-bottom: 1px solid #E8E8E8;">
+              <td style="padding: 10px 12px; font-weight: 700; color: #1C543A; white-space: nowrap;">{{ d.key }}</td>
+              <td style="padding: 10px 12px;"><span style="font-size: 10.5px; font-weight: 700; padding: 3px 8px; border-radius: 999px; background-color: {{ d.badgeBg }}; color: {{ d.badgeColor }}; white-space: nowrap;">{{ d.badge }}</span></td>
+              <td style="padding: 10px 12px; color: #666666;">{{ d.dataFmt }}</td>
+              <td style="padding: 10px 12px;">{{ d.origem }}</td>
+              <td style="padding: 10px 12px; text-align: center;">{{ d.nItens }}</td>
+              <td style="padding: 10px 12px; color: #666666; white-space: nowrap;">{{ d.procFmt }}</td>
+            </tr>
+          </sc-for>
+        </tbody>
+      </table>
+    </div>
+    <sc-if value="{{ docsEmpty }}" hint-placeholder-val="{{ false }}"><p style="padding: 24px; text-align: center; font-size: 13px; color: #666666;">Nenhum documento encontrado.</p></sc-if>
+    <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; padding-top: 12px;">
+      <span style="font-size: 12px; color: #666666;">{{ docPager.label }}</span>
+      <sc-if value="{{ docPager.show }}" hint-placeholder-val="{{ false }}">
+        <nav aria-label="Paginação dos documentos" style="display: flex; gap: 6px; align-items: center;">
+          <button onClick="{{ docPager.prev }}" disabled="{{ docPager.prevDisabled }}" aria-label="Página anterior" style="height: 36px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 6px; background-color: #FFFFFF; color: {{ docPager.prevColor }}; font-size: 12.5px; font-weight: 600; cursor: pointer;">‹ Anterior</button>
+          <sc-for list="{{ docPager.nums }}" as="pn" hint-placeholder-count="3">
+            <button onClick="{{ pn.go }}" aria-current="{{ pn.current }}" style="min-width: 36px; height: 36px; border: 1px solid {{ pn.border }}; border-radius: 6px; background-color: {{ pn.bg }}; color: {{ pn.color }}; font-size: 12.5px; font-weight: 700; cursor: pointer;">{{ pn.n }}</button>
+          </sc-for>
+          <button onClick="{{ docPager.next }}" disabled="{{ docPager.nextDisabled }}" aria-label="Próxima página" style="height: 36px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 6px; background-color: #FFFFFF; color: {{ docPager.nextColor }}; font-size: 12.5px; font-weight: 600; cursor: pointer;">Próxima ›</button>
+        </nav>
+      </sc-if>
+    </div>
+  </div>
+
+  <sc-if value="{{ formOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeForm }}" style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 95;">
+      <div role="dialog" aria-modal="true" aria-labelledby="novo-item-title" onClick="{{ stop }}" style="background-color: #FFFFFF; border-radius: 12px; width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.25);">
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 20px 24px; border-bottom: 1px solid #F0F0EE;">
+          <div>
+            <h3 id="novo-item-title" style="font-size: 16px; font-weight: 700;">Novo material</h3>
+            <p style="font-size: 12px; color: #666666; margin-top: 2px;">Use o mesmo código dos documentos RME e BRM.</p>
+          </div>
+          <button onClick="{{ closeForm }}" aria-label="Fechar" style="width: 36px; height: 36px; border-radius: 8px; border: none; background-color: #F4F4F2; font-size: 15px; color: #666666; cursor: pointer; flex-shrink: 0;">✕</button>
+        </div>
+        <div style="padding: 20px 24px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px;">
+          <div>
+            <label for="ni-code" style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 6px;">Código do material</label>
+            <input id="ni-code" type="text" inputmode="numeric" value="{{ form.code }}" onInput="{{ setCode }}" placeholder="1 50 02 0018 0" style="width: 100%; height: 44px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 14px; font-family: ui-monospace, monospace;" style-focus="border-color: #1C543A; outline: none;"/>
+          </div>
+          <div>
+            <label for="ni-unit" style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 6px;">Unidade</label>
+            <select id="ni-unit" value="{{ form.unit }}" onChange="{{ setUnit }}" style="width: 100%; height: 44px; padding: 0 10px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; background-color: #FFFFFF;">
+              <sc-for list="{{ units }}" as="u" hint-placeholder-count="6"><option value="{{ u }}">{{ u }}</option></sc-for>
+            </select>
+          </div>
+          <div style="grid-column: 1 / -1;">
+            <label for="ni-name" style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 6px;">Descrição</label>
+            <input id="ni-name" type="text" value="{{ form.name }}" onInput="{{ setName }}" placeholder="PACOTE DE PAPEL A4 C/ 500 FOLHAS 75G" style="width: 100%; height: 44px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px;" style-focus="border-color: #1C543A; outline: none;"/>
+          </div>
+          <div>
+            <label for="ni-cat" style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 6px;">Categoria</label>
+            <select id="ni-cat" value="{{ form.category }}" onChange="{{ setCategory }}" style="width: 100%; height: 44px; padding: 0 10px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; background-color: #FFFFFF;">
+              <sc-for list="{{ categories }}" as="c" hint-placeholder-count="4"><option value="{{ c }}">{{ c }}</option></sc-for>
+            </select>
+          </div>
+          <div>
+            <label for="ni-pri" style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 6px;">Prioridade de contagem</label>
+            <select id="ni-pri" value="{{ form.priority }}" onChange="{{ setPriority }}" style="width: 100%; height: 44px; padding: 0 10px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; background-color: #FFFFFF;">
+              <option value="Alta">Alta (semanal)</option>
+              <option value="Média">Média (quinzenal)</option>
+              <option value="Baixa">Baixa (mensal)</option>
+            </select>
+          </div>
+          <div>
+            <label for="ni-stock" style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 6px;">Estoque inicial</label>
+            <input id="ni-stock" type="number" min="0" step="1" value="{{ form.stock }}" onInput="{{ setStock }}" style="width: 100%; height: 44px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px;" style-focus="border-color: #1C543A; outline: none;"/>
+          </div>
+          <div>
+            <label for="ni-avg" style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 6px;">Consumo médio mensal</label>
+            <input id="ni-avg" type="number" min="0" step="0.1" value="{{ form.avgConsumption }}" onInput="{{ setAvg }}" style="width: 100%; height: 44px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px;" style-focus="border-color: #1C543A; outline: none;"/>
+          </div>
+          <sc-if value="{{ hasPendingFor }}" hint-placeholder-val="{{ false }}">
+            <p style="grid-column: 1 / -1; font-size: 12px; color: #1C543A; background-color: #F4F9F6; padding: 10px 12px; border-radius: 6px;">Ao salvar, o movimento pendente de {{ pendingFor }} será aplicado ao saldo deste item.</p>
+          </sc-if>
+          <sc-if value="{{ formError }}" hint-placeholder-val="{{ false }}"><p style="grid-column: 1 / -1; font-size: 12.5px; color: #B91C1C;">{{ formError }}</p></sc-if>
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 10px; padding: 16px 24px; border-top: 1px solid #F0F0EE;">
+          <button onClick="{{ closeForm }}" style="height: 44px; padding: 0 18px; border: 1px solid #E0E0E0; border-radius: 8px; background-color: #FFFFFF; font-size: 13px; cursor: pointer;">Cancelar</button>
+          <button onClick="{{ submitForm }}" style="height: 44px; padding: 0 18px; border: none; border-radius: 8px; background-color: #1C543A; color: #FFFFFF; font-size: 13px; font-weight: 700; cursor: pointer;" style-hover="background-color: #153A2E;">Cadastrar material</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ reviewOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeReview }}" style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 96;">
+      <div role="dialog" aria-modal="true" aria-labelledby="rev-title" onClick="{{ stop }}" style="background-color: #FFFFFF; border-radius: 12px; width: 100%; max-width: 920px; max-height: 92vh; display: flex; flex-direction: column; box-shadow: 0 20px 60px rgba(0,0,0,0.25);">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding: 20px 24px; border-bottom: 1px solid #F0F0EE;">
+          <div>
+            <h3 id="rev-title" style="font-size: 16px; font-weight: 700;">Itens novos encontrados nos documentos</h3>
+            <p style="font-size: 12.5px; color: #666666; margin-top: 4px; max-width: 640px;">Os dados vêm pré-preenchidos com a BRM (ou a RME, quando não houver BRM). Aceite para cadastrar o material e aplicar os movimentos ao saldo, ou recuse para não computá-los.</p>
+          </div>
+          <button onClick="{{ closeReview }}" aria-label="Fechar" style="width: 36px; height: 36px; border-radius: 8px; border: none; background-color: #F4F4F2; font-size: 15px; color: #666666; cursor: pointer; flex-shrink: 0;">✕</button>
+        </div>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 12px 24px; border-bottom: 1px solid #F0F0EE; background-color: #FAFAF9;">
+          <button onClick="{{ acceptAll }}" style="height: 36px; padding: 0 14px; border: 1px solid #1C543A; border-radius: 6px; background-color: #FFFFFF; color: #1C543A; font-size: 12.5px; font-weight: 700; cursor: pointer;">Aceitar todos</button>
+          <button onClick="{{ rejectAll }}" style="height: 36px; padding: 0 14px; border: 1px solid #E0E0E0; border-radius: 6px; background-color: #FFFFFF; color: #B91C1C; font-size: 12.5px; font-weight: 700; cursor: pointer;">Recusar todos</button>
+          <button onClick="{{ clearAll }}" style="height: 36px; padding: 0 14px; border: 1px solid #E0E0E0; border-radius: 6px; background-color: #FFFFFF; color: #444444; font-size: 12.5px; cursor: pointer;">Limpar seleção</button>
+          <span style="font-size: 12px; color: #666666; margin-left: auto;">{{ reviewSummary }}</span>
+        </div>
+        <div style="overflow-y: auto; padding: 16px 24px; display: flex; flex-direction: column; gap: 12px;">
+          <sc-for list="{{ reviewRows }}" as="r" hint-placeholder-count="3">
+            <div style="border: 1px solid {{ r.border }}; background-color: {{ r.bg }}; border-radius: 10px; padding: 14px; display: flex; flex-direction: column; gap: 12px;">
+              <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center;">
+                <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; min-width: 0;">
+                  <span style="font-family: ui-monospace, monospace; font-size: 13px; font-weight: 700; color: #1C543A;">{{ r.code }}</span>
+                  <span style="font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 999px; background-color: {{ r.srcBg }}; color: {{ r.srcColor }};">Dados de {{ r.fonteDoc }}</span>
+                  <sc-if value="{{ r.hasForn }}" hint-placeholder-val="{{ false }}"><span style="font-size: 12px; color: #666666;">{{ r.fornecedor }}</span></sc-if>
+                </div>
+                <div role="group" aria-label="Decisão para {{ r.code }}" style="display: inline-flex; gap: 4px; padding: 4px; background-color: #F0F0EE; border-radius: 8px;">
+                  <button onClick="{{ r.accept }}" aria-pressed="{{ r.isAccept }}" style="height: 36px; padding: 0 14px; border: none; border-radius: 6px; font-size: 12.5px; font-weight: 700; cursor: pointer; background-color: {{ r.accBg }}; color: {{ r.accColor }};">✓ Aceitar</button>
+                  <button onClick="{{ r.reject }}" aria-pressed="{{ r.isReject }}" style="height: 36px; padding: 0 14px; border: none; border-radius: 6px; font-size: 12.5px; font-weight: 700; cursor: pointer; background-color: {{ r.rejBg }}; color: {{ r.rejColor }};">✕ Recusar</button>
+                </div>
+              </div>
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px;">
+                <div style="grid-column: 1 / -1;">
+                  <label style="font-size: 11.5px; font-weight: 600; display: block; margin-bottom: 4px;">Descrição</label>
+                  <input type="text" value="{{ r.desc }}" onInput="{{ r.setDesc }}" disabled="{{ r.isReject }}" style="width: 100%; height: 40px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; background-color: #FFFFFF;" style-focus="border-color: #1C543A; outline: none;"/>
+                </div>
+                <div>
+                  <label style="font-size: 11.5px; font-weight: 600; display: block; margin-bottom: 4px;">Unidade</label>
+                  <select value="{{ r.unit }}" onChange="{{ r.setUnit }}" disabled="{{ r.isReject }}" style="width: 100%; height: 40px; padding: 0 10px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; background-color: #FFFFFF;">
+                    <sc-for list="{{ r.unitOptions }}" as="u" hint-placeholder-count="6"><option value="{{ u }}">{{ u }}</option></sc-for>
+                  </select>
+                </div>
+                <div>
+                  <label style="font-size: 11.5px; font-weight: 600; display: block; margin-bottom: 4px;">Categoria</label>
+                  <select value="{{ r.category }}" onChange="{{ r.setCategory }}" disabled="{{ r.isReject }}" style="width: 100%; height: 40px; padding: 0 10px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; background-color: #FFFFFF;">
+                    <sc-for list="{{ categories }}" as="c" hint-placeholder-count="4"><option value="{{ c }}">{{ c }}</option></sc-for>
+                  </select>
+                </div>
+                <div>
+                  <label style="font-size: 11.5px; font-weight: 600; display: block; margin-bottom: 4px;">Prioridade</label>
+                  <select value="{{ r.priority }}" onChange="{{ r.setPriority }}" disabled="{{ r.isReject }}" style="width: 100%; height: 40px; padding: 0 10px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; background-color: #FFFFFF;">
+                    <option value="Alta">Alta</option><option value="Média">Média</option><option value="Baixa">Baixa</option>
+                  </select>
+                </div>
+                <div>
+                  <label style="font-size: 11.5px; font-weight: 600; display: block; margin-bottom: 4px;">Consumo médio mensal</label>
+                  <input type="number" min="0" step="0.1" value="{{ r.avg }}" onInput="{{ r.setAvg }}" disabled="{{ r.isReject }}" style="width: 100%; height: 40px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; background-color: #FFFFFF;" style-focus="border-color: #1C543A; outline: none;"/>
+                </div>
+              </div>
+              <div style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center;">
+                <span style="font-size: 11.5px; color: #666666;">Movimentos:</span>
+                <sc-for list="{{ r.movs }}" as="m" hint-placeholder-count="1"><span style="font-size: 11.5px; font-weight: 600; padding: 3px 10px; border-radius: 999px; background-color: #FFFFFF; border: 1px solid #E8E8E8; color: {{ m.color }};">{{ m.label }}</span></sc-for>
+                <span style="font-size: 12px; font-weight: 700; color: {{ r.saldoColor }}; margin-left: auto;">Saldo inicial após aceitar: {{ r.saldoFmt }}</span>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; padding: 16px 24px; border-top: 1px solid #F0F0EE;">
+          <button onClick="{{ closeReview }}" style="height: 44px; padding: 0 18px; border: 1px solid #E0E0E0; border-radius: 8px; background-color: #FFFFFF; font-size: 13px; cursor: pointer;">Decidir depois</button>
+          <button onClick="{{ confirmReview }}" disabled="{{ reviewDisabled }}" style="height: 44px; padding: 0 18px; border: none; border-radius: 8px; background-color: {{ reviewBtnBg }}; color: #FFFFFF; font-size: 13px; font-weight: 700; cursor: {{ reviewBtnCursor }};">{{ reviewBtnLabel }}</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+    <div role="status" style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background-color: #1C543A; color: #FFFFFF; padding: 12px 22px; border-radius: 999px; font-size: 13px; font-weight: 600; z-index: 100; max-width: 90vw; text-align: center;">✓ {{ toast }}</div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: &quot;1100px&quot;, &quot;height&quot;: &quot;1200px&quot;}}">
+class Component extends DCLogic {
+  state = { review: null, tick: 0, q: '', docQ: '', docTipo: 'todos', docPage: 0, syncing: false, report: null, form: null, formError: '', editingFolder: false, folderDraft: '', folderError: '', toast: '', highlight: [] };
+  UNITS = ['UN', 'PCT', 'CX', 'GL', 'RL', 'RESMA', 'KG', 'L', 'M', 'PAR'];
+  CATS = ['Papelaria', 'Higiene', 'Escritório', 'Manutenção', 'Copa e Cozinha'];
+  componentDidMount() {
+    const w = () => { if (window.DAEstoque) this.setState(s => ({ tick: s.tick + 1 })); else setTimeout(w, 150); }; w();
+    this._on = () => this.setState(s => ({ tick: s.tick + 1 })); window.addEventListener('estoquechange', this._on);
+  }
+  componentWillUnmount() { window.removeEventListener('estoquechange', this._on); clearTimeout(this._t); }
+  showToast(m) { clearTimeout(this._t); this.setState({ toast: m }); this._t = setTimeout(() => this.setState({ toast: '' }), 3200); }
+  maskCode(v) { const d = String(v).replace(/\D/g, '').slice(0, 10); const parts = [d.slice(0, 1), d.slice(1, 3), d.slice(3, 5), d.slice(5, 9), d.slice(9, 10)].filter(Boolean); return parts.join(' '); }
+  fmtTs(iso) { if (!iso) return '—'; const d = new Date(iso); return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }); }
+  fmtD(iso) { return iso ? iso.split('-').reverse().join('/') : '—'; }
+  nf(v) { return Number(v).toLocaleString('pt-BR', { maximumFractionDigits: 3 }); }
+  setF(k) { return e => { const v = k === 'code' ? this.maskCode(e.target.value) : e.target.value; this.setState(s => ({ form: { ...s.form, [k]: v }, formError: '' })); }; }
+  folderInputRef = (el) => { if (el && !el.hasAttribute('webkitdirectory')) { el.setAttribute('webkitdirectory', ''); el.setAttribute('directory', ''); } };
+  _pickTyped(tipo, e) { const E = window.DAEstoque; const files = e.target.files; if (!E || !files || !files.length) return; const info = E.setTypedFolder(tipo, files); e.target.value = ''; if (!info.pdfs) { this.setState({ folderError: 'A pasta "' + info.name + '" não tem arquivos PDF.', report: null }); return; } this.setState({ folderError: '', report: null }); this.showToast('Pasta de ' + tipo + 's "' + info.name + '": ' + info.pdfs + ' PDF(s). Clique em Atualizar estoque.'); }
+  pickRME = (e) => this._pickTyped('RME', e);
+  pickBRM = (e) => this._pickTyped('BRM', e);
+  _dirRef(el) { if (el && !el.hasAttribute('webkitdirectory')) { el.setAttribute('webkitdirectory', ''); el.setAttribute('directory', ''); } }
+  folderRefRME = (el) => this._dirRef(el);
+  folderRefBRM = (el) => this._dirRef(el);
+  pickFolder = (e) => {
+    const E = window.DAEstoque; const files = e.target.files;
+    if (!E || !files || !files.length) return;
+    const info = E.setLocalFolder(files); e.target.value = '';
+    if (!info.pdfs) { this.setState({ folderError: 'A pasta "' + info.name + '" não tem arquivos PDF.', report: null }); return; }
+    this.setState({ folderError: '', report: null });
+    this.showToast('Pasta "' + info.name + '" selecionada: ' + info.pdfs + ' PDF(s). Clique em Atualizar estoque.');
+  };
+  openReview = () => {
+    const E = window.DAEstoque; if (!E) return;
+    const g = E.pendingGrouped(); if (!g.length) return;
+    this.setState({ review: g.map(x => ({ code: x.code, desc: x.desc || '', unit: this.UNITS.includes(x.unit) ? x.unit : (x.unit || 'UN'), category: 'Papelaria', priority: 'Baixa', avg: '0', fonte: x.fonte, fonteDoc: x.fonteDoc, fornecedor: x.fornecedor || '', movs: x.movs, saldoPrevisto: x.saldoPrevisto, decision: 'aceitar' })) });
+  };
+  setRev(i, patch) { this.setState(s => ({ review: s.review.map((r, k) => k === i ? { ...r, ...patch } : r) })); }
+  confirmReview = () => {
+    const E = window.DAEstoque, rv = this.state.review || [];
+    const bad = rv.find(r => r.decision === 'aceitar' && !String(r.desc).trim());
+    if (bad) { this.showToast('Informe a descrição de ' + bad.code); return; }
+    let ok = 0, apl = 0, rej = 0; const hl = [];
+    rv.forEach(r => {
+      if (r.decision === 'aceitar') { const res = E.acceptPending({ code: r.code, name: r.desc, unit: r.unit, category: r.category, priority: r.priority, avgConsumption: r.avg }); if (res.ok) { ok++; apl += res.aplicados; hl.push(E.digits(r.code)); } }
+      else if (r.decision === 'recusar') { E.discardPending(r.code); rej++; }
+    });
+    this.setState(s => ({ review: null, highlight: [...s.highlight, ...hl], report: null }));
+    this.showToast([ok ? ok + ' material(is) cadastrado(s) e ' + apl + ' movimento(s) aplicado(s)' : '', rej ? rej + ' recusado(s)' : ''].filter(Boolean).join(' · ') || 'Nenhuma alteração');
+  };
+  runSync = () => {
+    const E = window.DAEstoque; if (!E || this.state.syncing) return;
+    const actor = (window.DASession && window.DASession.get && window.DASession.get()) ? window.DASession.get().name : 'Usuário';
+    this.setState({ syncing: true });
+    E.sync(actor).then(r => {
+      const hl = [];
+      r.processados.forEach(d => d.itens.forEach(i => { if (i.aplicado) hl.push(E.digits(i.code)); }));
+      this.setState({ syncing: false, report: r, highlight: hl }); E.clearComputed();
+      this.showToast(r.processados.length ? r.processados.length + ' documento(s) novo(s) computado(s)' : 'Nenhum documento novo na pasta');
+    });
+  };
+  openForm(prefill) { this.setState({ form: { code: '', name: '', unit: 'UN', category: 'Papelaria', priority: 'Baixa', stock: '0', avgConsumption: '0', ...prefill }, formError: '' }); }
+  submitForm = () => {
+    const E = window.DAEstoque, f = this.state.form;
+    if (String(f.code).replace(/\D/g, '').length !== 10) { this.setState({ formError: 'O código deve ter 10 dígitos, no formato 1 50 02 0018 0.' }); return; }
+    if (!String(f.name).trim()) { this.setState({ formError: 'Informe a descrição do material.' }); return; }
+    if (+f.stock < 0) { this.setState({ formError: 'O estoque inicial não pode ser negativo.' }); return; }
+    const r = E.addItem(f);
+    if (!r.ok) { this.setState({ formError: r.error }); return; }
+    let msg = 'Material ' + r.item.code + ' cadastrado';
+    if (f.pendingDoc && E.applyPending(f.pendingDoc, r.item.code)) msg += ' e movimento de ' + f.pendingDoc + ' aplicado';
+    this.setState(s => ({ form: null, highlight: [...s.highlight, E.digits(r.item.code)] }));
+    this.showToast(msg);
+  };
+  renderVals() {
+    const E = window.DAEstoque, st = this.state;
+    const f = st.form || {};
+    const base = {
+      q: st.q, setQ: e => this.setState({ q: e.target.value }), syncing: st.syncing, toast: st.toast,
+      syncLabel: st.syncing ? 'Atualizando…' : '↻ Atualizar estoque', syncBg: st.syncing ? '#7FA693' : '#1C543A', syncCursor: st.syncing ? 'wait' : 'pointer', runSync: this.runSync,
+      formOpen: !!st.form, form: f, formError: st.formError, units: this.UNITS, categories: this.CATS,
+      setCode: this.setF('code'), setName: this.setF('name'), setUnit: this.setF('unit'), setCategory: this.setF('category'), setPriority: this.setF('priority'), setStock: this.setF('stock'), setAvg: this.setF('avgConsumption'),
+      hasPendingFor: !!f.pendingDoc, pendingFor: f.pendingDoc || '',
+      openNew: () => this.openForm({}), closeForm: () => this.setState({ form: null }), submitForm: this.submitForm, stop: e => e.stopPropagation(),
+      editingFolder: st.editingFolder, notEditingFolder: !st.editingFolder, folderDraft: st.folderDraft, folderError: st.folderError,
+      setFolderDraft: e => this.setState({ folderDraft: e.target.value, folderError: '' }), cancelFolder: () => this.setState({ editingFolder: false })
+    };
+    if (!E) return { ...base, folder: {}, files: [], rows: [], docs: [], reportDocs: [], reportNotes: [], hasReport: false, isEmpty: false, docsTotal: 0, docsEmpty: false, docQ: '', docTipo: 'todos', docPager: { show: false, nums: [], label: '' } };
+    const db = E.get();
+    const pend = E.pending();
+    const q = st.q.trim().toLowerCase();
+    const rows = db.items.filter(i => !q || (i.code + ' ' + i.name).toLowerCase().includes(q)).map(i => { const m = E.lastMove(i.code); const hl = st.highlight.includes(E.digits(i.code));
+      return { ...i, stock: this.nf(i.stock), avgFmt: (+i.avgConsumption || 0).toFixed(2),
+        priorityStyle: i.priority === 'Alta' ? 'background-color: #DC262622; color: #DC2626;' : i.priority === 'Média' ? 'background-color: #F59E0B22; color: #B45309;' : 'background-color: #E8E8E8; color: #666666;',
+        moveLabel: m ? (m.qtd > 0 ? '+' : '') + this.nf(m.qtd) + ' · ' + m.doc : '—', moveColor: m ? (m.qtd < 0 ? '#B91C1C' : '#1C543A') : '#999999', rowBg: hl ? '#F4F9F6' : '#FFFFFF' }; });
+    const BADGE = { RME: ['RME · Saída', '#FDF3F2', '#B91C1C'], BRM: ['BRM · Entrada', '#EAF3EE', '#1C543A'] };
+    const docView = d => { const b = BADGE[d.tipo];
+      return { ...d, badge: b[0], badgeBg: b[1], badgeColor: b[2], dataFmt: this.fmtD(d.data), procFmt: this.fmtTs(d.processadoEm), nItens: d.itens.length,
+        origem: d.tipo === 'RME' ? (d.setor || 'Requisição interna') : (d.fornecedor ? d.fornecedor + (d.notaFiscal ? ' · NF ' + d.notaFiscal : '') : 'Recebimento'),
+        meta: this.fmtD(d.data) + ' · ' + (d.tipo === 'RME' ? (d.setor || '') + (d.status ? ' · status ' + d.status : '') : (d.fornecedor || '') + (d.notaFiscal ? ' · NF ' + d.notaFiscal : '')),
+        lines: d.itens.map(it => ({ code: it.code, desc: it.desc || '(sem descrição no documento)', aplicado: !!it.aplicado, pendente: !it.aplicado,
+          qtdFmt: (d.tipo === 'RME' ? '−' : '+') + this.nf(it.qtd) + ' ' + (it.unit || ''), qtdColor: d.tipo === 'RME' ? '#B91C1C' : '#1C543A',
+          antes: it.antes != null ? this.nf(it.antes) : '', depois: it.depois != null ? this.nf(it.depois) : '',
+          register: () => this.openForm({ code: this.maskCode(it.code), name: it.desc || '', unit: this.UNITS.includes(it.unit) ? it.unit : 'UN', pendingDoc: d.key, stock: '0' }) })) }; };
+    const r = st.report;
+    const reportDocs = r ? r.processados.map(p => docView(db.docs.find(d => d.key === p.key) || p)) : [];
+    const notes = r ? r.ignorados.map(x => ({ text: '• ' + x.arquivo + ': ' + x.motivo, color: '#666666' })).concat(r.erros.map(x => ({ text: '• ' + x.arquivo + ': ' + x.motivo, color: '#B91C1C' }))) : [];
+    const files = E.driveFiles();
+    return { ...base,
+      folder: db.folder, lastSync: this.fmtTs(db.lastSync), docsCount: db.docs.length,
+      isLocal: E.isLocal(), folderInputRef: this.folderInputRef, pickFolder: this.pickFolder,
+      useSample: () => { E.clearLocalFolder(); this.setState({ report: null, folderError: '' }); },
+      folderRME: (() => { const i = E.typedInfo('RME'); return i ? { set: true, name: i.name, hint: i.pdfs + ' PDF(s) aguardando · vale até recarregar' } : { set: false, name: E.isLocal() ? 'Não selecionada' : 'Exemplo (simulada)', hint: 'Requisições de material (saídas)' }; })(),
+      folderBRM: (() => { const i = E.typedInfo('BRM'); return i ? { set: true, name: i.name, hint: i.pdfs + ' PDF(s) aguardando · vale até recarregar' } : { set: false, name: E.isLocal() ? 'Não selecionada' : 'Exemplo (simulada)', hint: 'Boletins de recebimento (entradas)' }; })(),
+      folderRefRME: this.folderRefRME, folderRefBRM: this.folderRefBRM, pickRME: this.pickRME, pickBRM: this.pickBRM,
+      clearRME: () => E.clearLocalFolder('RME'), clearBRM: () => E.clearLocalFolder('BRM'),
+      folderName: E.isLocal() ? E.localInfo().name : 'Pasta de exemplo (simulada)',
+      folderHint: E.isLocal() ? E.localInfo().pdfs + ' PDF(s) de ' + E.localInfo().total + ' arquivo(s) · a seleção vale até recarregar a página' : 'Contém os modelos de RME e BRM anexados. Selecione uma pasta do computador para testar com seus arquivos.',
+      noFiles: files.length === 0,
+      saveFolder: () => { const u = st.folderDraft.trim(); const m = /drive\.google\.com\/drive\/(?:u\/\d+\/)?folders\/([\w-]+)/.exec(u);
+        if (!m) { this.setState({ folderError: 'Cole o link de uma pasta do Google Drive.' }); return; }
+        E.setFolder({ url: u, id: m[1], name: 'Pasta ' + m[1].slice(0, 10) }); this.setState({ editingFolder: false }); this.showToast('Pasta monitorada atualizada'); },
+      ...(() => { const rv = st.review || []; const acc = rv.filter(r => r.decision === 'aceitar').length, rej = rv.filter(r => r.decision === 'recusar').length, n = acc + rej;
+        const mv = m => ({ label: (m.tipo === 'RME' ? '−' : '+') + this.nf(m.qtd) + ' ' + (m.unit || '') + ' · ' + m.doc, color: m.tipo === 'RME' ? '#B91C1C' : '#1C543A' });
+        return { reviewOpen: !!st.review, openReview: this.openReview, closeReview: () => this.setState({ review: null }), confirmReview: this.confirmReview,
+          acceptAll: () => this.setState(s => ({ review: s.review.map(r => ({ ...r, decision: 'aceitar' })) })), rejectAll: () => this.setState(s => ({ review: s.review.map(r => ({ ...r, decision: 'recusar' })) })), clearAll: () => this.setState(s => ({ review: s.review.map(r => ({ ...r, decision: '' })) })),
+          reviewSummary: acc + ' para cadastrar · ' + rej + ' para recusar · ' + (rv.length - n) + ' sem decisão',
+          reviewDisabled: !n, reviewBtnBg: n ? '#1C543A' : '#B8C7BF', reviewBtnCursor: n ? 'pointer' : 'not-allowed', reviewBtnLabel: n ? 'Confirmar (' + acc + ' cadastrar, ' + rej + ' recusar)' : 'Selecione uma decisão',
+          reviewRows: rv.map((r, i) => ({ ...r, isAccept: r.decision === 'aceitar', isReject: r.decision === 'recusar',
+            accBg: r.decision === 'aceitar' ? '#1C543A' : 'transparent', accColor: r.decision === 'aceitar' ? '#FFFFFF' : '#1C543A',
+            rejBg: r.decision === 'recusar' ? '#B91C1C' : 'transparent', rejColor: r.decision === 'recusar' ? '#FFFFFF' : '#B91C1C',
+            bg: r.decision === 'recusar' ? '#FAFAFA' : '#FFFFFF', border: r.decision === 'aceitar' ? '#B8D3C4' : r.decision === 'recusar' ? '#F5C2C2' : '#E8E8E8',
+            srcBg: r.fonte === 'BRM' ? '#EAF3EE' : '#FDF3F2', srcColor: r.fonte === 'BRM' ? '#1C543A' : '#B91C1C', hasForn: !!r.fornecedor,
+            unitOptions: this.UNITS.includes(r.unit) ? this.UNITS : [r.unit].concat(this.UNITS),
+            movs: r.movs.map(mv), saldoFmt: this.nf(r.saldoPrevisto) + ' ' + r.unit, saldoColor: r.saldoPrevisto < 0 ? '#B91C1C' : '#1D1D1B',
+            accept: () => this.setRev(i, { decision: r.decision === 'aceitar' ? '' : 'aceitar' }), reject: () => this.setRev(i, { decision: r.decision === 'recusar' ? '' : 'recusar' }),
+            setDesc: e => this.setRev(i, { desc: e.target.value }), setUnit: e => this.setRev(i, { unit: e.target.value }), setCategory: e => this.setRev(i, { category: e.target.value }),
+            setPriority: e => this.setRev(i, { priority: e.target.value }), setAvg: e => this.setRev(i, { avg: e.target.value }) })) }; })(),
+      hasPending: pend.length > 0, noPending: pend.length === 0, pendCursor: pend.length ? 'pointer' : 'default',
+      pendCount: E.pendingGrouped().length, pendColor: pend.length ? '#92400E' : '#1C543A', pendBg: pend.length ? '#FDF8EC' : '#FFFFFF', pendBorder: pend.length ? '#F3D9A4' : '#E8E8E8',
+      filesCount: files.length,
+      files: files.map(x => ({ ...x, modFmt: this.fmtTs(x.modified), label: x.computado ? 'Computado' : 'Novo', bg: x.computado ? '#F0F0F0' : '#EEF4FD', color: x.computado ? '#666666' : '#1E40AF' })),
+      hasReport: !!r && !st.syncing, reportTitle: r ? (r.processados.length ? 'Resultado da atualização: ' + r.processados.length + ' documento(s) computado(s)' : 'Nenhum documento novo — a pasta já está em dia.') : '',
+      reportDocs, reportNotes: notes,
+      itemsCount: db.items.length, rows, isEmpty: rows.length === 0,
+      ...(() => {
+        const dq = (st.docQ || '').trim().toLowerCase();
+        const all = db.docs.slice().sort((a, b) => String(b.processadoEm || '').localeCompare(String(a.processadoEm || '')));
+        const fl = all.filter(d => (st.docTipo === 'todos' || d.tipo === st.docTipo) && (!dq || [d.key, d.tipo, d.setor, d.fornecedor, d.notaFiscal, d.status, d.data].concat(d.itens.map(i => i.code + ' ' + (i.desc || ''))).join(' ').toLowerCase().includes(dq)));
+        const PS = (window.DAConfig ? +window.DAConfig.get('almox.pageDocs') : 10), pages = Math.max(1, Math.ceil(fl.length / PS)), pg = Math.min(st.docPage, pages - 1);
+        const nums = []; for (let k = Math.max(0, pg - 2); k <= Math.min(pages - 1, pg + 2); k++) nums.push({ n: k + 1, current: k === pg, bg: k === pg ? '#1C543A' : '#FFFFFF', color: k === pg ? '#FFFFFF' : '#1D1D1B', border: k === pg ? '#1C543A' : '#E0E0E0', go: () => this.setState({ docPage: k }) });
+        return { docs: fl.slice(pg * PS, pg * PS + PS).map(docView), docsTotal: all.length, docsEmpty: fl.length === 0, docQ: st.docQ, docTipo: st.docTipo,
+          setDocQ: ev => this.setState({ docQ: ev.target.value, docPage: 0 }), setDocTipo: ev => this.setState({ docTipo: ev.target.value, docPage: 0 }),
+          docPager: { show: pages > 1, nums, label: fl.length ? 'Mostrando ' + (pg * PS + 1) + '–' + Math.min(fl.length, pg * PS + PS) + ' de ' + fl.length : '',
+            prevDisabled: pg === 0, nextDisabled: pg >= pages - 1, prevColor: pg === 0 ? '#BBBBBB' : '#1C543A', nextColor: pg >= pages - 1 ? '#BBBBBB' : '#1C543A',
+            prev: () => this.setState({ docPage: Math.max(0, pg - 1) }), next: () => this.setState({ docPage: Math.min(pages - 1, pg + 1) }) } };
+      })()
+    };
+  }
+}
+</script>
+</body>
+</html>

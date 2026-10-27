@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <script src="./theme.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="design_doc_mode" content="canvas">
+  <title>Análise de Integração - React Codebase</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background-color: #FAFAFA; color: #1D1D1B; }
+  </style>
+</helmet>
+
+<div style="min-height: 100vh; padding: 40px 20px; background-color: #FAFAFA;">
+  <div style="max-width: 1400px; margin: 0 auto;">
+    <h1 style="font-size: 28px; font-weight: 700; margin-bottom: 8px;">Análise de Integração: React Codebase vs Design Components</h1>
+    <p style="font-size: 14px; color: #999999; margin-bottom: 32px;">Identificação de elementos reutilizáveis e padrões de implementação</p>
+
+    <!-- Seção 1: Estrutura Geral -->
+    <section style="background-color: #FFFFFF; padding: 24px; border-radius: 8px; border: 1px solid #E8E8E8; margin-bottom: 20px;">
+      <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid #1C543A;">1. Estrutura & Arquitetura da Aplicação React</h2>
+      
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+        <div style="padding: 16px; background-color: #F0FDF4; border-radius: 6px; border: 1px solid #86EFAC;">
+          <p style="font-size: 12px; font-weight: 600; color: #166534; margin-bottom: 12px;">✓ PADRÃO UTILIZADO</p>
+          <ul style="font-size: 11px; color: #166534; line-height: 2;">
+            <li>• State management com React.useState()</li>
+            <li>• useMemo() para cálculos de métricas</li>
+            <li>• Componentes funcionais (moderno)</li>
+            <li>• Props passagem de dados</li>
+            <li>• Callbacks para interações</li>
+          </ul>
+        </div>
+        <div style="padding: 16px; background-color: #FEF2F2; border-radius: 6px; border: 1px solid #FCC;">
+          <p style="font-size: 12px; font-weight: 600; color: #C33; margin-bottom: 12px;">⚠ DIFERENÇAS DO DESIGN COMPONENT</p>
+          <ul style="font-size: 11px; color: #C33; line-height: 2;">
+            <li>• React JSX vs HTML template literal</li>
+            <li>• Tailwind CSS vs inline styles</li>
+            <li>• Lucide icons vs emoji/SVG</li>
+            <li>• TypeScript opcional vs plain JS</li>
+            <li>• Build step necessário vs bundler-less</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Seção 2: Dados -->
+    <section style="background-color: #FFFFFF; padding: 24px; border-radius: 8px; border: 1px solid #E8E8E8; margin-bottom: 20px;">
+      <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid #1C543A;">2. Dados Reais - INITIAL_PRODUCTS (Planilha de Consumo)</h2>
+      
+      <p style="font-size: 12px; color: #666666; margin-bottom: 12px;">A aplicação React integra dados reais da planilha de consumo v.2.0 com 10 itens principais:</p>
+      
+      <div style="background-color: #F9F9F9; padding: 12px; border-radius: 6px; border: 1px solid #E8E8E8; font-size: 11px; font-family: monospace; color: #333333; line-height: 1.6; overflow-x: auto;">
+        <p style="margin-bottom: 8px;"><strong>Exemplo de item:</strong></p>
+        <p>{ code: "1 50 05 0024 8", name: "DESINFETANTE PARA USO PROFISSIONAL - 5L",</p>
+        <p>&nbsp;&nbsp;priority: "Alta", frequency: "Semanal", stock: 52,</p>
+        <p>&nbsp;&nbsp;avgConsumption: 10.308, category: "Higiene", verify: true }</p>
+      </div>
+
+      <div style="margin-top: 16px; padding: 12px; background-color: #F0FDF4; border: 1px solid #86EFAC; border-radius: 6px;">
+        <p style="font-size: 11px; color: #166534; font-weight: 600;">✓ PRONTO PARA REUTILIZAR</p>
+        <p style="font-size: 11px; color: #166534; margin-top: 4px;">Os dados podem ser copiados diretamente para o estado das Design Components (ComprasModule, Dashboard analytics, etc.)</p>
+      </div>
+    </section>
+
+    <!-- Seção 3: Módulos & Telas -->
+    <section style="background-color: #FFFFFF; padding: 24px; border-radius: 8px; border: 1px solid #E8E8E8; margin-bottom: 20px;">
+      <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid #1C543A;">3. Telas Implementadas no React</h2>
+      
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px;">
+        <!-- Dashboard -->
+        <div style="padding: 14px; background-color: #F9F9F9; border-radius: 6px; border: 1px solid #E8E8E8;">
+          <p style="font-size: 12px; font-weight: 600; color: #1C543A; margin-bottom: 8px;">📊 DASHBOARD (Painel Principal)</p>
+          <ul style="font-size: 11px; color: #666666; line-height: 1.8;">
+            <li>✓ 3 KPI cards (Itens, Críticos, Auditorias)</li>
+            <li>✓ Gráfico SVG de fluxo mensal</li>
+            <li>✓ Indicadores com badges coloridas</li>
+            <li>✓ Feed de alertas flutuantes (3 items mock)</li>
+            <li>⚠ Dados hardcoded, precisa data API real</li>
+          </ul>
+        </div>
+
+        <!-- Inventário -->
+        <div style="padding: 14px; background-color: #F9F9F9; border-radius: 6px; border: 1px solid #E8E8E8;">
+          <p style="font-size: 12px; font-weight: 600; color: #1C543A; margin-bottom: 8px;">📦 INVENTÁRIO / ALMOXARIFADO</p>
+          <ul style="font-size: 11px; color: #666666; line-height: 1.8;">
+            <li>✓ Geração de amostra inteligente</li>
+            <li>✓ Seletor de tamanho (range slider)</li>
+            <li>✓ Simulador de scanner de código</li>
+            <li>✓ Tabela completa dos 10 produtos reais</li>
+            <li>✓ Cálculo de divergência automático</li>
+          </ul>
+        </div>
+
+        <!-- Usuários -->
+        <div style="padding: 14px; background-color: #F9F9F9; border-radius: 6px; border: 1px solid #E8E8E8;">
+          <p style="font-size: 12px; font-weight: 600; color: #1C543A; margin-bottom: 8px;">👥 RBAC - USUÁRIOS & PERMISSÕES</p>
+          <ul style="font-size: 11px; color: #666666; line-height: 1.8;">
+            <li>✓ Matriz de 3 usuários com roles</li>
+            <li>✓ 4 módulos com toggle switches</li>
+            <li>✓ Cor Verde Câmara ao ativar</li>
+            <li>✓ Animação suave (duration-300)</li>
+            <li>⚠ Sem persistência em backend ainda</li>
+          </ul>
+        </div>
+
+        <!-- Perfil -->
+        <div style="padding: 14px; background-color: #F9F9F9; border-radius: 6px; border: 1px solid #E8E8E8;">
+          <p style="font-size: 12px; font-weight: 600; color: #1C543A; margin-bottom: 8px;">👤 PERFIL - MEUS DADOS</p>
+          <ul style="font-size: 11px; color: #666666; line-height: 1.8;">
+            <li>✓ Dados funcionais read-only</li>
+            <li>✓ Campos de contato editáveis</li>
+            <li>✓ Máscara de telefone dinâmica</li>
+            <li>✓ Date input nativo</li>
+            <li>✓ Separação visual clara</li>
+          </ul>
+        </div>
+
+        <!-- Sidebar -->
+        <div style="padding: 14px; background-color: #F9F9F9; border-radius: 6px; border: 1px solid #E8E8E8;">
+          <p style="font-size: 12px; font-weight: 600; color: #1C543A; margin-bottom: 8px;">🎨 SIDEBAR NAVIGATION</p>
+          <ul style="font-size: 11px; color: #666666; line-height: 1.8;">
+            <li>✓ Verde Câmara (#1C543A) fundo</li>
+            <li>✓ Menu responsivo mobile hamburger</li>
+            <li>✓ Ícones Lucide integrados</li>
+            <li>✓ Card de usuário na base</li>
+            <li>⚠ Requer adaptação para DC</li>
+          </ul>
+        </div>
+
+        <!-- Notificações -->
+        <div style="padding: 14px; background-color: #F9F9F9; border-radius: 6px; border: 1px solid #E8E8E8;">
+          <p style="font-size: 12px; font-weight: 600; color: #1C543A; margin-bottom: 8px;">🔔 TOAST NOTIFICATIONS</p>
+          <ul style="font-size: 11px; color: #666666; line-height: 1.8;">
+            <li>✓ Fixed top-right positioning</li>
+            <li>✓ 4 tipos: success, warning, info, danger</li>
+            <li>✓ Auto-dismiss após 4s</li>
+            <li>✓ Animação bounce</li>
+            <li>✓ Icons com cores semânticas</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Seção 4: Componentes Reutilizáveis -->
+    <section style="background-color: #FFFFFF; padding: 24px; border-radius: 8px; border: 1px solid #E8E8E8; margin-bottom: 20px;">
+      <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid #1C543A;">4. Padrões de Componentes Reutilizáveis</h2>
+      
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+        <!-- Card Pattern -->
+        <div style="padding: 14px; background-color: #F9F9F9; border-radius: 6px; border: 1px solid #E8E8E8;">
+          <p style="font-size: 12px; font-weight: 600; margin-bottom: 8px;">Card Pattern</p>
+          <p style="font-size: 11px; color: #666666; line-height: 1.6;">
+            <strong>React:</strong> className="bg-white p-6 rounded-2xl border border-gray-200/80 shadow-sm hover:shadow-md"<br/>
+            <strong>DC:</strong> Usar inline styles equivalentes com border-radius 8px
+          </p>
+        </div>
+
+        <!-- Toggle Switch -->
+        <div style="padding: 14px; background-color: #F9F9F9; border-radius: 6px; border: 1px solid #E8E8E8;">
+          <p style="font-size: 12px; font-weight: 600; margin-bottom: 8px;">Toggle Switch</p>
+          <p style="font-size: 11px; color: #666666; line-height: 1.6;">
+            <strong>Implementação:</strong> Button com width 44px, altura 24px, bg dinâmica, dot animation transform
+          </p>
+        </div>
+
+        <!-- Badge/Label -->
+        <div style="padding: 14px; background-color: #F9F9F9; border-radius: 6px; border: 1px solid #E8E8E8;">
+          <p style="font-size: 12px; font-weight: 600; margin-bottom: 8px;">Badge/Label</p>
+          <p style="font-size: 11px; color: #666666; line-height: 1.6;">
+            Usado extensamente: priority badges, status, role indicators — cores semânticas (Alta=rose, Baixa=gray)
+          </p>
+        </div>
+
+        <!-- Grid Responsivo -->
+        <div style="padding: 14px; background-color: #F9F9F9; border-radius: 6px; border: 1px solid #E8E8E8;">
+          <p style="font-size: 12px; font-weight: 600; margin-bottom: 8px;">Grid Responsivo</p>
+          <p style="font-size: 11px; color: #666666; line-height: 1.6;">
+            grid-cols-1 sm:grid-cols-2 lg:grid-cols-3+ — padrão Tailwind com gap-4 ou gap-6
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Seção 5: Lógica de Negócio -->
+    <section style="background-color: #FFFFFF; padding: 24px; border-radius: 8px; border: 1px solid #E8E8E8; margin-bottom: 20px;">
+      <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid #1C543A;">5. Lógica de Negócio Implementada</h2>
+      
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        <div style="padding: 14px; background-color: #F0FDF4; border-radius: 6px; border: 1px solid #86EFAC;">
+          <p style="font-size: 11px; font-weight: 600; color: #166534; margin-bottom: 8px;">✓ PRONTO PARA PORTAR</p>
+          <ul style="font-size: 10px; color: #166534; line-height: 1.8;">
+            <li>generateSamplingScale() — filtro e embaralhamento</li>
+            <li>handleCountChange() — cálculo divergência</li>
+            <li>formatPhone() — máscara telefone</li>
+            <li>handleTogglePermission() — RBAC toggle</li>
+            <li>useMemo stats — cálculos KPI</li>
+          </ul>
+        </div>
+
+        <div style="padding: 14px; background-color: #FEF2F2; border-radius: 6px; border: 1px solid #FCC;">
+          <p style="font-size: 11px; font-weight: 600; color: #C33; margin-bottom: 8px;">⚠ REQUER ADAPTAÇÃO</p>
+          <ul style="font-size: 10px; color: #C33; line-height: 1.8;">
+            <li>simulador de scanner → validator simples</li>
+            <li>triggerToast() → sistema de notificação DC</li>
+            <li>state management → DC renderVals()</li>
+            <li>onClick handlers → event listeners</li>
+            <li>Tailwind classes → inline styles</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Seção 6: Paleta & Tokens -->
+    <section style="background-color: #FFFFFF; padding: 24px; border-radius: 8px; border: 1px solid #E8E8E8; margin-bottom: 20px;">
+      <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid #1C543A;">6. Design Tokens Utilizados</h2>
+      
+      <table style="width: 100%; font-size: 11px; border-collapse: collapse;">
+        <thead style="background-color: #F9F9F9; border-bottom: 1px solid #E8E8E8;">
+          <tr>
+            <th style="padding: 8px; text-align: left; font-weight: 600; color: #666666;">Tokens React (Tailwind)</th>
+            <th style="padding: 8px; text-align: left; font-weight: 600; color: #666666;">Valor</th>
+            <th style="padding: 8px; text-align: left; font-weight: 600; color: #666666;">DC Equivalente</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom: 1px solid #E8E8E8;">
+            <td style="padding: 8px;">bg-[#1C543A]</td>
+            <td style="padding: 8px; font-family: monospace;">#1C543A</td>
+            <td style="padding: 8px;">background-color: #1C543A ✓</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #E8E8E8;">
+            <td style="padding: 8px;">rounded-2xl</td>
+            <td style="padding: 8px;">border-radius: 16px</td>
+            <td style="padding: 8px;">border-radius: 8px (spec)</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #E8E8E8;">
+            <td style="padding: 8px;">shadow-sm / shadow-md</td>
+            <td style="padding: 8px;">0 1-2px / 0 4-12px</td>
+            <td style="padding: 8px;">box-shadow: 0 2px 4px rgba(...)</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #E8E8E8;">
+            <td style="padding: 8px;">gap-4 / gap-6</td>
+            <td style="padding: 8px;">16px / 24px</td>
+            <td style="padding: 8px;">gap: 16px; no Tailwind</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px;">text-xs / text-sm</td>
+            <td style="padding: 8px;">12px / 14px</td>
+            <td style="padding: 8px;">font-size: 12px/13px ✓</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Seção 7: Recomendações de Integração -->
+    <section style="background-color: #F0FDF4; border: 1px solid #86EFAC; padding: 24px; border-radius: 8px;">
+      <h2 style="font-size: 16px; font-weight: 600; color: #166534; margin-bottom: 16px;">✓ Recomendações de Integração</h2>
+      
+      <ol style="font-size: 12px; color: #166534; line-height: 2;">
+        <li><strong>Copiar dados INITIAL_PRODUCTS:</strong> Já testados e validados — usar como state do ComprasModule e Dashboard</li>
+        <li><strong>Portar lógica de negócio:</strong> generateSamplingScale(), handleCountChange(), formatPhone() → convertê-los para funções de classe DCLogic</li>
+        <li><strong>Reutilizar padrão sidebar:</strong> Layout 2-coluna pode ser adaptado (mas DC preferem layout simples, então apenas referência)</li>
+        <li><strong>Cores semânticas:</strong> Amber, Rose, Sky, Emerald já estão alinhadas com spec — manter padrão</li>
+        <li><strong>Animações:</strong> React usa transition-all duration-300 — DC usa CSS @keyframes (ambos funcionam, DC preferem for streaming)</li>
+        <li><strong>Sistema de notificações:</strong> Toast já existe em ambos — padronizar mensagens e tempos de auto-dismiss (4-5s recomendado)</li>
+        <li><strong>Backend API:</strong> Código React é simulado — definir contratos de API (endpoints, payloads) para próxima fase</li>
+      </ol>
+    </section>
+
+    <!-- Seção 8: Matriz de Cobertura -->
+    <section style="background-color: #FFFFFF; padding: 24px; border-radius: 8px; border: 1px solid #E8E8E8;">
+      <h2 style="font-size: 16px; font-weight: 600; color: #1D1D1B; margin-bottom: 16px;">Matriz de Cobertura: React vs Design Components</h2>
+      
+      <table style="width: 100%; font-size: 11px; border-collapse: collapse;">
+        <thead style="background-color: #F9F9F9; border-bottom: 2px solid #1C543A;">
+          <tr>
+            <th style="padding: 10px; text-align: left; font-weight: 600;">Funcionalidade</th>
+            <th style="padding: 10px; text-align: center; font-weight: 600;">React</th>
+            <th style="padding: 10px; text-align: center; font-weight: 600;">DC</th>
+            <th style="padding: 10px; text-align: left; font-weight: 600;">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom: 1px solid #E8E8E8;">
+            <td style="padding: 10px;">Login / Autenticação</td>
+            <td style="padding: 10px; text-align: center;">—</td>
+            <td style="padding: 10px; text-align: center;">✓</td>
+            <td style="padding: 10px;">DC completo, React não tem</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #E8E8E8;">
+            <td style="padding: 10px;">Dashboard / KPIs</td>
+            <td style="padding: 10px; text-align: center;">✓</td>
+            <td style="padding: 10px; text-align: center;">✓</td>
+            <td style="padding: 10px;">Ambos têm — dados podem ser sincronizados</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #E8E8E8;">
+            <td style="padding: 10px;">Almoxarifado / Inventário</td>
+            <td style="padding: 10px; text-align: center;">✓ Completo</td>
+            <td style="padding: 10px; text-align: center;">—</td>
+            <td style="padding: 10px;">React é a referência — portar toda lógica</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #E8E8E8;">
+            <td style="padding: 10px;">RBAC / Usuários</td>
+            <td style="padding: 10px; text-align: center;">✓</td>
+            <td style="padding: 10px; text-align: center;">✓</td>
+            <td style="padding: 10px;">Ambos têm — matriz RBAC 3 usuários</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #E8E8E8;">
+            <td style="padding: 10px;">Perfil / Meus Dados</td>
+            <td style="padding: 10px; text-align: center;">✓</td>
+            <td style="padding: 10px; text-align: center;">✓</td>
+            <td style="padding: 10px;">Ambos implementados — dados sincronizados</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #E8E8E8;">
+            <td style="padding: 10px;">RH / Compras Modules</td>
+            <td style="padding: 10px; text-align: center;">—</td>
+            <td style="padding: 10px; text-align: center;">✓</td>
+            <td style="padding: 10px;">DC tem estrutura — React não detalhou</td>
+          </tr>
+          <tr>
+            <td style="padding: 10px;">Protocolo Module</td>
+            <td style="padding: 10px; text-align: center;">—</td>
+            <td style="padding: 10px; text-align: center;">—</td>
+            <td style="padding: 10px;">Pendente em ambas as implementações</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: &quot;100%&quot;, &quot;height&quot;: &quot;100%&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+
+</script>
+</body>
+</html>

@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <script src="./theme.js"></script>
+  <script src="./session.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema DA - Módulo de Protocolo</title>
+  <script src="./config.js"></script>
+  <script src="./liccont.js"></script>
+  <script src="./calendar-feed.js"></script>
+  <script src="./api.js"></script>
+  <script src="./sectors.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #FAFAFA;
+      color: #1D1D1B;
+    }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</helmet>
+
+<div style="display: flex; min-height: 100vh; background-color: #FFFFFF; position: relative;">
+  <sc-if value="{{ navOverlayVisible }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ navClose }}" style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); z-index: 40;"></div>
+  </sc-if>
+  <aside style="background-color: #1C543A; color: #FFFFFF; width: 250px; flex-shrink: 0; display: flex; flex-direction: column; padding: 22px 16px; gap: 22px; position: {{ navSidebarPosition }}; top: 0; left: 0; height: 100vh; overflow-y: auto; z-index: 50; transform: {{ navSidebarTransform }}; transition: transform 0.3s cubic-bezier(0.34, 1.25, 0.64, 1);">
+      <a href="Dashboard.dc.html" title="Voltar ao Painel de Controle" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: #FFFFFF; padding: 0 4px;">
+        <div style="width: 36px; height: 36px; background-color: #FFFFFF; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; color: #1C543A; flex-shrink: 0;">DA</div>
+        <div>
+          <p style="font-size: 12.5px; font-weight: 700; line-height: 1.3; color: #FFFFFF;">CÂMARA MUNICIPAL</p>
+          <p style="font-size: 9.5px; letter-spacing: 0.4px; color: rgba(255,255,255,0.65); text-transform: uppercase;">Diretoria Administrativa</p>
+        </div>
+      </a>
+      <nav style="display: flex; flex-direction: column; gap: 2px;">
+        <p style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: rgba(255,255,255,0.5); padding: 0 12px; margin-bottom: 6px;">Sistemas &amp; Gestão</p>
+        <a href="Dashboard.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 13px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">▦</span>Painel de Controle</a>
+        <a href="AlmoxarifadoAmostragem.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 13px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">📦</span>Almoxarifado</a>
+        <a href="ComprasModule.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 13px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">🛒</span>Compras &amp; Licitações</a>
+        <a href="MocoesHomenagens.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 13px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">🎗</span>Moções &amp; Homenagens</a>
+        <a href="PatrimonioModule.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 13px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">🏛</span>Patrimônio</a>
+      </nav>
+      <nav style="display: flex; flex-direction: column; gap: 2px;">
+        <p style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: rgba(255,255,255,0.5); padding: 0 12px; margin-bottom: 6px;">Módulos Complementares</p>
+        <a href="AnalyticsModule.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">📈</span>Analytics &amp; Relatórios</a>
+        <a href="RHModule.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">🧑‍💼</span>Gestão de Pessoal</a>
+        <a href="Legislacoes.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">⚖</span>Legislações</a>
+        <a href="AuditLog.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">🛡</span>Log e Auditoria</a>
+        <a href="Configuracoes.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">⚙</span>Configurações do Sistema</a>
+      <a href="ProtocoloModule.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; background-color: #FFFFFF; color: #1C543A; font-weight: 700;"><span style="width: 18px; text-align: center; flex-shrink: 0;">📋</span>Protocolo</a>
+      </nav>
+      <div style="margin-top: auto; display: flex; flex-direction: column; gap: 4px; padding-top: 8px;">
+        <a href="UserProfile.dc.html" style="display: flex; align-items: center; gap: 10px; background-color: rgba(255,255,255,0.08); border-radius: 10px; padding: 12px; text-decoration: none; color: #FFFFFF;" style-hover="background-color: rgba(255,255,255,0.14);">
+          <div style="width: 34px; height: 34px; border-radius: 50%; background-color: #F0B429; color: #1C543A; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; flex-shrink: 0;">RA</div>
+          <div style="min-width: 0;">
+            <p style="font-size: 12.5px; font-weight: 700; color: #FFFFFF;">Dr. Roberto Alencar</p>
+            <p style="font-size: 10.5px; color: rgba(255,255,255,0.6);">DA-2026-948 · Diretoria</p>
+          </div>
+        </a>
+        <div role="group" aria-label="Aparência" style="display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 40px; padding: 0 12px;">
+          <span style="font-size: 11px; font-weight: 600; letter-spacing: 0.3px; color: rgba(255,255,255,0.6);">Aparência</span>
+          <div style="display: flex; padding: 2px; border-radius: 999px; background-color: rgba(0,0,0,0.22);">
+            <button onClick="{{ navThemeLight }}" aria-pressed="{{ navThemeIsLight }}" aria-label="Modo padrão" title="Modo padrão" style="width: 30px; height: 26px; border: none; border-radius: 999px; background-color: {{ navThemeLightBg }}; color: {{ navThemeLightFg }}; font-size: 13px; line-height: 1; cursor: pointer; transition: background-color 0.2s;">☀</button>
+            <button onClick="{{ navThemeDarkSet }}" aria-pressed="{{ navThemeDark }}" aria-label="Modo escuro" title="Modo escuro" style="width: 30px; height: 26px; border: none; border-radius: 999px; background-color: {{ navThemeDarkBg }}; color: {{ navThemeDarkFg }}; font-size: 13px; line-height: 1; cursor: pointer; transition: background-color 0.2s;">☾</button>
+          </div>
+        </div>
+        <a href="Login.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; color: rgba(255,255,255,0.7); text-decoration: none; font-size: 12.5px; font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1); color: #FFFFFF;"><span style="width: 18px; text-align: center; flex-shrink: 0;">⎋</span>Sair do sistema</a>
+      </div>
+    </aside>
+  <div style="flex: 1; min-width: 0; display: flex; flex-direction: column;">
+    <div style="position: sticky; top: 0; z-index: 30; background-color: rgba(255,255,255,0.96); backdrop-filter: blur(6px); border-bottom: 1px solid #E8E8E8; min-height: 64px; padding: 10px {{ navGutter }}; display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+      <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
+        <sc-if value="{{ navIsMobile }}" hint-placeholder-val="{{ false }}">
+          <button onClick="{{ navOpen }}" aria-label="Abrir menu" style="width: 44px; height: 44px; border-radius: 8px; border: 1px solid #E0E0E0; background-color: #FFFFFF; font-size: 18px; color: #1D1D1B; cursor: pointer; flex-shrink: 0;">☰</button>
+          <a href="Dashboard.dc.html" title="Painel de Controle" style="width: 36px; height: 36px; background-color: #1C543A; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 12px; color: #FFFFFF; text-decoration: none; flex-shrink: 0;">DA</a>
+        </sc-if>
+        <sc-if value="{{ navShowBreadcrumb }}" hint-placeholder-val="{{ true }}">
+          <div style="display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: #666666; white-space: nowrap;">
+            <a href="Dashboard.dc.html" style="color: #666666; text-decoration: none;" style-hover="color: #1C543A;">Painel de Controle</a>
+            <span style="color: #CCCCCC;">›</span>
+            <span style="color: #1D1D1B; font-weight: 600;">Protocolo</span>
+          </div>
+        </sc-if>
+      </div>
+      <div style="display: flex; align-items: center; gap: 10px; flex: 1; justify-content: flex-end; min-width: 0;">
+        <div style="position: relative; flex: 1; max-width: 340px; min-width: 0;">
+          <input type="search" placeholder="Buscar módulos e telas…" aria-label="Busca global" value="{{ navSearch }}" onInput="{{ navSearchInput }}" onFocus="{{ navSearchFocus }}" onBlur="{{ navSearchBlur }}" onKeyDown="{{ navSearchKey }}" style="width: 100%; height: 44px; padding: 0 12px 0 34px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; color: #1D1D1B; background-color: #F9F9F9;" style-focus="border-color: #1C543A; background-color: #FFFFFF; outline: none;"/>
+          <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 14px; color: #999999; pointer-events: none;">⌕</span>
+          <sc-if value="{{ navSearchOpen }}" hint-placeholder-val="{{ false }}">
+            <div style="position: absolute; top: 50px; right: 0; left: 0; min-width: 240px; background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 8px; box-shadow: 0 12px 32px rgba(0,0,0,0.12); padding: 6px; z-index: 60;">
+              <sc-for list="{{ navSearchResults }}" as="r" hint-placeholder-count="3">
+                <a href="{{ r.href }}" onMouseDown="{{ r.go }}" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 10px; border-radius: 6px; text-decoration: none; color: #1D1D1B; font-size: 13px;" style-hover="background-color: #F2F7F4;">
+                  <span style="width: 20px; text-align: center; flex-shrink: 0;">{{ r.icon }}</span>
+                  <span style="flex: 1; font-weight: 600;">{{ r.label }}</span>
+                  <span style="font-size: 11px; color: #999999;">{{ r.group }}</span>
+                </a>
+              </sc-for>
+              <sc-if value="{{ navSearchEmpty }}" hint-placeholder-val="{{ false }}">
+                <p style="padding: 12px 10px; font-size: 12.5px; color: #999999;">Nenhum resultado para “{{ navSearch }}”</p>
+              </sc-if>
+            </div>
+          </sc-if>
+        </div>
+        <a href="NotificationsModule.dc.html" title="Notificações" style="position: relative; width: 44px; height: 44px; border-radius: 8px; border: 1px solid #E0E0E0; background-color: #FFFFFF; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 16px; flex-shrink: 0;" style-hover="border-color: #1C543A;">🔔<span style="position: absolute; top: 9px; right: 10px; width: 7px; height: 7px; border-radius: 50%; background-color: #DC2626; border: 1.5px solid #FFFFFF;"></span></a>
+      </div>
+    </div>
+    <div style="padding: {{ navHeaderPad }}; display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+      <div>
+        <p style="font-size: 11px; font-weight: 700; letter-spacing: 0.6px; color: #1C543A; text-transform: uppercase;">Sistema de Gestão Integrada &nbsp;•&nbsp; Protocolo</p>
+        <h1 style="font-size: {{ navTitleSize }}; font-weight: 800; color: #1D1D1B; margin-top: 6px;">Protocolo</h1>
+      </div>
+    </div>
+
+  <!-- Tab Navigation -->
+  <div style="background-color: #FFFFFF; border-bottom: 1px solid #E8E8E8; padding: 0 {{ navGutter }}; display: flex; gap: 24px; overflow-x: auto; overflow-x: auto;">
+    <button onClick="{{ tab_documentos_go }}" style="padding: 16px 0; background: none; border: none; font-size: 13px; font-weight: 600; color: {{ tab_documentos_color }}; cursor: pointer; border-bottom: 2px solid {{ tab_documentos_border }}; transition: all 0.2s ease; white-space: nowrap;">
+      Documentos
+    </button>
+    <button onClick="{{ tab_processos_go }}" style="padding: 16px 0; background: none; border: none; font-size: 13px; font-weight: 600; color: {{ tab_processos_color }}; cursor: pointer; border-bottom: 2px solid {{ tab_processos_border }}; transition: all 0.2s ease; white-space: nowrap;">
+      Processos
+    </button>
+    <button onClick="{{ tab_fluxo_go }}" style="padding: 16px 0; background: none; border: none; font-size: 13px; font-weight: 600; color: {{ tab_fluxo_color }}; cursor: pointer; border-bottom: 2px solid {{ tab_fluxo_border }}; transition: all 0.2s ease; white-space: nowrap;">
+      Fluxo
+    </button>
+    <button onClick="{{ tab_calendario_go }}" style="padding: 16px 0; background: none; border: none; font-size: 13px; font-weight: 600; color: {{ tab_calendario_color }}; cursor: pointer; border-bottom: 2px solid {{ tab_calendario_border }}; transition: all 0.2s ease; white-space: nowrap;">
+      📅 Calendário Integrado
+    </button>
+  </div>
+
+  <main style="flex: 1; width: 100%; padding: 24px {{ navGutter }} 40px;">
+    <!-- Documentos Tab -->
+    <sc-if value="{{ isDocumentosTab }}" hint-placeholder-val="{{ true }}">
+      <div style="animation: fadeInUp 0.4s ease-out;">
+        <div style="background-color: #FFFFFF; padding: 16px; border-radius: 8px; border: 1px solid #E8E8E8; margin-bottom: 16px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
+          <input type="text" placeholder="🔍 Buscar documento..." value="{{ docSearch }}" onInput="{{ handleDocSearch }}" style="flex: 1; min-width: 180px; padding: 8px 12px; border: 1px solid #E8E8E8; border-radius: 6px; font-size: 13px;" style-focus="border-color: #1C543A; outline: none;"/>
+          <select value="{{ docStatusFilter }}" onChange="{{ handleDocStatusFilter }}" style="padding: 8px 12px; border: 1px solid #E8E8E8; border-radius: 6px; font-size: 13px; background-color: #FFFFFF; cursor: pointer;">
+            <option value="todos">Todos os Status</option>
+            <option value="Registrado">Registrado</option>
+            <option value="Em Processamento">Em Processamento</option>
+            <option value="Finalizado">Finalizado</option>
+            <option value="Arquivado">Arquivado</option>
+          </select>
+          <span style="font-size: 12px; color: #999999;">{{ docShown }} de {{ docTotal }}</span>
+          <button onClick="{{ openNewDoc }}" style="padding: 10px 16px; background-color: #1C543A; color: #FFFFFF; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer;" style-hover="background-color: #164530;">+ Protocolar Documento</button>
+        </div>
+
+        <div style="background-color: #FFFFFF; border-radius: 8px; border: 1px solid #E8E8E8; overflow-x: auto;">
+          <div style="min-width: 640px;">
+          <div style="padding: 16px 20px; border-bottom: 1px solid #E8E8E8; display: grid; grid-template-columns: 0.8fr 1.5fr 1fr 0.8fr 0.9fr 1fr; gap: 12px; background-color: #F9F9F9; font-weight: 600; font-size: 12px; color: #999999; text-transform: uppercase; letter-spacing: 0.5px;">
+            <div>Protocolo</div>
+            <div>Assunto</div>
+            <div>Interessado</div>
+            <div>Data</div>
+            <div>Status</div>
+            <div>Ações</div>
+          </div>
+
+          <sc-for list="{{ documentos }}" as="doc" hint-placeholder-count="5">
+            <div style="padding: 16px 20px; border-bottom: 1px solid #E8E8E8; display: grid; grid-template-columns: 0.8fr 1.5fr 1fr 0.8fr 0.9fr 1fr; gap: 12px; align-items: center;" style-hover="background-color: #F5F5F5;">
+              <button onClick="{{ doc.edit }}" title="Ver e editar documento" style="background: none; border: none; padding: 0; text-align: left; font-size: 13px; font-weight: 600; color: #1C543A; cursor: pointer;" style-hover="text-decoration: underline;">{{ doc.protocolo }}</button>
+              <p style="font-size: 13px; color: #1D1D1B;">{{ doc.assunto }}</p>
+              <p style="font-size: 12px; color: #666666;">{{ doc.interessado }}</p>
+              <p style="font-size: 12px; color: #666666;">{{ doc.data }}</p>
+              <span style="padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 600; {{ doc.statusStyle }}">
+                {{ doc.status }}
+              </span>
+              <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                <sc-if value="{{ doc.canBack }}" hint-placeholder-val="{{ false }}">
+                  <button onClick="{{ doc.back }}" title="Voltar para {{ doc.prevLabel }}" style="padding: 6px 10px; background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 4px; font-size: 11px; font-weight: 600; color: #666666; cursor: pointer; white-space: nowrap;" style-hover="background-color: #F5F5F5; color: #1D1D1B;">← Voltar</button>
+                </sc-if>
+                <sc-if value="{{ doc.canAdvance }}" hint-placeholder-val="{{ false }}">
+                  <button onClick="{{ doc.advance }}" style="padding: 6px 10px; background-color: #F5F5F5; border: 1px solid #E8E8E8; border-radius: 4px; font-size: 11px; font-weight: 600; color: #1C543A; cursor: pointer; white-space: nowrap;" style-hover="background-color: #EAF3EE;">{{ doc.nextLabel }} →</button>
+                </sc-if>
+              </div>
+            </div>
+          </sc-for>
+          <sc-if value="{{ docEmpty }}" hint-placeholder-val="{{ false }}">
+            <div style="padding: 40px 20px; text-align: center; color: #999999; font-size: 13px;">Nenhum documento encontrado com os filtros atuais.</div>
+          </sc-if>
+        </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- Processos Tab -->
+    <sc-if value="{{ isProcessosTab }}" hint-placeholder-val="{{ false }}">
+      <div style="animation: fadeInUp 0.4s ease-out;">
+        <div style="margin-bottom: 16px;">
+          <button onClick="{{ openNewProc }}" style="padding: 10px 16px; background-color: #1C543A; color: #FFFFFF; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer;" style-hover="background-color: #164530;">
+            + Novo Processo
+          </button>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;">
+          <sc-for list="{{ processos }}" as="proc" hint-placeholder-count="4">
+            <div style="background-color: #FFFFFF; padding: 16px; border-radius: 8px; border: 1px solid #E8E8E8; transition: all 0.2s ease;" style-hover="box-shadow: 0 4px 12px rgba(0,0,0,0.1); transform: translateY(-2px);">
+              <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                <button onClick="{{ proc.edit }}" title="Ver e editar processo" style="background: none; border: none; padding: 0; text-align: left; font-size: 13px; font-weight: 600; color: #1C543A; cursor: pointer;" style-hover="text-decoration: underline;">{{ proc.id }}</button>
+                <span style="font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 3px; {{ proc.priorityStyle }}">
+                  {{ proc.priority }}
+                </span>
+              </div>
+              <p style="font-size: 13px; font-weight: 600; color: #1D1D1B; margin-bottom: 8px;">{{ proc.titulo }}</p>
+              <p style="font-size: 12px; color: #666666; margin-bottom: 12px; line-height: 1.5;">{{ proc.descricao }}</p>
+              
+              <!-- Progress Bar -->
+              <div style="margin-bottom: 12px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                  <span style="font-size: 11px; color: #999999; font-weight: 600;">Progresso</span>
+                  <span style="font-size: 11px; color: #1C543A; font-weight: 600;">{{ proc.progresso }}%</span>
+                </div>
+                <div style="width: 100%; height: 4px; background-color: #E8E8E8; border-radius: 2px; overflow: hidden;">
+                  <div style="height: 100%; background-color: #1C543A; width: {{ proc.progresso }}%; transition: width 0.3s ease;"></div>
+                </div>
+              </div>
+
+              <div style="display: flex; gap: 8px; font-size: 11px; color: #999999; border-top: 1px solid #E8E8E8; padding-top: 8px; align-items: center; justify-content: space-between;">
+                <span>Responsável: {{ proc.responsavel }}</span>
+                <div style="display: flex; gap: 6px;">
+                  <sc-if value="{{ proc.canBack }}" hint-placeholder-val="{{ false }}"><button onClick="{{ proc.subProgress }}" title="Voltar 10%" style="padding: 6px 10px; background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 4px; font-size: 11px; font-weight: 600; color: #666666; cursor: pointer; white-space: nowrap;" style-hover="background-color: #F5F5F5; color: #1D1D1B;">← −10%</button></sc-if>
+                  <sc-if value="{{ proc.canProgress }}" hint-placeholder-val="{{ false }}"><button onClick="{{ proc.addProgress }}" style="padding: 6px 10px; background-color: #F5F5F5; border: 1px solid #E8E8E8; border-radius: 4px; font-size: 11px; font-weight: 600; color: #1C543A; cursor: pointer; white-space: nowrap;" style-hover="background-color: #EAF3EE;">+10% →</button></sc-if>
+                </div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- Prazos Críticos Tab -->
+    
+
+
+    <!-- Calendário Integrado Tab -->
+    <sc-if value="{{ isCalendarioTab }}" hint-placeholder-val="{{ false }}">
+      <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+        <div role="group" aria-label="Modo de visualização" style="display: inline-flex; gap: 4px; padding: 4px; background-color: #F0F0EE; border-radius: 8px;">
+          <button onClick="{{ calMode_mes }}" aria-pressed="{{ calModeIs_mes }}" style="height: 40px; padding: 0 16px; border: none; border-radius: 6px; font-size: 13px; font-weight: 700; cursor: pointer; background-color: {{ calModeBg_mes }}; color: {{ calModeColor_mes }};">Calendário</button>
+          <button onClick="{{ calMode_lista }}" aria-pressed="{{ calModeIs_lista }}" style="height: 40px; padding: 0 16px; border: none; border-radius: 6px; font-size: 13px; font-weight: 700; cursor: pointer; background-color: {{ calModeBg_lista }}; color: {{ calModeColor_lista }};">Lista de prazos críticos</button>
+        </div>
+      </div>
+      <sc-if value="{{ calModeIs_mes }}" hint-placeholder-val="{{ true }}">
+      <div style="display: flex; flex-direction: column; gap: 16px; animation: fadeInUp 0.4s ease-out;">
+        <div style="background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 8px; padding: 14px 16px; display: flex; flex-direction: column; gap: 12px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <button onClick="{{ calPrev }}" aria-label="Mês anterior" style="width: 44px; height: 44px; border: 1px solid #E0E0E0; border-radius: 8px; background-color: #FFFFFF; font-size: 16px; cursor: pointer; color: #1D1D1B;" style-hover="border-color: #1C543A;">‹</button>
+              <h2 style="font-size: 18px; font-weight: 800; color: #1D1D1B; min-width: 170px; text-align: center;">{{ calMonthLabel }}</h2>
+              <button onClick="{{ calNext }}" aria-label="Próximo mês" style="width: 44px; height: 44px; border: 1px solid #E0E0E0; border-radius: 8px; background-color: #FFFFFF; font-size: 16px; cursor: pointer; color: #1D1D1B;" style-hover="border-color: #1C543A;">›</button>
+              <button onClick="{{ calToday }}" style="height: 44px; padding: 0 14px; border: 1px solid #1C543A; border-radius: 8px; background-color: #FFFFFF; font-size: 13px; font-weight: 700; color: #1C543A; cursor: pointer;" style-hover="background-color: #F2F7F4;">Hoje</button>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button onClick="{{ calAllOn }}" style="height: 36px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 6px; background-color: #FFFFFF; font-size: 12px; font-weight: 600; color: #1D1D1B; cursor: pointer;" style-hover="background-color: #F5F5F5;">Mostrar todos</button>
+              <button onClick="{{ calAllOff }}" style="height: 36px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 6px; background-color: #FFFFFF; font-size: 12px; font-weight: 600; color: #1D1D1B; cursor: pointer;" style-hover="background-color: #F5F5F5;">Ocultar todos</button>
+            </div>
+          </div>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <sc-for list="{{ calModules }}" as="md" hint-placeholder-count="6">
+              <button onClick="{{ md.toggle }}" aria-pressed="{{ md.on }}" style="display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px; border-radius: 999px; border: 1px solid {{ md.border }}; background-color: {{ md.bg }}; font-size: 12.5px; font-weight: 600; color: {{ md.textColor }}; cursor: pointer; transition: all 0.2s;">
+                <span style="width: 10px; height: 10px; border-radius: 3px; background-color: {{ md.dot }};"></span>{{ md.label }}<span style="font-size: 11px; color: #666666;">{{ md.count }}</span>
+              </button>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: {{ calLayout }}; gap: 16px; align-items: start;">
+          <div style="background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 8px; overflow: hidden;">
+            <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); background-color: #F9F9F9; border-bottom: 1px solid #E8E8E8;">
+              <sc-for list="{{ calWeekdays }}" as="wd" hint-placeholder-count="7">
+                <span style="padding: 10px 6px; font-size: 11px; font-weight: 700; color: #666666; text-transform: uppercase; text-align: center;">{{ wd }}</span>
+              </sc-for>
+            </div>
+            <sc-for list="{{ calWeeks }}" as="wk" hint-placeholder-count="5">
+              <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr));">
+                <sc-for list="{{ wk.days }}" as="d" hint-placeholder-count="7">
+                  <button onClick="{{ d.select }}" style="min-height: {{ calCellH }}; padding: 6px; border: none; border-right: 1px solid #F0F0F0; border-bottom: 1px solid #F0F0F0; background-color: {{ d.bg }}; text-align: left; cursor: pointer; display: flex; flex-direction: column; gap: 3px; min-width: 0; font-family: inherit; box-shadow: {{ d.ring }};" style-hover="background-color: #F2F7F4;">
+                    <span style="width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12.5px; font-weight: 700; background-color: {{ d.numBg }}; color: {{ d.numColor }};">{{ d.num }}</span>
+                    <sc-if value="{{ calShowBars }}" hint-placeholder-val="{{ true }}">
+                      <sc-for list="{{ d.bars }}" as="b" hint-placeholder-count="0">
+                        <span style="display: block; font-size: 10.5px; font-weight: 600; line-height: 1.3; padding: 2px 5px; border-radius: 4px; background-color: {{ b.bg }}; color: {{ b.color }}; border-left: 3px solid {{ b.color }}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ b.title }}</span>
+                      </sc-for>
+                    </sc-if>
+                    <sc-if value="{{ calShowDots }}" hint-placeholder-val="{{ false }}">
+                      <span style="display: flex; gap: 2px; flex-wrap: wrap;"><sc-for list="{{ d.bars }}" as="b" hint-placeholder-count="0"><span style="width: 6px; height: 6px; border-radius: 50%; background-color: {{ b.color }};"></span></sc-for></span>
+                    </sc-if>
+                    <sc-if value="{{ d.more }}" hint-placeholder-val="{{ false }}"><span style="font-size: 10.5px; font-weight: 700; color: #666666;">{{ d.more }}</span></sc-if>
+                  </button>
+                </sc-for>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 16px;">
+            <div style="background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 8px; padding: 18px;">
+              <h3 style="font-size: 14.5px; font-weight: 700; color: #1D1D1B; padding-bottom: 10px; margin-bottom: 10px; border-bottom: 1px solid #1C543A;">{{ calSelLabel }}</h3>
+              <sc-for list="{{ calSelEvents }}" as="ev" hint-placeholder-count="2">
+                <div style="display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid #F0F0F0;">
+                  <span style="width: 4px; border-radius: 2px; background-color: {{ ev.color }}; flex-shrink: 0;"></span>
+                  <div style="flex: 1; min-width: 0;">
+                    <p style="font-size: 10.5px; font-weight: 700; color: {{ ev.color }}; text-transform: uppercase; letter-spacing: 0.3px;">{{ ev.moduleLabel }}</p>
+                    <p style="font-size: 13px; font-weight: 600; color: #1D1D1B; margin-top: 2px;">{{ ev.title }}</p>
+                    <p style="font-size: 12px; color: #666666; margin-top: 2px;">{{ ev.period }}</p>
+                    <a href="{{ ev.href }}" style="font-size: 12px; font-weight: 600; color: #1C543A; text-decoration: none; display: inline-block; margin-top: 4px;">Abrir módulo →</a>
+                  </div>
+                  <sc-if value="{{ ev.levelLabel }}" hint-placeholder-val="{{ false }}"><span style="font-size: 10.5px; font-weight: 700; padding: 3px 8px; border-radius: 999px; background-color: {{ ev.levelBg }}; color: {{ ev.levelColor }}; height: fit-content; white-space: nowrap;">{{ ev.levelLabel }}</span></sc-if>
+                </div>
+              </sc-for>
+              <sc-if value="{{ calSelEmpty }}" hint-placeholder-val="{{ false }}"><p style="font-size: 12.5px; color: #666666; padding: 8px 0;">Nenhum prazo neste dia para os módulos visíveis.</p></sc-if>
+            </div>
+            <div style="background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 8px; padding: 18px;">
+              <h3 style="font-size: 14.5px; font-weight: 700; color: #1D1D1B; padding-bottom: 10px; margin-bottom: 10px; border-bottom: 1px solid #1C543A;">Próximos prazos</h3>
+              <sc-for list="{{ calUpcoming }}" as="up" hint-placeholder-count="5">
+                <div style="display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid #F0F0F0;">
+                  <div style="width: 42px; text-align: center; flex-shrink: 0;"><p style="font-size: 16px; font-weight: 800; color: {{ up.color }}; line-height: 1;">{{ up.day }}</p><p style="font-size: 10px; font-weight: 700; color: #666666; text-transform: uppercase;">{{ up.mon }}</p></div>
+                  <div style="min-width: 0;"><p style="font-size: 12.5px; font-weight: 600; color: #1D1D1B; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ up.title }}</p><p style="font-size: 11.5px; color: #666666;">{{ up.moduleLabel }} · {{ up.duration }}</p></div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+      <sc-if value="{{ calModeIs_lista }}" hint-placeholder-val="{{ false }}">
+      <div style="animation: fadeInUp 0.4s ease-out;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; margin-bottom: 20px;">
+          <div style="background-color: #DC262622; border: 1px solid #DC2626; padding: 16px; border-radius: 8px;">
+            <p style="font-size: 12px; color: #DC2626; font-weight: 600; text-transform: uppercase; margin-bottom: 8px;">Vencidos</p>
+            <p style="font-size: 28px; font-weight: 700; color: #DC2626;">{{ criticosVencidos }}</p>
+          </div>
+          <div style="background-color: #F59E0B22; border: 1px solid #F59E0B; padding: 16px; border-radius: 8px;">
+            <p style="font-size: 12px; color: #B45309; font-weight: 600; text-transform: uppercase; margin-bottom: 8px;">{{ labelUrgente }}</p>
+            <p style="font-size: 28px; font-weight: 700; color: #F59E0B;">{{ criticosProximos }}</p>
+          </div>
+          <div style="background-color: #3B82F622; border: 1px solid #3B82F6; padding: 16px; border-radius: 8px;">
+            <p style="font-size: 12px; color: #2563EB; font-weight: 600; text-transform: uppercase; margin-bottom: 8px;">{{ labelProximo }}</p>
+            <p style="font-size: 28px; font-weight: 700; color: #3B82F6;">{{ normalPrazos }}</p>
+          </div>
+        </div>
+
+        <div style="background-color: #FFFFFF; border-radius: 8px; border: 1px solid #E8E8E8; overflow: hidden;">
+          <div style="padding: 16px 20px; border-bottom: 1px solid #E8E8E8; background-color: #F9F9F9; font-weight: 600; font-size: 12px; color: #999999; text-transform: uppercase;">
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;"><span>Lista de Prazos Críticos — todos os módulos · {{ agendarPrazos }} a agendar</span><button onClick="{{ openNewPrazo }}" style="min-height: 36px; padding: 0 14px; background-color: #1C543A; color: #FFFFFF; border: none; border-radius: 6px; font-size: 12px; font-weight: 700; text-transform: none; cursor: pointer;" style-hover="background-color: #153A2E;">+ Novo prazo</button></div>
+          </div>
+
+          <sc-for list="{{ prazosLista }}" as="prazo" hint-placeholder-count="4">
+            <div style="padding: 16px 20px; border-bottom: 1px solid #E8E8E8; display: flex; justify-content: space-between; align-items: center;" style-hover="background-color: #F5F5F5;">
+              <div style="flex: 1;">
+                <p style="font-size: 11px; font-weight: 700; color: {{ prazo.modColor }}; text-transform: uppercase; letter-spacing: 0.3px;">{{ prazo.processo }}</p>
+                <p style="font-size: 13px; color: #1D1D1B; margin-top: 4px; font-weight: 600;">{{ prazo.descricao }}</p>
+              </div>
+              <div style="text-align: right; margin-left: 16px;">
+                <p style="font-size: 13px; font-weight: 600; color: {{ prazo.urgColor }};">{{ prazo.dataVencimento }}</p>
+                <span style="font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 3px; {{ prazo.urgStyle }}">
+                  {{ prazo.urgencia }}
+                </span>
+              </div>
+              <sc-if value="{{ prazo.own }}" hint-placeholder-val="{{ false }}"><button onClick="{{ prazo.edit }}" title="Editar prazo" style="margin-left: 12px; min-height: 36px; padding: 6px 12px; background-color: #FFFFFF; color: #1C543A; border: 1px solid #E0E0E0; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; flex-shrink: 0;" style-hover="background-color: #F4F9F6;">Editar</button><button onClick="{{ prazo.resolve }}" title="Marcar como concluído" style="margin-left: 12px; min-height: 36px; padding: 6px 12px; background-color: #1C543A; color: #FFFFFF; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; flex-shrink: 0;" style-hover="background-color: #164530;">✓ Concluir</button></sc-if>
+              <sc-if value="{{ prazo.notOwn }}" hint-placeholder-val="{{ true }}"><a href="{{ prazo.href }}" style="margin-left: 12px; min-height: 36px; display: inline-flex; align-items: center; padding: 6px 12px; border: 1px solid #1C543A; color: #1C543A; border-radius: 6px; font-size: 12px; font-weight: 600; text-decoration: none; flex-shrink: 0;" style-hover="background-color: #EAF3EE;">Abrir →</a></sc-if>
+            </div>
+          </sc-for>
+          <sc-if value="{{ prazosEmpty }}" hint-placeholder-val="{{ false }}">
+            <div style="padding: 40px 20px; text-align: center; color: #666666; font-size: 13px;">Nenhum prazo vencido ou nos próximos dias.</div>
+          </sc-if>
+        </div>
+      </div>
+    </sc-if>
+    </sc-if>
+
+    <!-- Fluxo Tab -->
+    <sc-if value="{{ isFluxoTab }}" hint-placeholder-val="{{ false }}">
+      <div style="animation: fadeInUp 0.4s ease-out;">
+        <div style="background-color: #FFFFFF; padding: 20px; border-radius: 8px; border: 1px solid #E8E8E8;">
+          <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 20px;">Fluxo Padrão de Documentos</h3>
+          
+          <!-- Fluxo Visual -->
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 12px;">
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; flex: 1; min-width: 100px;">
+              <div style="width: 60px; height: 60px; border-radius: 50%; background-color: #1C543A; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 12px; text-align: center;">Autuação</div>
+              <p style="font-size: 11px; color: #999999;">Registro</p>
+            </div>
+            <div style="flex-grow: 1; height: 2px; background: linear-gradient(90deg, #1C543A 0%, #1C543A 50%, #E8E8E8 50%, #E8E8E8 100%); margin: 0 8px;"></div>
+            
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; flex: 1; min-width: 100px;">
+              <div style="width: 60px; height: 60px; border-radius: 50%; background-color: #1C543A; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 12px; text-align: center;">Análise</div>
+              <p style="font-size: 11px; color: #999999;">Revisão</p>
+            </div>
+            <div style="flex-grow: 1; height: 2px; background: linear-gradient(90deg, #1C543A 0%, #1C543A 50%, #E8E8E8 50%, #E8E8E8 100%); margin: 0 8px;"></div>
+            
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; flex: 1; min-width: 100px;">
+              <div style="width: 60px; height: 60px; border-radius: 50%; background-color: #F59E0B; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 12px; text-align: center;">Parecer</div>
+              <p style="font-size: 11px; color: #999999;">Em Análise</p>
+            </div>
+            <div style="flex-grow: 1; height: 2px; background-color: #E8E8E8; margin: 0 8px;"></div>
+            
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; flex: 1; min-width: 100px;">
+              <div style="width: 60px; height: 60px; border-radius: 50%; background-color: #E8E8E8; color: #999999; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 12px; text-align: center;">Arquivamento</div>
+              <p style="font-size: 11px; color: #999999;">Finalização</p>
+            </div>
+          </div>
+
+          <div style="background-color: #F9F9F9; padding: 16px; border-radius: 6px; border-left: 3px solid #1C543A;">
+            <p style="font-size: 12px; color: #666666; line-height: 1.6;">
+              <strong>Processo Padrão:</strong> Os documentos protocolados seguem um fluxo linear pela Diretoria Administrativa. 
+              Cada fase possui responsáveis definidos e prazos específicos. O sistema permite acompanhamento em tempo real 
+              e notificações automáticas de vencimentos.
+            </p>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+  </main>
+
+  <!-- Protocolar Documento Modal -->
+  <sc-if value="{{ newDocOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeNewDoc }}" style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; padding: 24px; z-index: 90;">
+      <div onClick="{{ stopPropagation }}" style="background-color: #FFFFFF; border-radius: 14px; width: 100%; max-width: 460px; max-height: 88vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.25); animation: fadeInUp 0.3s ease-out;">
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 20px 24px; border-bottom: 1px solid #F0F0F0;">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;">
+            <div><label style="font-size: 12px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">Prazo (opcional) <span style="font-weight: 400; color: #666666;">{{ prazoHint }}</span></label><input type="text" inputmode="numeric" placeholder="dd/mm/aaaa ou +X dias" value="{{ docForm.prazoTxt }}" onInput="{{ handleDocPrazo }}" style="width: 100%; height: 44px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; color: #1D1D1B; background-color: #FFFFFF;" style-focus="border-color: #1C543A; outline: none;"/></div>
+            <div><label style="font-size: 12px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">Descrição do prazo</label><input type="text" value="{{ docForm.prazoDesc }}" onInput="{{ handleDocPrazoDesc }}" placeholder="Ex.: Resposta ao ofício" style="width: 100%; height: 44px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; color: #1D1D1B; background-color: #FFFFFF;" style-focus="border-color: #1C543A; outline: none;"/></div>
+          </div>
+          <div>
+            <h3 style="font-size: 16px; font-weight: 700; color: #1D1D1B;">{{ docModalTitle }}</h3>
+            <p style="font-size: 12px; color: #999999; margin-top: 2px;">O documento entra com status Registrado</p>
+          </div>
+          <button onClick="{{ closeNewDoc }}" style="width: 30px; height: 30px; border-radius: 6px; border: none; background-color: #F5F5F5; font-size: 15px; color: #666666; cursor: pointer; flex-shrink: 0;" style-hover="background-color: #E8E8E8;">✕</button>
+        </div>
+        <div style="padding: 22px 24px; display: flex; flex-direction: column; gap: 14px;">
+          <div>
+            <label style="font-size: 11.5px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">Assunto</label>
+            <input type="text" value="{{ docForm.assunto }}" onInput="{{ handleDocAssunto }}" placeholder="Ex: Solicitação de parecer jurídico" style="width: 100%; padding: 10px 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px;" style-focus="border-color: #1C543A; outline: none;"/>
+          </div>
+          <div>
+            <label style="font-size: 11.5px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">Interessado</label>
+            <input type="text" value="{{ docForm.interessado }}" onInput="{{ handleDocInteressado }}" placeholder="Nome do solicitante" style="width: 100%; padding: 10px 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px;" style-focus="border-color: #1C543A; outline: none;"/>
+          </div>
+          <div>
+            <label style="font-size: 11.5px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">Setor de destino</label>
+            <input type="text" list="dl-cc-protocolom1" autocomplete="off" placeholder="Digite ou selecione o centro de custo" value="{{ docForm.setor }}" onChange="{{ handleDocSetor }}" style="width: 100%; padding: 10px 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; background-color: #FFFFFF;"/><datalist id="dl-cc-protocolom1"><sc-for list="{{ sectors }}" as="sec" hint-placeholder-count="3"><option value="{{ sec }}"></option></sc-for></datalist>
+          </div>
+          <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 6px;">
+            <button onClick="{{ closeNewDoc }}" style="padding: 10px 16px; border: 1px solid #E0E0E0; border-radius: 8px; background-color: #FFFFFF; font-size: 13px; cursor: pointer;" style-hover="background-color: #F5F5F5;">Cancelar</button>
+            <button onClick="{{ submitNewDoc }}" disabled="{{ docSubmitDisabled }}" style="padding: 10px 16px; background-color: {{ docSubmitBg }}; color: #FFFFFF; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: {{ docSubmitCursor }};">{{ docSubmitLabel }}</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- Novo Processo Modal -->
+  <sc-if value="{{ newProcOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeNewProc }}" style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; padding: 24px; z-index: 90;">
+      <div onClick="{{ stopPropagation }}" style="background-color: #FFFFFF; border-radius: 14px; width: 100%; max-width: 460px; max-height: 88vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.25); animation: fadeInUp 0.3s ease-out;">
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 20px 24px; border-bottom: 1px solid #F0F0F0;">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;">
+            <div><label style="font-size: 12px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">Prazo (opcional) <span style="font-weight: 400; color: #666666;">{{ prazoHint }}</span></label><input type="text" inputmode="numeric" placeholder="dd/mm/aaaa ou +X dias" value="{{ procForm.prazoTxt }}" onInput="{{ handleProcPrazo }}" style="width: 100%; height: 44px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; color: #1D1D1B; background-color: #FFFFFF;" style-focus="border-color: #1C543A; outline: none;"/></div>
+            <div><label style="font-size: 12px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">Descrição do prazo</label><input type="text" value="{{ procForm.prazoDesc }}" onInput="{{ handleProcPrazoDesc }}" placeholder="Ex.: Resposta ao ofício" style="width: 100%; height: 44px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; color: #1D1D1B; background-color: #FFFFFF;" style-focus="border-color: #1C543A; outline: none;"/></div>
+          </div>
+          <div>
+            <h3 style="font-size: 16px; font-weight: 700; color: #1D1D1B;">{{ procModalTitle }}</h3>
+            <p style="font-size: 12px; color: #999999; margin-top: 2px;">Inicia na fase de Autuação com 0% de progresso</p>
+          </div>
+          <button onClick="{{ closeNewProc }}" style="width: 30px; height: 30px; border-radius: 6px; border: none; background-color: #F5F5F5; font-size: 15px; color: #666666; cursor: pointer; flex-shrink: 0;" style-hover="background-color: #E8E8E8;">✕</button>
+        </div>
+        <div style="padding: 22px 24px; display: flex; flex-direction: column; gap: 14px;">
+          <div>
+            <label style="font-size: 11.5px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">Título</label>
+            <input type="text" value="{{ procForm.titulo }}" onInput="{{ handleProcTitulo }}" placeholder="Ex: Revisão de contrato de limpeza" style="width: 100%; padding: 10px 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px;" style-focus="border-color: #1C543A; outline: none;"/>
+          </div>
+          <div>
+            <label style="font-size: 11.5px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">Descrição</label>
+            <input type="text" value="{{ procForm.descricao }}" onInput="{{ handleProcDescricao }}" placeholder="Resumo do objetivo do processo" style="width: 100%; padding: 10px 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px;" style-focus="border-color: #1C543A; outline: none;"/>
+          </div>
+          <div style="display: flex; gap: 12px;">
+            <div style="flex: 1;">
+              <label style="font-size: 11.5px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">Prioridade</label>
+              <select value="{{ procForm.priority }}" onChange="{{ handleProcPriority }}" style="width: 100%; padding: 10px 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; background-color: #FFFFFF;">
+                <option value="Alta">Alta</option>
+                <option value="Média">Média</option>
+                <option value="Baixa">Baixa</option>
+              </select>
+            </div>
+            <div style="flex: 1;">
+              <label style="font-size: 11.5px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">Responsável</label>
+              <input type="text" value="{{ procForm.responsavel }}" onInput="{{ handleProcResponsavel }}" placeholder="Nome" style="width: 100%; padding: 10px 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px;" style-focus="border-color: #1C543A; outline: none;"/>
+            </div>
+          </div>
+          <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 6px;">
+            <button onClick="{{ closeNewProc }}" style="padding: 10px 16px; border: 1px solid #E0E0E0; border-radius: 8px; background-color: #FFFFFF; font-size: 13px; cursor: pointer;" style-hover="background-color: #F5F5F5;">Cancelar</button>
+            <button onClick="{{ submitNewProc }}" disabled="{{ procSubmitDisabled }}" style="padding: 10px 16px; background-color: {{ procSubmitBg }}; color: #FFFFFF; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: {{ procSubmitCursor }};">{{ procSubmitLabel }}</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- Toast -->
+  <sc-if value="{{ toastVisible }}" hint-placeholder-val="{{ false }}">
+    <div style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background-color: #1C543A; color: #FFFFFF; padding: 12px 22px; border-radius: 999px; font-size: 13px; font-weight: 600; z-index: 100; box-shadow: 0 8px 24px rgba(28,84,58,0.35);">✓ {{ toastMessage }}</div>
+  </sc-if>
+</div>
+
+  <sc-if value="{{ prazoOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closePrazo }}" style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 95;">
+      <div onClick="{{ stopPropagation }}" role="dialog" aria-label="{{ prazoTitle }}" style="background-color: #FFFFFF; border-radius: 12px; width: 100%; max-width: 480px; padding: 22px; display: flex; flex-direction: column; gap: 14px;">
+        <h3 style="font-size: 16px; font-weight: 700; color: #1D1D1B;">{{ prazoTitle }}</h3>
+        <div><label for="pz-ref" style="font-size: 12px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">Documento ou processo</label><select id="pz-ref" value="{{ prazoForm.processo }}" onChange="{{ setPrazoRef }}" style="width: 100%; height: 44px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; color: #1D1D1B; background-color: #FFFFFF;"><sc-for list="{{ prazoRefs }}" as="pr" hint-placeholder-count="5"><option value="{{ pr.value }}">{{ pr.label }}</option></sc-for></select></div>
+        <div><label for="pz-desc" style="font-size: 12px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">Descrição</label><input id="pz-desc" type="text" value="{{ prazoForm.descricao }}" onInput="{{ setPrazoDesc }}" placeholder="Ex.: Parecer jurídico" style="width: 100%; height: 44px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; color: #1D1D1B; background-color: #FFFFFF;" style-focus="border-color: #1C543A; outline: none;"/></div>
+        <div><label for="pz-data" style="font-size: 12px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">Data do prazo <span style="font-weight: 400; color: #666666;">{{ prazoHint }}</span></label><input id="pz-data" type="text" inputmode="numeric" placeholder="dd/mm/aaaa ou +X dias" value="{{ prazoForm.dataTxt }}" onInput="{{ setPrazoData }}" style="width: 100%; height: 44px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; color: #1D1D1B; background-color: #FFFFFF;" style-focus="border-color: #1C543A; outline: none;"/></div>
+        <sc-if value="{{ prazoError }}" hint-placeholder-val="{{ false }}"><p role="alert" style="font-size: 12.5px; color: #B91C1C; background-color: #FDF3F2; padding: 8px 12px; border-radius: 6px;">{{ prazoError }}</p></sc-if>
+        <div style="display: flex; justify-content: flex-end; gap: 10px;">
+          <button onClick="{{ closePrazo }}" style="height: 40px; padding: 0 16px; border: 1px solid #E0E0E0; border-radius: 8px; background-color: #FFFFFF; font-size: 13px; cursor: pointer;">Cancelar</button>
+          <button onClick="{{ savePrazo }}" style="height: 40px; padding: 0 16px; border: none; border-radius: 8px; background-color: #1C543A; color: #FFFFFF; font-size: 13px; font-weight: 700; cursor: pointer;" style-hover="background-color: #153A2E;">Salvar prazo</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: &quot;100%&quot;, &quot;height&quot;: &quot;1000px&quot;}}">
+class Component extends DCLogic {
+  state = {
+    calMode: /[?&]tab=prazos/.test(window.location.search) ? 'lista' : 'mes',
+    calYear: new Date().getFullYear(), calMonthIdx: new Date().getMonth(), calSel: new Date().toISOString().slice(0, 10), calHidden: {}, calFeed: null,
+    activeTab: (/[?&]tab=prazos/.test(window.location.search) ? 'calendario' : 'documentos'),
+    docSearch: '',
+    docStatusFilter: 'todos',
+    sectors: ['Diretoria Administrativa', 'Serviço de Licitações e Contratos', 'Serviço de Almoxarifado e Patrimônio'],
+    newDocOpen: false,
+    docForm: { assunto: '', interessado: '', setor: '', prazo: '', prazoDesc: '' },
+    prazoForm: null, prazoError: '',
+    newProcOpen: false,
+    procForm: { titulo: '', descricao: '', priority: 'Média', responsavel: '', prazo: '', prazoDesc: '' },
+    toastVisible: false,
+    toastMessage: '',
+    docSeq: 6,
+    procSeq: 5,
+    documentos: [
+      { protocolo: 'PRT-2025-001', assunto: 'Solicitação de Parecer - Contrato de Manutenção', interessado: 'Dr. Roberto Alencar', data: '2025-06-01', status: 'Finalizado' },
+      { protocolo: 'PRT-2025-002', assunto: 'Processo de Revisão de Normas Administrativas', interessado: 'Ana Silva', data: '2025-06-05', status: 'Em Processamento' },
+      { protocolo: 'PRT-2025-003', assunto: 'Requerimento de Isenção Fiscal', interessado: 'Carlos Costa', data: '2025-06-08', status: 'Registrado' },
+      { protocolo: 'PRT-2025-004', assunto: 'Autorização para Despesa Extraordinária', interessado: 'Mariana Luz', data: '2025-06-10', status: 'Em Processamento' },
+      { protocolo: 'PRT-2025-005', assunto: 'Relatório Semestral de Atividades', interessado: 'Dr. Roberto Alencar', data: '2025-06-12', status: 'Arquivado' }
+    ],
+    processos: [
+      { id: 'PROC-001', titulo: 'Revisão de Normativos Internos', descricao: 'Análise e atualização das normas administrativas da Câmara para 2025.', priority: 'Alta', progresso: 65, responsavel: 'Dr. Roberto' },
+      { id: 'PROC-002', titulo: 'Contratação de Consultoria Externa', descricao: 'Processo de seleção e contratação de consultores para modernização de TI.', priority: 'Média', progresso: 40, responsavel: 'Ana Silva' },
+      { id: 'PROC-003', titulo: 'Auditoria Interna Anual', descricao: 'Auditoria geral dos processos administrativos e financeiros.', priority: 'Baixa', progresso: 20, responsavel: 'Carlos Costa' },
+      { id: 'PROC-004', titulo: 'Elaboração de Relatório de Conformidade', descricao: 'Relatório anual de conformidade com legislação federal.', priority: 'Alta', progresso: 80, responsavel: 'Mariana Luz' }
+    ],
+    prazosLista: (() => { try { const s = JSON.parse(localStorage.getItem('DA_protocolo_prazos')); if (Array.isArray(s)) return s; } catch (e) {} return [
+      { processo: 'PRT-2026-002', descricao: 'Parecer jurídico obrigatório', dataVencimento: '2026-10-20' },
+      { processo: 'PROC-001', descricao: 'Aprovação da diretoria', dataVencimento: '2026-10-26' },
+      { processo: 'PRT-2026-004', descricao: 'Despacho final', dataVencimento: '2026-10-28' },
+      { processo: 'PROC-002', descricao: 'Publicação de edital', dataVencimento: '2026-11-06' },
+      { processo: 'PROC-003', descricao: 'Conclusão de auditoria', dataVencimento: '2026-11-17' }
+    ]; })()
+  };
+
+  setTab = (tab) => {
+    this.setState({ activeTab: tab });
+  };
+
+  DOC_FLOW = ['Registrado', 'Em Processamento', 'Finalizado', 'Arquivado'];
+
+  componentDidMount() {
+    const qTab = new URLSearchParams(location.search).get('tab');
+    if (qTab) this.setState({ activeTab: qTab });
+    const loadCal = () => { if (window.DACalendar) this.setState({ calFeed: window.DACalendar.get() }); else setTimeout(loadCal, 200); };
+    loadCal();
+    this._onCal = () => { if (window.DACalendar) this.setState({ calFeed: window.DACalendar.get() }); };
+    window.addEventListener('calendarchange', this._onCal);
+    window.addEventListener('storage', this._onCal);
+    const loadSectors = () => {
+      if (window.DASectors) this.setState({ sectors: window.DASectors.get() });
+      else setTimeout(loadSectors, 200);
+    };
+    loadSectors();
+    this._onSectors = (e) => this.setState({ sectors: e.detail.sectors });
+    window.addEventListener('sectorschange', this._onSectors);
+  }
+  componentWillUnmount() { window.removeEventListener('sectorschange', this._onSectors); }
+
+  showToast = (msg) => {
+    clearTimeout(this._toastTimer);
+    this.setState({ toastVisible: true, toastMessage: msg });
+    this._toastTimer = setTimeout(() => this.setState({ toastVisible: false }), 2500);
+  };
+
+  handleDocSearch = (e) => { this.setState({ docSearch: e.target.value }); };
+  handleDocStatusFilter = (e) => { this.setState({ docStatusFilter: e.target.value }); };
+  stopPropagation = (e) => { e.stopPropagation(); };
+
+  openNewDoc = () => { this.setState({ docEditId: null, newDocOpen: true, docForm: { assunto: '', interessado: '', setor: this.state.sectors[0], prazo: '', prazoDesc: '' } }); };
+  closeNewDoc = () => { this.setState({ newDocOpen: false }); };
+  handleDocAssunto = (e) => { const v = e.target.value; this.setState(s => ({ docForm: { ...s.docForm, assunto: v } })); };
+  handleDocInteressado = (e) => { const v = e.target.value; this.setState(s => ({ docForm: { ...s.docForm, interessado: v } })); };
+  handleDocSetor = (e) => { const v = e.target.value; this.setState(s => ({ docForm: { ...s.docForm, setor: v } })); };
+  openEditDoc = (id) => { const d = this.state.documentos.find(x => x.protocolo === id); if (!d) return; const setor = d.setor || ((d.assunto.match(/\(([^)]+)\)$/) || [])[1] || ''); const z = this.state.prazosLista.find(x => x.processo === id);
+    this.setState({ docEditId: id, newDocOpen: true, docForm: { assunto: d.assunto.replace(/\s*\([^)]+\)$/, ''), interessado: d.interessado, setor: setor, prazo: z ? z.dataVencimento : '', prazoTxt: z ? this._br(z.dataVencimento) : '', prazoDesc: z ? z.descricao : '' } }); };
+  openEditProc = (id) => { const pr = this.state.processos.find(x => x.id === id); if (!pr) return; const z = this.state.prazosLista.find(x => x.processo === id);
+    this.setState({ procEditId: id, newProcOpen: true, procForm: { titulo: pr.titulo, descricao: pr.descricao, priority: pr.priority, responsavel: pr.responsavel === '—' ? '' : pr.responsavel, prazo: z ? z.dataVencimento : '', prazoTxt: z ? this._br(z.dataVencimento) : '', prazoDesc: z ? z.descricao : '' } }); };
+  _upsertPrazo(ref, f, def) { const l = this.state.prazosLista.filter(x => x.processo !== ref); if (f.prazo) l.push({ id: 'Z' + Date.now(), processo: ref, descricao: (f.prazoDesc || '').trim() || def, dataVencimento: f.prazo }); this._setPrazos(l); }
+  submitNewDoc = () => {
+    const f = this.state.docForm;
+    if (!f.assunto.trim() || !f.interessado.trim()) return;
+    if (this.state.docEditId) { const id = this.state.docEditId; this.setState(s => ({ documentos: s.documentos.map(d => d.protocolo === id ? { ...d, assunto: f.assunto.trim() + (f.setor ? ' (' + f.setor + ')' : ''), setor: f.setor, interessado: f.interessado.trim() } : d), newDocOpen: false, docEditId: null })); this._upsertPrazo(id, f, 'Prazo de resposta'); if (window.DAAudit) window.DAAudit.log('Documento editado', 'protocolo', id); this.showToast('Documento ' + id + ' atualizado'); return; }
+    const id = 'PRT-2026-' + String(this.state.docSeq).padStart(3, '0');
+    const doc = { protocolo: id, assunto: f.assunto.trim() + ' (' + f.setor + ')', interessado: f.interessado.trim(), data: new Date().toISOString().slice(0, 10), status: 'Registrado' };
+    this.setState(s => ({ documentos: [doc, ...s.documentos], docSeq: s.docSeq + 1, newDocOpen: false }));
+    if (f.prazo) this._setPrazos([...this.state.prazosLista, { id: 'Z' + Date.now(), processo: id, descricao: (f.prazoDesc || '').trim() || 'Prazo de resposta', dataVencimento: f.prazo }]);
+    this.showToast('Documento ' + id + ' protocolado');
+  };
+  advanceDoc = (protocolo) => {
+    this.setState(s => ({ documentos: s.documentos.map(d => {
+      if (d.protocolo !== protocolo) return d;
+      const i = this.DOC_FLOW.indexOf(d.status);
+      return i < this.DOC_FLOW.length - 1 ? { ...d, status: this.DOC_FLOW[i + 1] } : d;
+    }) }));
+    this.showToast(protocolo + ' avançou no fluxo');
+  };
+
+  openNewProc = () => { this.setState({ procEditId: null, newProcOpen: true, procForm: { titulo: '', descricao: '', priority: 'Média', responsavel: '', prazo: '', prazoDesc: '' } }); };
+  closeNewProc = () => { this.setState({ newProcOpen: false }); };
+  handleProcTitulo = (e) => { const v = e.target.value; this.setState(s => ({ procForm: { ...s.procForm, titulo: v } })); };
+  handleProcDescricao = (e) => { const v = e.target.value; this.setState(s => ({ procForm: { ...s.procForm, descricao: v } })); };
+  handleProcPriority = (e) => { const v = e.target.value; this.setState(s => ({ procForm: { ...s.procForm, priority: v } })); };
+  handleProcResponsavel = (e) => { const v = e.target.value; this.setState(s => ({ procForm: { ...s.procForm, responsavel: v } })); };
+  submitNewProc = () => {
+    const f = this.state.procForm;
+    if (!f.titulo.trim()) return;
+    if (this.state.procEditId) { const id = this.state.procEditId; this.setState(s => ({ processos: s.processos.map(pr => pr.id === id ? { ...pr, titulo: f.titulo.trim(), descricao: f.descricao.trim() || 'Sem descrição.', priority: f.priority, responsavel: f.responsavel.trim() || '—' } : pr), newProcOpen: false, procEditId: null })); this._upsertPrazo(id, f, 'Prazo do processo'); if (window.DAAudit) window.DAAudit.log('Processo editado', 'protocolo', id); this.showToast('Processo ' + id + ' atualizado'); return; }
+    const id = 'PROC-' + String(this.state.procSeq).padStart(3, '0');
+    const proc = { id: id, titulo: f.titulo.trim(), descricao: f.descricao.trim() || 'Sem descrição.', priority: f.priority, progresso: 0, responsavel: f.responsavel.trim() || '—' };
+    this.setState(s => ({ processos: [proc, ...s.processos], procSeq: s.procSeq + 1, newProcOpen: false }));
+    if (f.prazo) this._setPrazos([...this.state.prazosLista, { id: 'Z' + Date.now(), processo: id, descricao: (f.prazoDesc || '').trim() || 'Prazo do processo', dataVencimento: f.prazo }]);
+    this.showToast('Processo ' + id + ' criado');
+  };
+  backDoc = (protocolo) => { this.setState(s => ({ documentos: s.documentos.map(d => { if (d.protocolo !== protocolo) return d; const i = this.DOC_FLOW.indexOf(d.status); return i > 0 ? { ...d, status: this.DOC_FLOW[i - 1] } : d; }) })); this.showToast(protocolo + ' voltou uma etapa'); };
+  subProgress = (id) => { this.setState(s => ({ processos: s.processos.map(p => p.id === id ? { ...p, progresso: Math.max(0, p.progresso - 10) } : p) })); };
+  addProgress = (id) => {
+    this.setState(s => ({ processos: s.processos.map(p => p.id === id ? { ...p, progresso: Math.min(100, p.progresso + 10) } : p) }));
+  };
+
+  _parsePrazo(t) {
+    t = String(t || '').trim(); const pad = n => String(n).padStart(2, '0'); const iso = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+    let m = t.match(/^\+\s*(\d{1,4})$/); if (m) { const d = new Date(); d.setDate(d.getDate() + parseInt(m[1], 10)); return iso(d); }
+    m = t.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/); if (m) { const d = new Date(+m[3], +m[2] - 1, +m[1]); if (d.getDate() === +m[1]) return iso(d); }
+    m = t.match(/^(\d{4})-(\d{2})-(\d{2})$/); if (m) return t;
+    return '';
+  }
+  _br(iso) { return iso ? iso.split('-').reverse().join('/') : ''; }
+  _setPrazos(l) { try { localStorage.setItem('DA_protocolo_prazos', JSON.stringify(l)); } catch (e) {} this.setState({ prazosLista: l }); }
+  handleDocPrazo = (e) => { const v = e.target.value; const iso = this._parsePrazo(v); this.setState(s => ({ docForm: { ...s.docForm, prazoTxt: /^\+/.test(v.trim()) && iso ? this._br(iso) : v, prazo: iso } })); };
+  handleDocPrazoDesc = (e) => { const v = e.target.value; this.setState(s => ({ docForm: { ...s.docForm, prazoDesc: v } })); };
+  handleProcPrazo = (e) => { const v = e.target.value; const iso = this._parsePrazo(v); this.setState(s => ({ procForm: { ...s.procForm, prazoTxt: /^\+/.test(v.trim()) && iso ? this._br(iso) : v, prazo: iso } })); };
+  handleProcPrazoDesc = (e) => { const v = e.target.value; this.setState(s => ({ procForm: { ...s.procForm, prazoDesc: v } })); };
+  openNewPrazo = () => { const refs = this._prazoRefs(); this.setState({ prazoForm: { id: '', processo: refs[0] ? refs[0].value : '', descricao: '', dataVencimento: '', dataTxt: '' }, prazoError: '' }); };
+  openEditPrazo = (id) => { const z = this.state.prazosLista.find(x => (x.id || x.processo) === id); if (z) this.setState({ prazoForm: { ...z, id: z.id || z.processo, dataTxt: this._br(z.dataVencimento) }, prazoError: '' }); };
+  closePrazo = () => { this.setState({ prazoForm: null }); };
+  setPrazoField = (k) => (e) => { const v = e.target.value; this.setState(s => ({ prazoForm: { ...s.prazoForm, [k]: v }, prazoError: '' })); };
+  savePrazo = () => {
+    const f = this.state.prazoForm; if (!f) return;
+    if (!f.processo || !(f.descricao || '').trim() || !f.dataVencimento) { this.setState({ prazoError: 'Informe o documento/processo, a descrição e a data.' }); return; }
+    const rec = { id: f.id || ('Z' + Date.now()), processo: f.processo, descricao: f.descricao.trim(), dataVencimento: f.dataVencimento };
+    const exists = this.state.prazosLista.some(x => (x.id || x.processo) === f.id && f.id);
+    this._setPrazos(exists ? this.state.prazosLista.map(x => ((x.id || x.processo) === f.id ? rec : x)) : [...this.state.prazosLista, rec]);
+    this.setState({ prazoForm: null }); this.showToast(exists ? 'Prazo atualizado' : 'Prazo cadastrado');
+  };
+  _prazoRefs() { return this.state.documentos.map(d => ({ value: d.protocolo, label: d.protocolo + ' — ' + d.assunto })).concat(this.state.processos.map(p => ({ value: p.id, label: p.id + ' — ' + p.titulo }))); }
+  resolvePrazo = (processo) => {
+    this._setPrazos(this.state.prazosLista.filter(p => (p.id || p.processo) !== processo));
+    this.showToast('Prazo de ' + processo + ' concluído');
+  };
+
+  _tabVals(keys) {
+    const o = {};
+    for (const k of keys) {
+      o['tab_' + k + '_go'] = () => this.setTab(k);
+      o['tab_' + k + '_color'] = this.state.activeTab === k ? '#1C543A' : '#999999';
+      o['tab_' + k + '_border'] = this.state.activeTab === k ? '#1C543A' : 'transparent';
+    }
+    return o;
+  }
+
+  _iso(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+  _calEvents() {
+    const mods = (window.DACalendar && window.DACalendar.modules) || [];
+    const feed = this.state.calFeed || {};
+    const out = [];
+    mods.forEach(m => (feed[m.key] || []).forEach(e => out.push({ ...e, module: m.key, moduleLabel: m.label, color: m.color, href: m.href })));
+    const pm = mods.find(m => m.key === 'protocolo');
+    if (pm) this._ownPrazos().forEach(e => out.push({ ...e, module: 'protocolo', moduleLabel: pm.label, color: pm.color }));
+    return out.filter(e => e.start && e.end);
+  }
+  _ownPrazos() {
+    const hoje = new Date().toISOString().slice(0, 10), alerta = window.DALic ? +window.DALic.CFG('prot.alertaAntes', 3) : 3;
+    const lim = new Date(Date.now() + alerta * 864e5).toISOString().slice(0, 10);
+    return this.state.prazosLista.map(p => ({ title: p.processo + ' — ' + p.descricao, start: p.dataVencimento, end: p.dataVencimento, level: p.dataVencimento < hoje ? 'critical' : (p.dataVencimento <= lim ? 'warning' : 'info'), deadline: true, own: true, ref: p.id || p.processo, href: 'ProtocoloModule.dc.html' }));
+  }
+  _visible() { return this._calEvents().filter(e => !this.state.calHidden[e.module]); }
+  _span(e) { return Math.round((new Date(e.end) - new Date(e.start)) / 86400000) + 1; }
+  _fmt(iso) { const p = iso.split('-'); return p[2] + '/' + p[1]; }
+  calPrev = () => { this.setState(s => { const m = s.calMonthIdx - 1; return m < 0 ? { calMonthIdx: 11, calYear: s.calYear - 1 } : { calMonthIdx: m }; }); };
+  calNext = () => { this.setState(s => { const m = s.calMonthIdx + 1; return m > 11 ? { calMonthIdx: 0, calYear: s.calYear + 1 } : { calMonthIdx: m }; }); };
+  calToday = () => { const d = new Date(); this.setState({ calYear: d.getFullYear(), calMonthIdx: d.getMonth(), calSel: this._iso(d) }); };
+  calAllOn = () => { this.setState({ calHidden: {} }); };
+  calAllOff = () => { const h = {}; ((window.DACalendar && window.DACalendar.modules) || []).forEach(m => { h[m.key] = true; }); this.setState({ calHidden: h }); };
+
+  _shellVals() {
+    if (!this._navBound) {
+      this._navBound = true;
+      window.addEventListener('resize', () => this.forceUpdate());
+      window.addEventListener('themechange', () => this.forceUpdate());
+    }
+    const st = this.state || {};
+    const isMobile = window.innerWidth < 900;
+    const open = !!st.navMenuOpen && isMobile;
+    const norm = s => String(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    const q = norm((st.navSearch || '').trim());
+    const INDEX = [["Dashboard.dc.html","▦","Painel de Controle","Sistemas & Gestão","painel dashboard indicadores alertas prazos fluxo"],["AlmoxarifadoAmostragem.dc.html","📦","Almoxarifado","Sistemas & Gestão","almoxarifado estoque amostragem materiais contagem"],["MocoesHomenagens.dc.html","🎗","Moções & Homenagens","Sistemas & Gestão","mocoes homenagens galeria vereador portaria"],["PatrimonioModule.dc.html","🏛","Patrimônio","Sistemas & Gestão","patrimonio bens tombamento transferencias ativos"],["UserProfile.dc.html","👤","Meus Dados (Perfil)","Sistemas & Gestão","perfil meus dados telefone email aniversario"],["ComprasModule.dc.html","🛒","Compras & Licitações","Sistemas & Gestão","compras licitacoes requisicoes fornecedores pregao"],["ProtocoloModule.dc.html","📋","Protocolo","Complementares","protocolo documentos processos prazos"],["RHModule.dc.html","🧑‍💼","Gestão de Pessoal","Complementares","rh recursos humanos servidores ferias"],["AnalyticsModule.dc.html","📈","Analytics & Relatórios","Complementares","analytics relatorios metricas indicadores"],["AuditLog.dc.html","🛡","Log e Auditoria","Administração","log auditoria seguranca acessos lgpd logins"],["Configuracoes.dc.html","⚙","Configurações do Sistema","Administração","configuracoes parametros parametrizacao ajustes alertas limites acessos perfis"],["Legislacoes.dc.html","⚖","Legislações","Administração","legislacao leis decretos portarias resolucoes recomendacoes normas"]];
+    const results = q ? INDEX.filter(i => norm(i[2] + ' ' + i[4]).includes(q)).slice(0, 6).map(i => ({ href: i[0], icon: i[1], label: i[2], group: i[3], go: () => { window.location.href = i[0]; } })) : [];
+    return {
+      navIsMobile: isMobile,
+      navOverlayVisible: open,
+      navSidebarPosition: isMobile ? 'fixed' : 'sticky',
+      navSidebarTransform: isMobile ? (open ? 'translateX(0)' : 'translateX(-100%)') : 'translateX(0)',
+      navOpen: () => this.setState({ navMenuOpen: true }),
+      navClose: () => this.setState({ navMenuOpen: false }),
+      navGutter: isMobile ? '16px' : '36px',
+      navHeaderPad: isMobile ? '18px 16px 12px' : '28px 36px 16px',
+      navTitleSize: isMobile ? '24px' : '30px',
+      navShowBreadcrumb: !isMobile,
+      navSearch: st.navSearch || '',
+      navSearchInput: (e) => this.setState({ navSearch: e.target.value, navSearchFocused: true }),
+      navSearchFocus: () => this.setState({ navSearchFocused: true }),
+      navSearchBlur: () => setTimeout(() => this.setState({ navSearchFocused: false }), 150),
+      navSearchKey: (e) => {
+        if (e.key === 'Enter' && results.length) window.location.href = results[0].href;
+        if (e.key === 'Escape') this.setState({ navSearch: '', navSearchFocused: false });
+      },
+      navSearchResults: results,
+      navSearchOpen: !!(st.navSearchFocused && q),
+      navSearchEmpty: !!q && results.length === 0,
+      ...(() => { const dk = !!(window.theme && window.theme.isDark && window.theme.isDark()); return { navThemeDark: dk, navThemeIsLight: !dk, navThemeLightBg: dk ? 'transparent' : 'rgba(255,255,255,0.9)', navThemeLightFg: dk ? 'rgba(255,255,255,0.6)' : '#1C543A', navThemeDarkBg: dk ? 'rgba(255,255,255,0.18)' : 'transparent', navThemeDarkFg: dk ? '#FFFFFF' : 'rgba(255,255,255,0.6)', navThemeLight: () => { if (window.theme) window.theme.set('light'); }, navThemeDarkSet: () => { if (window.theme) window.theme.set('dark'); } }; })()
+    };
+  }
+
+  renderVals() {
+    const tabFlags = { isDocumentosTab: this.state.activeTab === 'documentos', isProcessosTab: this.state.activeTab === 'processos', isPrazosTab: this.state.activeTab === 'prazos', isFluxoTab: this.state.activeTab === 'fluxo', isCalendarioTab: this.state.activeTab === 'calendario' };
+    const { documentos, processos, prazosLista, activeTab } = this.state;
+    const critRows = window.DACalendar && window.DACalendar.critical ? window.DACalendar.critical(this._ownPrazos()).filter(r => !this.state.calHidden[r.module]) : [];
+    const criticosVencidos = critRows.filter(r => r.bucket === 'vencido').length;
+    const criticosProximos = critRows.filter(r => r.bucket === 'urgente').length;
+    const normalPrazos = critRows.filter(r => r.bucket === 'proximo').length;
+    const agendarPrazos = critRows.filter(r => r.bucket === 'agendar').length;
+    const janela7 = window.DALic ? window.DALic.CFG('painel.janelaUrgente', 7) : 7, janela30 = window.DALic ? window.DALic.CFG('painel.janelaProxima', 30) : 30;
+    const BK = { vencido: ['Vencido', '#DC2626'], urgente: ['Até ' + janela7 + ' dias', '#B45309'], proximo: ['Até ' + janela30 + ' dias', '#2563EB'], agendar: ['A agendar', '#92400E'] };
+
+    const term = this.state.docSearch.trim().toLowerCase();
+    const filteredDocs = documentos.filter(d => {
+      const matchesTerm = !term || d.assunto.toLowerCase().includes(term) || d.protocolo.toLowerCase().includes(term) || d.interessado.toLowerCase().includes(term);
+      const matchesStatus = this.state.docStatusFilter === 'todos' || d.status === this.state.docStatusFilter;
+      return matchesTerm && matchesStatus;
+    });
+    const canSubmitDoc = !!(this.state.docForm.assunto.trim() && this.state.docForm.interessado.trim());
+    const canSubmitProc = !!this.state.procForm.titulo.trim();
+    return {
+      ...this._shellVals(),
+      ...(() => {
+        const mods = (window.DACalendar && window.DACalendar.modules) || [];
+        const all = this._calEvents(), vis = this._visible();
+        const y = this.state.calYear, mi = this.state.calMonthIdx;
+        const today = this._iso(new Date()), sel = this.state.calSel;
+        const first = new Date(y, mi, 1), start = new Date(y, mi, 1 - first.getDay());
+        const isMobile = window.innerWidth < 900;
+        const wide = window.innerWidth >= 1280;
+        const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+        const LV = { critical: ['Crítico', '#FDECEC', '#B91C1C'], warning: ['Atenção', '#FEF3C7', '#92400E'] };
+        const weeks = [];
+        for (let w = 0; w < 6; w++) {
+          const days = [];
+          for (let k = 0; k < 7; k++) {
+            const d = new Date(start); d.setDate(start.getDate() + w * 7 + k);
+            const iso = this._iso(d), inMonth = d.getMonth() === mi;
+            const evs = vis.filter(e => e.start <= iso && e.end >= iso);
+            const max = isMobile ? 4 : 3;
+            days.push({ num: d.getDate(), bg: iso === sel ? '#F2F7F4' : inMonth ? '#FFFFFF' : '#FAFAFA',
+              ring: iso === sel ? 'inset 0 0 0 2px #1C543A' : 'none',
+              numBg: iso === today ? '#1C543A' : 'transparent', numColor: iso === today ? '#FFFFFF' : inMonth ? '#1D1D1B' : '#999999',
+              bars: evs.slice(0, max).map(e => ({ title: e.title, color: e.color, bg: e.color + '1A' })),
+              more: evs.length > max ? '+' + (evs.length - max) + ' mais' : '',
+              select: () => this.setState({ calSel: iso }) });
+          }
+          if (w === 5 && days.every(dd => dd.numColor === '#999999')) break;
+          weeks.push({ days: days });
+        }
+        const selEvents = vis.filter(e => e.start <= sel && e.end >= sel).map(e => {
+          const n = this._span(e), lv = LV[e.level];
+          return { ...e, period: n > 1 ? this._fmt(e.start) + ' a ' + this._fmt(e.end) + ' · ' + n + ' dias' : 'Prazo em ' + this._fmt(e.start), levelLabel: lv ? lv[0] : '', levelBg: lv ? lv[1] : '', levelColor: lv ? lv[2] : '' };
+        });
+        const MON = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+        const upcoming = vis.filter(e => e.end >= today).sort((a, b) => a.start.localeCompare(b.start)).slice(0, 8).map(e => {
+          const d = e.start < today ? today : e.start; const n = this._span(e);
+          return { title: e.title, moduleLabel: e.moduleLabel, color: e.color, day: d.slice(8, 10), mon: MON[Number(d.slice(5, 7)) - 1], duration: n > 1 ? n + ' dias (até ' + this._fmt(e.end) + ')' : 'prazo único' };
+        });
+        const selD = new Date(sel + 'T12:00:00');
+        return {
+          calMonthLabel: cap(first.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })),
+          calPrev: this.calPrev, calNext: this.calNext, calToday: this.calToday, calAllOn: this.calAllOn, calAllOff: this.calAllOff,
+          calModules: mods.map(m => { const on = !this.state.calHidden[m.key]; return { label: m.label, on: on, dot: on ? m.color : '#CCCCCC', bg: on ? m.color + '12' : '#FFFFFF', border: on ? m.color : '#E0E0E0', textColor: on ? '#1D1D1B' : '#999999', count: all.filter(e => e.module === m.key).length,
+            toggle: () => this.setState(s => ({ calHidden: { ...s.calHidden, [m.key]: !s.calHidden[m.key] } })) }; }),
+          calWeekdays: ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'], calWeeks: weeks,
+          calCellH: isMobile ? '64px' : '104px', calShowBars: !isMobile, calShowDots: isMobile, calLayout: wide ? 'minmax(0, 2.2fr) minmax(280px, 1fr)' : '1fr',
+          calSelLabel: cap(selD.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })), calSelEvents: selEvents, calSelEmpty: selEvents.length === 0, calUpcoming: upcoming
+        };
+      })(),
+      ...this._tabVals(["documentos","processos","fluxo","calendario"]),
+      ...(() => { const m = this.state.calMode || 'mes'; const o = {}; ['mes', 'lista'].forEach(k => { o['calMode_' + k] = () => this.setState({ calMode: k }); o['calModeIs_' + k] = m === k; o['calModeBg_' + k] = m === k ? '#FFFFFF' : 'transparent'; o['calModeColor_' + k] = m === k ? '#1C543A' : '#666666'; }); return o; })(),
+      ...tabFlags,
+      activeTab,
+      criticosVencidos,
+      criticosProximos,
+      normalPrazos,
+      sectors: this.state.sectors,
+      docSearch: this.state.docSearch,
+      handleDocSearch: this.handleDocSearch,
+      docStatusFilter: this.state.docStatusFilter,
+      handleDocStatusFilter: this.handleDocStatusFilter,
+      docShown: filteredDocs.length,
+      docTotal: documentos.length,
+      docEmpty: filteredDocs.length === 0,
+      newDocOpen: this.state.newDocOpen,
+      openNewDoc: this.openNewDoc,
+      closeNewDoc: this.closeNewDoc,
+      stopPropagation: this.stopPropagation,
+      docForm: this.state.docForm,
+      handleDocAssunto: this.handleDocAssunto,
+      handleDocInteressado: this.handleDocInteressado,
+      handleDocSetor: this.handleDocSetor,
+      submitNewDoc: this.submitNewDoc,
+      docSubmitDisabled: !canSubmitDoc,
+      docSubmitBg: canSubmitDoc ? '#1C543A' : '#B8C7BF',
+      docSubmitCursor: canSubmitDoc ? 'pointer' : 'not-allowed',
+      newProcOpen: this.state.newProcOpen,
+      openNewProc: this.openNewProc,
+      closeNewProc: this.closeNewProc,
+      procForm: this.state.procForm,
+      handleProcTitulo: this.handleProcTitulo,
+      handleProcDescricao: this.handleProcDescricao,
+      handleProcPriority: this.handleProcPriority,
+      handleProcResponsavel: this.handleProcResponsavel,
+      submitNewProc: this.submitNewProc,
+      procSubmitDisabled: !canSubmitProc,
+      procSubmitBg: canSubmitProc ? '#1C543A' : '#B8C7BF',
+      procSubmitCursor: canSubmitProc ? 'pointer' : 'not-allowed',
+      toastVisible: this.state.toastVisible,
+      toastMessage: this.state.toastMessage,
+      documentos: filteredDocs.map(d => {
+        const flowIdx = this.DOC_FLOW.indexOf(d.status);
+        return {...d,
+          statusStyle: ({'Registrado':'background-color: #3B82F622; color: #3B82F6;','Em Processamento':'background-color: #F59E0B22; color: #F59E0B;','Finalizado':'background-color: #1C543A22; color: #1C543A;'})[d.status] || 'background-color: #E8E8E8; color: #999999;',
+          canAdvance: flowIdx >= 0 && flowIdx < this.DOC_FLOW.length - 1,
+          nextLabel: flowIdx >= 0 && flowIdx < this.DOC_FLOW.length - 1 ? this.DOC_FLOW[flowIdx + 1] : '',
+          canBack: flowIdx > 0, prevLabel: flowIdx > 0 ? this.DOC_FLOW[flowIdx - 1] : '',
+          back: () => this.backDoc(d.protocolo), edit: () => this.openEditDoc(d.protocolo),
+          advance: () => this.advanceDoc(d.protocolo)};
+      }),
+      processos: processos.map(p => ({...p,
+        priorityStyle: ({'Alta':'background-color: #DC262622; color: #DC2626;','Média':'background-color: #F59E0B22; color: #F59E0B;'})[p.priority] || 'background-color: #1C543A22; color: #1C543A;',
+        canProgress: p.progresso < 100, addProgress: () => this.addProgress(p.id), canBack: p.progresso > 0, subProgress: () => this.subProgress(p.id), edit: () => this.openEditProc(p.id)})),
+      prazosLista: critRows.map(r => { const b = BK[r.bucket]; return { processo: r.moduleLabel, descricao: r.title, dataVencimento: r.date ? r.date.split('-').reverse().join('/') : 'Sem data', urgencia: b[0], urgColor: b[1], urgStyle: 'background-color: ' + b[1] + '1F; color: ' + b[1] + ';', modColor: r.color, own: r.own, notOwn: !r.own, href: r.href, resolve: () => this.resolvePrazo(r.ref), edit: () => this.openEditPrazo(r.ref) }; }),
+      prazoOpen: !!this.state.prazoForm, prazoForm: this.state.prazoForm || {}, prazoError: this.state.prazoError, prazoTitle: this.state.prazoForm && this.state.prazoForm.id ? 'Editar prazo' : 'Novo prazo',
+      prazoRefs: this._prazoRefs(), openNewPrazo: this.openNewPrazo, closePrazo: this.closePrazo, savePrazo: this.savePrazo,
+      setPrazoRef: this.setPrazoField('processo'), setPrazoDesc: this.setPrazoField('descricao'), setPrazoData: (e) => { const v = e.target.value; const iso = this._parsePrazo(v); this.setState(s => ({ prazoForm: { ...s.prazoForm, dataTxt: /^\+/.test(v.trim()) && iso ? this._br(iso) : v, dataVencimento: iso }, prazoError: '' })); },
+      prazoHint: '· digite +X para somar X dias a hoje',
+      docSubmitLabel: this.state.docEditId ? 'Salvar alterações' : 'Protocolar', procSubmitLabel: this.state.procEditId ? 'Salvar alterações' : 'Criar Processo',
+      docModalTitle: this.state.docEditId ? 'Editar documento ' + this.state.docEditId : 'Protocolar Documento',
+      procModalTitle: this.state.procEditId ? 'Editar processo ' + this.state.procEditId : 'Novo Processo',
+      handleDocPrazo: this.handleDocPrazo, handleDocPrazoDesc: this.handleDocPrazoDesc, handleProcPrazo: this.handleProcPrazo, handleProcPrazoDesc: this.handleProcPrazoDesc,
+      prazosEmpty: critRows.length === 0, agendarPrazos, labelUrgente: 'Até ' + janela7 + ' dias', labelProximo: 'De ' + (+janela7 + 1) + ' a ' + janela30 + ' dias',
+      setTab: this.setTab
+    };
+  }
+}
+
+</script>
+</body>
+</html>

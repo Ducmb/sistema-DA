@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <script src="./theme.js"></script>
+  <script src="./config.js"></script>
+  <script src="./session.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema DA - Notifications</title>
+  <script src="./liccont.js"></script>
+  <script src="./api.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #FAFAFA;
+      color: #1D1D1B;
+    }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+  </style>
+</helmet>
+
+<div style="display: flex; min-height: 100vh; background-color: #FFFFFF; position: relative;">
+  <sc-if value="{{ navOverlayVisible }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ navClose }}" style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); z-index: 40;"></div>
+  </sc-if>
+  <aside style="background-color: #1C543A; color: #FFFFFF; width: 250px; flex-shrink: 0; display: flex; flex-direction: column; padding: 22px 16px; gap: 22px; position: {{ navSidebarPosition }}; top: 0; left: 0; height: 100vh; overflow-y: auto; z-index: 50; transform: {{ navSidebarTransform }}; transition: transform 0.3s cubic-bezier(0.34, 1.25, 0.64, 1);">
+      <a href="Dashboard.dc.html" title="Voltar ao Painel de Controle" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: #FFFFFF; padding: 0 4px;">
+        <div style="width: 36px; height: 36px; background-color: #FFFFFF; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; color: #1C543A; flex-shrink: 0;">DA</div>
+        <div>
+          <p style="font-size: 12.5px; font-weight: 700; line-height: 1.3; color: #FFFFFF;">CÂMARA MUNICIPAL</p>
+          <p style="font-size: 9.5px; letter-spacing: 0.4px; color: rgba(255,255,255,0.65); text-transform: uppercase;">Diretoria Administrativa</p>
+        </div>
+      </a>
+      <nav style="display: flex; flex-direction: column; gap: 2px;">
+        <p style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: rgba(255,255,255,0.5); padding: 0 12px; margin-bottom: 6px;">Sistemas &amp; Gestão</p>
+        <a href="Dashboard.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 13px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">▦</span>Painel de Controle</a>
+        <a href="AlmoxarifadoAmostragem.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 13px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">📦</span>Almoxarifado</a>
+        <a href="ComprasModule.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 13px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">🛒</span>Compras &amp; Licitações</a>
+        <a href="MocoesHomenagens.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 13px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">🎗</span>Moções &amp; Homenagens</a>
+        <a href="PatrimonioModule.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 13px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">🏛</span>Patrimônio</a>
+      </nav>
+      <nav style="display: flex; flex-direction: column; gap: 2px;">
+        <p style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: rgba(255,255,255,0.5); padding: 0 12px; margin-bottom: 6px;">Módulos Complementares</p>
+        <a href="AnalyticsModule.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">📈</span>Analytics &amp; Relatórios</a>
+        <a href="RHModule.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">🧑‍💼</span>Gestão de Pessoal</a>
+        <a href="Legislacoes.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">⚖</span>Legislações</a>
+        <a href="AuditLog.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">🛡</span>Log e Auditoria</a>
+        <a href="Configuracoes.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">⚙</span>Configurações do Sistema</a>
+      <a href="ProtocoloModule.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">📋</span>Protocolo</a>
+      </nav>
+      <div style="margin-top: auto; display: flex; flex-direction: column; gap: 4px; padding-top: 8px;">
+        <a href="UserProfile.dc.html" style="display: flex; align-items: center; gap: 10px; background-color: rgba(255,255,255,0.08); border-radius: 10px; padding: 12px; text-decoration: none; color: #FFFFFF;" style-hover="background-color: rgba(255,255,255,0.14);">
+          <div style="width: 34px; height: 34px; border-radius: 50%; background-color: #F0B429; color: #1C543A; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; flex-shrink: 0;">RA</div>
+          <div style="min-width: 0;">
+            <p style="font-size: 12.5px; font-weight: 700; color: #FFFFFF;">Dr. Roberto Alencar</p>
+            <p style="font-size: 10.5px; color: rgba(255,255,255,0.6);">DA-2026-948 · Diretoria</p>
+          </div>
+        </a>
+        <div role="group" aria-label="Aparência" style="display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 40px; padding: 0 12px;">
+          <span style="font-size: 11px; font-weight: 600; letter-spacing: 0.3px; color: rgba(255,255,255,0.6);">Aparência</span>
+          <div style="display: flex; padding: 2px; border-radius: 999px; background-color: rgba(0,0,0,0.22);">
+            <button onClick="{{ navThemeLight }}" aria-pressed="{{ navThemeIsLight }}" aria-label="Modo padrão" title="Modo padrão" style="width: 30px; height: 26px; border: none; border-radius: 999px; background-color: {{ navThemeLightBg }}; color: {{ navThemeLightFg }}; font-size: 13px; line-height: 1; cursor: pointer; transition: background-color 0.2s;">☀</button>
+            <button onClick="{{ navThemeDarkSet }}" aria-pressed="{{ navThemeDark }}" aria-label="Modo escuro" title="Modo escuro" style="width: 30px; height: 26px; border: none; border-radius: 999px; background-color: {{ navThemeDarkBg }}; color: {{ navThemeDarkFg }}; font-size: 13px; line-height: 1; cursor: pointer; transition: background-color 0.2s;">☾</button>
+          </div>
+        </div>
+        <a href="Login.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; color: rgba(255,255,255,0.7); text-decoration: none; font-size: 12.5px; font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1); color: #FFFFFF;"><span style="width: 18px; text-align: center; flex-shrink: 0;">⎋</span>Sair do sistema</a>
+      </div>
+    </aside>
+  <div style="flex: 1; min-width: 0; display: flex; flex-direction: column;">
+    <div style="position: sticky; top: 0; z-index: 30; background-color: rgba(255,255,255,0.96); backdrop-filter: blur(6px); border-bottom: 1px solid #E8E8E8; min-height: 64px; padding: 10px {{ navGutter }}; display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+      <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
+        <sc-if value="{{ navIsMobile }}" hint-placeholder-val="{{ false }}">
+          <button onClick="{{ navOpen }}" aria-label="Abrir menu" style="width: 44px; height: 44px; border-radius: 8px; border: 1px solid #E0E0E0; background-color: #FFFFFF; font-size: 18px; color: #1D1D1B; cursor: pointer; flex-shrink: 0;">☰</button>
+          <a href="Dashboard.dc.html" title="Painel de Controle" style="width: 36px; height: 36px; background-color: #1C543A; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 12px; color: #FFFFFF; text-decoration: none; flex-shrink: 0;">DA</a>
+        </sc-if>
+        <sc-if value="{{ navShowBreadcrumb }}" hint-placeholder-val="{{ true }}">
+          <div style="display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: #666666; white-space: nowrap;">
+            <a href="Dashboard.dc.html" style="color: #666666; text-decoration: none;" style-hover="color: #1C543A;">Painel de Controle</a>
+            <span style="color: #CCCCCC;">›</span>
+            <span style="color: #1D1D1B; font-weight: 600;">Notificações</span>
+          </div>
+        </sc-if>
+      </div>
+      <div style="display: flex; align-items: center; gap: 10px; flex: 1; justify-content: flex-end; min-width: 0;">
+        <div style="position: relative; flex: 1; max-width: 340px; min-width: 0;">
+          <input type="search" placeholder="Buscar módulos e telas…" aria-label="Busca global" value="{{ navSearch }}" onInput="{{ navSearchInput }}" onFocus="{{ navSearchFocus }}" onBlur="{{ navSearchBlur }}" onKeyDown="{{ navSearchKey }}" style="width: 100%; height: 44px; padding: 0 12px 0 34px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; color: #1D1D1B; background-color: #F9F9F9;" style-focus="border-color: #1C543A; background-color: #FFFFFF; outline: none;"/>
+          <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 14px; color: #999999; pointer-events: none;">⌕</span>
+          <sc-if value="{{ navSearchOpen }}" hint-placeholder-val="{{ false }}">
+            <div style="position: absolute; top: 50px; right: 0; left: 0; min-width: 240px; background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 8px; box-shadow: 0 12px 32px rgba(0,0,0,0.12); padding: 6px; z-index: 60;">
+              <sc-for list="{{ navSearchResults }}" as="r" hint-placeholder-count="3">
+                <a href="{{ r.href }}" onMouseDown="{{ r.go }}" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 10px; border-radius: 6px; text-decoration: none; color: #1D1D1B; font-size: 13px;" style-hover="background-color: #F2F7F4;">
+                  <span style="width: 20px; text-align: center; flex-shrink: 0;">{{ r.icon }}</span>
+                  <span style="flex: 1; font-weight: 600;">{{ r.label }}</span>
+                  <span style="font-size: 11px; color: #999999;">{{ r.group }}</span>
+                </a>
+              </sc-for>
+              <sc-if value="{{ navSearchEmpty }}" hint-placeholder-val="{{ false }}">
+                <p style="padding: 12px 10px; font-size: 12.5px; color: #999999;">Nenhum resultado para “{{ navSearch }}”</p>
+              </sc-if>
+            </div>
+          </sc-if>
+        </div>
+        <a href="NotificationsModule.dc.html" title="Notificações" style="position: relative; width: 44px; height: 44px; border-radius: 8px; border: 1px solid #E0E0E0; background-color: #FFFFFF; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 16px; flex-shrink: 0;" style-hover="border-color: #1C543A;">🔔<span style="position: absolute; top: 9px; right: 10px; width: 7px; height: 7px; border-radius: 50%; background-color: #DC2626; border: 1.5px solid #FFFFFF;"></span></a>
+      </div>
+    </div>
+    <div style="padding: {{ navHeaderPad }}; display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+      <div>
+        <p style="font-size: 11px; font-weight: 700; letter-spacing: 0.6px; color: #1C543A; text-transform: uppercase;">Sistema de Gestão Integrada &nbsp;•&nbsp; Notificações</p>
+        <h1 style="font-size: {{ navTitleSize }}; font-weight: 800; color: #1D1D1B; margin-top: 6px;">Central de Notificações</h1>
+      </div>
+      <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+        <span style="font-size: 12px; font-weight: 600; background-color: #EAF3EE; color: #1C543A; padding: 6px 12px; border-radius: 999px;">{{ unreadCount }} não lidas</span>
+        <button 
+        onClick="{{ toggleTheme }}"
+        style="background-color: #FFFFFF; border: 1px solid #E0E0E0; color: #1D1D1B; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; padding: 6px; border-radius: 8px; transition: background-color 0.2s;"
+        style-hover="background-color: #FFFFFF;"
+      >
+        {{ themeIcon }}
+      </button>
+      </div>
+    </div>
+
+  <!-- Tab Navigation -->
+  <div style="background-color: #FFFFFF; border-bottom: 1px solid #E8E8E8; padding: 0 {{ navGutter }}; display: flex; gap: 24px; overflow-x: auto; overflow-x: auto;">
+    <button onClick="{{ tab_inbox_go }}" style="padding: 16px 0; background: none; border: none; font-size: 13px; font-weight: 600; color: {{ tab_inbox_color }}; cursor: pointer; border-bottom: 2px solid {{ tab_inbox_border }}; transition: all 0.2s ease; white-space: nowrap;">
+      📬 Caixa de Entrada
+    </button>
+    <button onClick="{{ tab_unread_go }}" style="padding: 16px 0; background: none; border: none; font-size: 13px; font-weight: 600; color: {{ tab_unread_color }}; cursor: pointer; border-bottom: 2px solid {{ tab_unread_border }}; transition: all 0.2s ease; white-space: nowrap;">
+      🔴 Não Lidas ({{ unreadCount }})
+    </button>
+    <button onClick="{{ tab_archived_go }}" style="padding: 16px 0; background: none; border: none; font-size: 13px; font-weight: 600; color: {{ tab_archived_color }}; cursor: pointer; border-bottom: 2px solid {{ tab_archived_border }}; transition: all 0.2s ease; white-space: nowrap;">
+      📦 Arquivadas
+    </button>
+    <button onClick="{{ tab_preferences_go }}" style="padding: 16px 0; background: none; border: none; font-size: 13px; font-weight: 600; color: {{ tab_preferences_color }}; cursor: pointer; border-bottom: 2px solid {{ tab_preferences_border }}; transition: all 0.2s ease; white-space: nowrap;">
+      ⚙️ Preferências
+    </button>
+  </div>
+
+  <main style="flex: 1; width: 100%; padding: 24px {{ navGutter }} 40px;">
+    <!-- Inbox Tab -->
+    <sc-if value="{{ isInboxTab }}" hint-placeholder-val="{{ true }}">
+      <div style="animation: fadeInUp 0.4s ease-out;">
+        <!-- Filter Bar -->
+        <div style="background-color: #FFFFFF; padding: 16px; border-radius: 8px; border: 1px solid #E8E8E8; margin-bottom: 16px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
+          <input 
+            type="text"
+            placeholder="🔍 Buscar notificações..."
+            style="flex: 1; min-width: 200px; padding: 10px 12px; border: 1px solid #E8E8E8; border-radius: 6px; font-size: 13px; background-color: #FFFFFF;"
+            onChange="{{ handleSearchChange }}"
+          />
+          <select style="padding: 10px 12px; border: 1px solid #E8E8E8; border-radius: 6px; font-size: 13px; background-color: #FFFFFF; cursor: pointer;">
+            <option>Todos os tipos</option>
+            <option>Alertas</option>
+            <option>Mensagens</option>
+            <option>Aprovações</option>
+            <option>Atualizações</option>
+          </select>
+          <button onClick="{{ clearAll }}" style="padding: 10px 16px; background-color: #F5F5F5; border: 1px solid #E8E8E8; border-radius: 6px; font-size: 13px; cursor: pointer; transition: all 0.2s;" style-hover="background-color: #E8E8E8;">
+            Limpar todos
+          </button>
+        </div>
+
+        <!-- Notifications List -->
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <sc-for list="{{ notifications }}" as="notif" hint-placeholder-count="5">
+            <div 
+              style="background-color: #FFFFFF; padding: 16px; border-radius: 8px; border-left: 4px solid {{ notif.color }}; border: 1px solid #E8E8E8; animation: slideIn 0.3s ease-out; display: flex; align-items: flex-start; gap: 12px; cursor: pointer; transition: all 0.2s;"
+              style-hover="background-color: #F9F9F9; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"
+              onClick="{{ notif.onSelect }}"
+            >
+              <!-- Icon -->
+              <span style="font-size: 20px; flex-shrink: 0; margin-top: 2px;">{{ notif.icon }}</span>
+              
+              <!-- Content -->
+              <div style="flex: 1; min-width: 0;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
+                  <p style="font-size: 13px; font-weight: 600; color: #1D1D1B;">{{ notif.title }}</p>
+                  <sc-if value="{{ notif.unread }}" hint-placeholder-val="{{ false }}">
+                    <div style="width: 8px; height: 8px; background-color: {{ notif.color }}; border-radius: 50%; flex-shrink: 0;"></div>
+                  </sc-if>
+                </div>
+                <p style="font-size: 12px; color: #666666; margin-bottom: 8px; line-height: 1.4;">{{ notif.message }}</p>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <p style="font-size: 11px; color: #999999;">{{ notif.time }}</p>
+                  <div style="display: flex; gap: 8px;">
+                    <button 
+                      style="font-size: 12px; padding: 4px 8px; background-color: #F5F5F5; border: 1px solid #E8E8E8; border-radius: 4px; cursor: pointer; transition: all 0.2s;"
+                      style-hover="background-color: #E8E8E8;"
+                      onClick="{{ (e) => { e.stopPropagation(); markAsRead(notif.id); } }}"
+                    >
+                      {{ notif.readLabel }}
+                    </button>
+                    <button 
+                      style="font-size: 12px; padding: 4px 8px; background-color: #F5F5F5; border: 1px solid #E8E8E8; border-radius: 4px; cursor: pointer; transition: all 0.2s;"
+                      style-hover="background-color: #E8E8E8;"
+                      onClick="{{ (e) => { e.stopPropagation(); archiveNotification(notif.id); } }}"
+                    >
+                      📦
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+
+        <sc-if value="{{ notificationsEmpty }}" hint-placeholder-val="{{ false }}">
+          <div style="text-align: center; padding: 40px; background-color: #FFFFFF; border-radius: 8px; border: 1px solid #E8E8E8;">
+            <p style="font-size: 32px; margin-bottom: 12px;">📭</p>
+            <p style="font-size: 14px; font-weight: 600; color: #1D1D1B; margin-bottom: 4px;">Nenhuma notificação</p>
+            <p style="font-size: 12px; color: #999999;">Você está em dia com todas as atualizações</p>
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <!-- Unread Tab -->
+    <sc-if value="{{ isUnreadTab }}" hint-placeholder-val="{{ false }}">
+      <div style="animation: fadeInUp 0.4s ease-out;">
+        <button onClick="{{ markAllRead }}" style="margin-bottom: 16px; padding: 10px 16px; background-color: #1C543A; color: #FFFFFF; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; transition: background-color 0.2s;" style-hover="background-color: #164530;">
+          ✓ Marcar tudo como lido
+        </button>
+        
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <sc-for list="{{ unreadNotifications }}" as="notif" hint-placeholder-count="4">
+            <div 
+              style="background-color: #FFFFFF; padding: 16px; border-radius: 8px; border-left: 4px solid {{ notif.color }}; border: 1px solid #E8E8E8; display: flex; align-items: flex-start; gap: 12px; cursor: pointer; transition: all 0.2s; background-color: {{ notif.color }}11;"
+              style-hover="box-shadow: 0 2px 8px rgba(0,0,0,0.1);"
+            >
+              <span style="font-size: 20px; flex-shrink: 0; margin-top: 2px;">{{ notif.icon }}</span>
+              <div style="flex: 1; min-width: 0;">
+                <p style="font-size: 13px; font-weight: 600; color: #1D1D1B; margin-bottom: 6px;">{{ notif.title }}</p>
+                <p style="font-size: 12px; color: #666666; margin-bottom: 8px;">{{ notif.message }}</p>
+                <p style="font-size: 11px; color: #999999;">{{ notif.time }}</p>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- Archived Tab -->
+    <sc-if value="{{ isArchivedTab }}" hint-placeholder-val="{{ false }}">
+      <div style="animation: fadeInUp 0.4s ease-out;">
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <sc-for list="{{ archivedNotifications }}" as="notif" hint-placeholder-count="3">
+            <div style="background-color: #FFFFFF; padding: 16px; border-radius: 8px; border: 1px solid #E8E8E8; display: flex; align-items: center; justify-content: space-between; opacity: 0.7;">
+              <div style="display: flex; align-items: center; gap: 12px; flex: 1;">
+                <span style="font-size: 16px;">{{ notif.icon }}</span>
+                <div style="min-width: 0;">
+                  <p style="font-size: 13px; font-weight: 600; color: #1D1D1B;">{{ notif.title }}</p>
+                  <p style="font-size: 11px; color: #999999;">Arquivado {{ notif.archivedTime }}</p>
+                </div>
+              </div>
+              <button onClick="{{ notif.restore }}" style="padding: 6px 12px; background-color: #F5F5F5; border: 1px solid #E8E8E8; border-radius: 4px; font-size: 12px; cursor: pointer;">
+                Restaurar
+              </button>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- Preferences Tab -->
+    <sc-if value="{{ isPreferencesTab }}" hint-placeholder-val="{{ false }}">
+      <div style="animation: fadeInUp 0.4s ease-out;">
+        <div style="max-width: 600px;">
+          <!-- Notification Type Settings -->
+          <div style="background-color: #FFFFFF; padding: 20px; border-radius: 8px; border: 1px solid #E8E8E8; margin-bottom: 20px;">
+            <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 16px; color: #1D1D1B;">Tipos de Notificação</h3>
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+              <sc-for list="{{ notificationTypes }}" as="type" hint-placeholder-count="5">
+                <div style="padding: 12px; border: 1px solid #E8E8E8; border-radius: 6px; display: flex; align-items: center; justify-content: space-between;">
+                  <div>
+                    <p style="font-size: 13px; font-weight: 600; color: #1D1D1B; margin-bottom: 4px;">{{ type.label }}</p>
+                    <p style="font-size: 11px; color: #999999;">{{ type.description }}</p>
+                  </div>
+                  <input 
+                    type="checkbox"
+                    checked="{{ type.enabled }}"
+                    style="width: 18px; height: 18px; cursor: pointer; accent-color: #1C543A;"
+                    onChange="{{ type.onToggle }}"
+                  />
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <!-- Delivery Method -->
+          <div style="background-color: #FFFFFF; padding: 20px; border-radius: 8px; border: 1px solid #E8E8E8; margin-bottom: 20px;">
+            <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 16px; color: #1D1D1B;">Método de Entrega</h3>
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+              <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                <input type="checkbox" checked="true" style="width: 18px; height: 18px; cursor: pointer; accent-color: #1C543A;" />
+                <span style="font-size: 13px; color: #1D1D1B;">Notificações em tempo real no aplicativo</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                <input type="checkbox" checked="true" style="width: 18px; height: 18px; cursor: pointer; accent-color: #1C543A;" />
+                <span style="font-size: 13px; color: #1D1D1B;">Notificações por e-mail (diárias às 09h)</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                <input type="checkbox" checked="false" style="width: 18px; height: 18px; cursor: pointer; accent-color: #1C543A;" />
+                <span style="font-size: 13px; color: #1D1D1B;">Notificações por SMS (apenas críticas)</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Quiet Hours -->
+          <div style="background-color: #FFFFFF; padding: 20px; border-radius: 8px; border: 1px solid #E8E8E8; margin-bottom: 20px;">
+            <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 16px; color: #1D1D1B;">Horário de Silêncio</h3>
+            <div style="display: flex; gap: 12px; align-items: center;">
+              <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                <input type="checkbox" checked="true" style="width: 18px; height: 18px; cursor: pointer; accent-color: #1C543A;" />
+                <span style="font-size: 13px; color: #1D1D1B;">Ativar</span>
+              </label>
+              <input type="time" value="22:00" style="padding: 8px 10px; border: 1px solid #E8E8E8; border-radius: 4px; font-size: 13px;" />
+              <span style="font-size: 13px; color: #999999;">até</span>
+              <input type="time" value="08:00" style="padding: 8px 10px; border: 1px solid #E8E8E8; border-radius: 4px; font-size: 13px;" />
+            </div>
+            <p style="font-size: 11px; color: #999999; margin-top: 8px;">Apenas notificações críticas serão entregues fora do horário de trabalho</p>
+          </div>
+
+          <!-- Save Button -->
+          <button onClick="{{ savePrefs }}" style="width: 100%; padding: 12px; background-color: #1C543A; color: #FFFFFF; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background-color 0.2s;" style-hover="background-color: #164530;">
+            💾 Salvar Preferências
+          </button>
+        <sc-if value="{{ prefsSaved }}" hint-placeholder-val="{{ false }}"><p role="status" style="margin-top: 10px; font-size: 12.5px; font-weight: 600; color: #1C543A; text-align: center;">✓ Preferências salvas</p></sc-if>
+        </div>
+      </div>
+    </sc-if>
+  </main>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: &quot;100%&quot;, &quot;height&quot;: &quot;900px&quot;}}">
+class Component extends DCLogic {
+  state = {
+    activeTab: 'inbox',
+    isDarkMode: window.theme?.current === 'dark' || false,
+    notifications: [
+      { id: 1, link: 'AlmoxarifadoAmostragem.dc.html', icon: '🔴', title: 'Alerta Crítico', message: 'Caderno Universitário abaixo do estoque mínimo (11/50)', time: 'há 8 min', color: '#DC2626', unread: true, type: 'alert' },
+      { id: 2, link: 'ComprasModule.dc.html?tab=requests', icon: '🟠', title: 'Aprovação Pendente', message: 'Pedido 847/2026 aguardando sua aprovação', time: 'há 35 min', color: '#F59E0B', unread: true, type: 'approval' },
+      { id: 3, link: 'MocoesHomenagens.dc.html', icon: '🟢', title: 'Processo Concluído', message: 'Moção 402/2026 foi aprovada com sucesso', time: 'há 2h', color: '#1C543A', unread: false, type: 'update' },
+      { id: 4, link: 'ProtocoloModule.dc.html?tab=processos', icon: '🔵', title: 'Nova Mensagem', message: 'Carlos Mendes comentou no processo 840/2026', time: 'há 3h', color: '#3B82F6', unread: false, type: 'message' },
+      { id: 5, link: 'RHModule.dc.html', icon: '💜', title: 'Atualizações do Sistema', message: 'Novos campos foram adicionados ao módulo de RH', time: 'há 1 dia', color: '#A855F7', unread: false, type: 'update' }
+    ],
+    archivedNotifications: [
+      { id: 101, link: 'ComprasModule.dc.html?tab=requests', icon: '📦', title: 'Compra Finalizada', archivedTime: 'há 2 dias' },
+      { id: 102, link: 'RHModule.dc.html?tab=vacation', icon: '✅', title: 'Férias Processadas', archivedTime: 'há 5 dias' }
+    ],
+    notificationTypes: [
+      { id: 'alert', label: 'Alertas Críticos', description: 'Estoque baixo, prazos vencidos, erros', enabled: true },
+      { id: 'approval', label: 'Aprovações Pendentes', description: 'Itens aguardando sua aprovação', enabled: true },
+      { id: 'message', label: 'Mensagens', description: 'Comentários e respostas', enabled: true },
+      { id: 'update', label: 'Atualizações', description: 'Mudanças de status e conclusões', enabled: true },
+      { id: 'reminder', label: 'Lembretes', description: 'Próximas ações e prazos', enabled: false }
+    ]
+  };
+
+  get unreadCount() {
+    return this.state.notifications.filter(n => n.unread).length;
+  }
+
+  get unreadNotifications() {
+    return this.state.notifications.filter(n => n.unread);
+  }
+
+  setTab = (tab) => {
+    this.setState({ activeTab: tab });
+  };
+
+  toggleTheme = () => {
+    if (window.theme) {
+      window.theme.toggle();
+    }
+  };
+
+  markAsRead = (id) => {
+    this.setState(s => ({
+      notifications: s.notifications.map(n => 
+        n.id === id ? { ...n, unread: false } : n
+      )
+    }));
+  };
+
+  archiveNotification = (id) => {
+    this.setState(s => {
+      const notif = s.notifications.find(n => n.id === id);
+      if (notif) {
+        return {
+      ...this._tabVals(["inbox","unread","archived","preferences"]),
+          notifications: s.notifications.filter(n => n.id !== id),
+          archivedNotifications: [...s.archivedNotifications, { 
+            ...notif, 
+            archivedTime: 'just now' 
+          }]
+        };
+      }
+      return s;
+    });
+  };
+
+  selectNotification = (id, e) => {
+    if (e && e.target && e.target.closest && e.target.closest('button')) return;
+    const all = this.state.notifications.concat(this.state.archivedNotifications);
+    const n = all.find(x => x.id === id);
+    this.setState(s => ({ notifications: s.notifications.map(x => x.id === id ? { ...x, unread: false } : x) }));
+    if (n && n.link) location.href = n.link;
+  };
+  markAllRead = () => { this.setState(s => ({ notifications: s.notifications.map(x => ({ ...x, unread: false })) })); };
+  clearAll = () => { this.setState(s => ({ archivedNotifications: s.notifications.map(x => ({ ...x, unread: false, archivedTime: 'agora' })).concat(s.archivedNotifications), notifications: [] })); };
+  restoreNotification = (id) => { this.setState(s => { const n = s.archivedNotifications.find(x => x.id === id); if (!n) return null; return { archivedNotifications: s.archivedNotifications.filter(x => x.id !== id), notifications: [{ color: '#1C543A', message: n.title, time: n.archivedTime || '', type: 'update', ...n, unread: false }].concat(s.notifications) }; }); };
+  savePrefs = () => { try { localStorage.setItem('DA_notif_prefs', JSON.stringify(this.state.notificationTypes)); } catch (e) {} this.setState({ prefsSaved: true }); clearTimeout(this._ps); this._ps = setTimeout(() => this.setState({ prefsSaved: false }), 2500); };
+
+  handleSearchChange = (e) => {
+    // Placeholder for search functionality
+  };
+
+  toggleNotificationType = (typeId) => {
+    this.setState(s => ({
+      notificationTypes: s.notificationTypes.map(t =>
+        t.id === typeId ? { ...t, enabled: !t.enabled } : t
+      )
+    }));
+  };
+
+  _origMount() {
+    window.addEventListener('themechange', (e) => {
+      this.setState({ isDarkMode: e.detail.theme === 'dark' });
+    });
+  }
+
+  _tabVals(keys) {
+    const o = {};
+    for (const k of keys) {
+      o['tab_' + k + '_go'] = () => this.setTab(k);
+      o['tab_' + k + '_color'] = this.state.activeTab === k ? '#1C543A' : '#999999';
+      o['tab_' + k + '_border'] = this.state.activeTab === k ? '#1C543A' : 'transparent';
+    }
+    return o;
+  }
+
+  _shellVals() {
+    if (!this._navBound) {
+      this._navBound = true;
+      window.addEventListener('resize', () => this.forceUpdate());
+      window.addEventListener('themechange', () => this.forceUpdate());
+    }
+    const st = this.state || {};
+    const isMobile = window.innerWidth < 900;
+    const open = !!st.navMenuOpen && isMobile;
+    const norm = s => String(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    const q = norm((st.navSearch || '').trim());
+    const INDEX = [["Dashboard.dc.html","▦","Painel de Controle","Sistemas & Gestão","painel dashboard indicadores alertas prazos fluxo"],["AlmoxarifadoAmostragem.dc.html","📦","Almoxarifado","Sistemas & Gestão","almoxarifado estoque amostragem materiais contagem"],["MocoesHomenagens.dc.html","🎗","Moções & Homenagens","Sistemas & Gestão","mocoes homenagens galeria vereador portaria"],["PatrimonioModule.dc.html","🏛","Patrimônio","Sistemas & Gestão","patrimonio bens tombamento transferencias ativos"],["UserProfile.dc.html","👤","Meus Dados (Perfil)","Sistemas & Gestão","perfil meus dados telefone email aniversario"],["ComprasModule.dc.html","🛒","Compras & Licitações","Sistemas & Gestão","compras licitacoes requisicoes fornecedores pregao"],["ProtocoloModule.dc.html","📋","Protocolo","Complementares","protocolo documentos processos prazos"],["RHModule.dc.html","🧑‍💼","Gestão de Pessoal","Complementares","rh recursos humanos servidores ferias"],["AnalyticsModule.dc.html","📈","Analytics & Relatórios","Complementares","analytics relatorios metricas indicadores"],["AuditLog.dc.html","🛡","Log e Auditoria","Administração","log auditoria seguranca acessos lgpd logins"],["Configuracoes.dc.html","⚙","Configurações do Sistema","Administração","configuracoes parametros parametrizacao ajustes alertas limites acessos perfis"],["Legislacoes.dc.html","⚖","Legislações","Administração","legislacao leis decretos portarias resolucoes recomendacoes normas"]];
+    const results = q ? INDEX.filter(i => norm(i[2] + ' ' + i[4]).includes(q)).slice(0, 6).map(i => ({ href: i[0], icon: i[1], label: i[2], group: i[3], go: () => { window.location.href = i[0]; } })) : [];
+    return {
+      navIsMobile: isMobile,
+      navOverlayVisible: open,
+      navSidebarPosition: isMobile ? 'fixed' : 'sticky',
+      navSidebarTransform: isMobile ? (open ? 'translateX(0)' : 'translateX(-100%)') : 'translateX(0)',
+      navOpen: () => this.setState({ navMenuOpen: true }),
+      navClose: () => this.setState({ navMenuOpen: false }),
+      navGutter: isMobile ? '16px' : '36px',
+      navHeaderPad: isMobile ? '18px 16px 12px' : '28px 36px 16px',
+      navTitleSize: isMobile ? '24px' : '30px',
+      navShowBreadcrumb: !isMobile,
+      navSearch: st.navSearch || '',
+      navSearchInput: (e) => this.setState({ navSearch: e.target.value, navSearchFocused: true }),
+      navSearchFocus: () => this.setState({ navSearchFocused: true }),
+      navSearchBlur: () => setTimeout(() => this.setState({ navSearchFocused: false }), 150),
+      navSearchKey: (e) => {
+        if (e.key === 'Enter' && results.length) window.location.href = results[0].href;
+        if (e.key === 'Escape') this.setState({ navSearch: '', navSearchFocused: false });
+      },
+      navSearchResults: results,
+      navSearchOpen: !!(st.navSearchFocused && q),
+      navSearchEmpty: !!q && results.length === 0,
+      ...(() => { const dk = !!(window.theme && window.theme.isDark && window.theme.isDark()); return { navThemeDark: dk, navThemeIsLight: !dk, navThemeLightBg: dk ? 'transparent' : 'rgba(255,255,255,0.9)', navThemeLightFg: dk ? 'rgba(255,255,255,0.6)' : '#1C543A', navThemeDarkBg: dk ? 'rgba(255,255,255,0.18)' : 'transparent', navThemeDarkFg: dk ? '#FFFFFF' : 'rgba(255,255,255,0.6)', navThemeLight: () => { if (window.theme) window.theme.set('light'); }, navThemeDarkSet: () => { if (window.theme) window.theme.set('dark'); } }; })()
+    };
+  }
+
+  _mergeLive() {
+    const L = window.DALic; if (!L) return;
+    const ICON = { critical: ['🔴', '#DC2626'], warning: ['🟠', '#F59E0B'], info: ['🔵', '#2563EB'] };
+    this.setState(s => {
+      const known = new Set(s.notifications.map(n => n.id).concat(s.archivedNotifications.map(n => n.id)));
+      const live = L.alerts().filter(a => !known.has(a.id)).map(a => ({ id: a.id, live: true, link: a.href || (a.category === 'CONTRATOS' ? 'ComprasModule.dc.html?tab=contratos' : 'ComprasModule.dc.html?tab=processos'), icon: (ICON[a.level] || ICON.info)[0], color: (ICON[a.level] || ICON.info)[1], title: a.title, message: a.description, time: 'agora', unread: true, type: 'alert' }));
+      return live.length ? { notifications: live.concat(s.notifications) } : null;
+    });
+  }
+  componentDidMount() {
+    const w = () => { if (window.DALic) this._mergeLive(); else setTimeout(w, 200); }; w();
+    this._onLic = () => this._mergeLive(); window.addEventListener('licchange', this._onLic);
+    if (this._origMount) this._origMount();
+  }
+
+  renderVals() {
+    const tabFlags = { isInboxTab: this.state.activeTab === 'inbox', isUnreadTab: this.state.activeTab === 'unread', isArchivedTab: this.state.activeTab === 'archived', isPreferencesTab: this.state.activeTab === 'preferences' };
+    return {
+      markAllRead: this.markAllRead, clearAll: this.clearAll, savePrefs: this.savePrefs, prefsSaved: !!this.state.prefsSaved,
+      ...this._shellVals(),
+      ...this._tabVals(["inbox","unread","archived","preferences"]),
+      ...tabFlags,
+      activeTab: this.state.activeTab,
+      isDarkMode: this.state.isDarkMode,
+      unreadCount: this.unreadCount,
+      notifications: this.state.notifications.map(n => ({...n, onSelect: (e) => this.selectNotification(n.id, e), readLabel: n.unread ? '✓ Marcar lido' : 'Lido'})),
+      unreadNotifications: this.unreadNotifications.map(n => ({...n, onSelect: (e) => this.selectNotification(n.id, e), readLabel: n.unread ? '✓ Marcar lido' : 'Lido'})),
+      archivedNotifications: this.state.archivedNotifications.map(n => ({...n, restore: () => this.restoreNotification(n.id), onSelect: (e) => this.selectNotification(n.id, e), readLabel: n.unread ? '✓ Marcar lido' : 'Lido'})),
+      notificationTypes: this.state.notificationTypes.map(ty => ({...ty, onToggle: () => this.toggleNotificationType(ty.id)})),
+      notificationsEmpty: this.state.notifications.length === 0,
+      themeIcon: this.state.isDarkMode ? '☀️' : '🌙',
+      setTab: this.setTab,
+      toggleTheme: this.toggleTheme,
+      markAsRead: this.markAsRead,
+      archiveNotification: this.archiveNotification,
+      selectNotification: this.selectNotification,
+      handleSearchChange: this.handleSearchChange,
+      toggleNotificationType: this.toggleNotificationType
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <script src="./theme.js"></script>
+  <script src="./config.js"></script>
+  <script src="./session.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema DA - Login</title>
+  <script src="./api.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #FFFFFF;
+      color: #1D1D1B;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    input:focus { outline: none; }
+  </style>
+</helmet>
+
+<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; background-color: #FFFFFF;">
+  <div style="animation: fadeIn 0.6s ease-out; width: 100%; max-width: 400px;">
+    <!-- Logo -->
+    <div style="text-align: center; margin-bottom: 40px;">
+      <div style="width: 60px; height: 60px; background-color: #1C543A; border-radius: 8px; margin: 0 auto; display: flex; align-items: center; justify-content: center; color: #FFFFFF; font-weight: bold; font-size: 28px;">
+        DA
+      </div>
+      <h1 style="font-size: 24px; font-weight: 600; margin-top: 16px; color: #1D1D1B;">Sistema DA</h1>
+      <p style="font-size: 14px; color: #999999; margin-top: 4px;">Diretoria Administrativa</p>
+    </div>
+
+    <!-- Form Container -->
+    <form style="display: flex; flex-direction: column; gap: 16px;" onSubmit="{{ handleLogin }}">
+      <!-- Username Field -->
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        <label style="font-size: 13px; font-weight: 500; color: #1D1D1B;">Usuário</label>
+        <input 
+          type="text" 
+          placeholder="Digite seu usuário"
+          value="{{ username }}"
+          onChange="{{ handleUsernameChange }}"
+          style="padding: 12px 14px; border: 1px solid #E0E0E0; border-radius: 6px; font-size: 14px; color: #1D1D1B; background-color: #FFFFFF; transition: border-color 0.2s ease;"
+          style-focus="border-color: #1C543A; box-shadow: 0 0 0 2px rgba(28, 84, 58, 0.1);"
+        />
+      </div>
+
+      <!-- Password Field -->
+      <div style="display: flex; flex-direction: column; gap: 6px;">
+        <label style="font-size: 13px; font-weight: 500; color: #1D1D1B;">Senha</label>
+        <div style="position: relative; display: flex; align-items: center;">
+          <input 
+            type="{{ passwordInputType }}"
+            placeholder="Digite sua senha"
+            value="{{ password }}"
+            onChange="{{ handlePasswordChange }}"
+            style="width: 100%; padding: 12px 14px; border: 1px solid #E0E0E0; border-radius: 6px; font-size: 14px; color: #1D1D1B; background-color: #FFFFFF; transition: border-color 0.2s ease; padding-right: 40px;"
+            style-focus="border-color: #1C543A; box-shadow: 0 0 0 2px rgba(28, 84, 58, 0.1);"
+          />
+          <button 
+            type="button"
+            onClick="{{ togglePasswordVisibility }}"
+            style="position: absolute; right: 12px; background: none; border: none; cursor: pointer; color: #999999; font-size: 16px; padding: 4px; display: flex; align-items: center; justify-content: center;"
+          >
+            {{ passwordToggleIcon }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Remember Me Checkbox -->
+      <div style="display: flex; align-items: center; gap: 8px; margin: 8px 0;">
+        <input 
+          type="checkbox"
+          id="rememberMe"
+          checked="{{ rememberMe }}"
+          onChange="{{ handleRememberMeChange }}"
+          style="width: 16px; height: 16px; cursor: pointer; accent-color: #1C543A;"
+        />
+        <label htmlFor="rememberMe" style="font-size: 13px; color: #666666; cursor: pointer; user-select: none;">
+          Lembrar meus dados
+        </label>
+      </div>
+
+      <!-- Login Button -->
+      <button 
+        type="submit"
+        disabled="{{ isLoading }}"
+        style="padding: 12px 16px; background-color: #1C543A; color: #FFFFFF; border: none; border-radius: 6px; font-size: 15px; font-weight: 600; cursor: pointer; transition: background-color 0.2s ease; margin-top: 8px;"
+        style-hover="background-color: #164530;"
+        style-disabled="background-color: #CCCCCC; cursor: not-allowed;"
+      >
+        {{ loginButtonLabel }}
+      </button>
+    </form>
+
+    <!-- Forgot Password Link & Theme Toggle -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 16px;">
+      <a href="ForgotPassword.dc.html" style="font-size: 13px; color: #1C543A; text-decoration: none; transition: opacity 0.2s ease; cursor: pointer;">
+        Esqueci minha senha
+      </a>
+      <button 
+        onClick="{{ toggleTheme }}"
+        style="background: none; border: none; color: #1C543A; font-size: 16px; cursor: pointer; padding: 4px; transition: opacity 0.2s;"
+        style-hover="opacity: 0.7;"
+      >
+        {{ themeIcon }}
+      </button>
+    </div>
+
+    <!-- Error Message -->
+    <sc-if value="{{ errorMessage }}" hint-placeholder-val="{{ false }}">
+      <div style="margin-top: 16px; padding: 12px 14px; background-color: #FEE; border-left: 3px solid #C33; border-radius: 4px; font-size: 13px; color: #933;">
+        {{ errorMessage }}
+      </div>
+    </sc-if>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: &quot;400px&quot;, &quot;height&quot;: &quot;600px&quot;}}">
+class Component extends DCLogic {
+  state = {
+    username: '',
+    password: '',
+    showPassword: false,
+    rememberMe: false,
+    isLoading: false,
+    errorMessage: '',
+    isDarkMode: window.theme?.current === 'dark' || false
+  };
+
+  componentDidMount() {
+    window.addEventListener('themechange', (e) => {
+      this.setState({ isDarkMode: e.detail.theme === 'dark' });
+    });
+    const motivo = new URLSearchParams(location.search).get('motivo');
+    if (motivo === 'expirada') this.setState({ errorMessage: 'Sessão expirada por inatividade. Entre novamente.' });
+    if (motivo === 'login') this.setState({ errorMessage: 'Faça login para continuar.' });
+    const saved = localStorage.getItem('DA_user');
+    if (saved) {
+      try {
+        const { username, rememberMe } = JSON.parse(saved);
+        if (rememberMe) {
+          this.setState({ username, rememberMe: true });
+        }
+      } catch (e) {}
+    }
+  }
+
+  handleUsernameChange = (e) => {
+    this.setState({ username: e.target.value, errorMessage: '' });
+  };
+
+  handlePasswordChange = (e) => {
+    this.setState({ password: e.target.value, errorMessage: '' });
+  };
+
+  togglePasswordVisibility = () => {
+    this.setState(s => ({ showPassword: !s.showPassword }));
+  };
+
+  handleRememberMeChange = (e) => {
+    this.setState({ rememberMe: e.target.checked });
+  };
+
+  handleLogin = async (e) => {
+    e.preventDefault();
+    const { username, password, rememberMe } = this.state;
+
+    if (!username || !password) {
+      this.setState({ errorMessage: 'Preencha todos os campos' });
+      return;
+    }
+
+    const cfg = (k, d) => (window.DAConfig ? +window.DAConfig.get(k) : d);
+    const LK = 'DA_login_fail', uk = String(username).trim().toLowerCase();
+    let fails = {}; try { fails = JSON.parse(localStorage.getItem(LK)) || {}; } catch (er) {}
+    const f0 = fails[uk] || { n: 0, until: 0 };
+    if (f0.until > Date.now()) { this.setState({ errorMessage: 'Conta bloqueada temporariamente. Tente novamente em ' + Math.ceil((f0.until - Date.now()) / 60000) + ' min.' }); return; }
+    this.setState({ isLoading: true, errorMessage: '' });
+
+    try {
+      // Call API login (window.API.login returns mock data by default)
+      const response = await window.API.login(username, password);
+      
+      if (!response.success) {
+        const n = (f0.until && f0.until <= Date.now() ? 0 : f0.n) + 1, max = cfg('geral.loginTentativas', 5);
+        fails[uk] = n >= max ? { n: 0, until: Date.now() + cfg('geral.loginBloqueioMin', 15) * 60000 } : { n: n, until: 0 };
+        try { localStorage.setItem(LK, JSON.stringify(fails)); } catch (er) {}
+        this.setState({ errorMessage: n >= max ? 'Muitas tentativas. Conta bloqueada por ' + cfg('geral.loginBloqueioMin', 15) + ' min.' : 'Usuário ou senha inválidos (' + (max - n) + ' tentativa(s) restante(s))' });
+        if (window.DAAudit) window.DAAudit.log('Falha de login', 'auth', 'Usuário: ' + username, 'warning', 'desconhecido');
+        return;
+      }
+
+      delete fails[uk]; try { localStorage.setItem(LK, JSON.stringify(fails)); } catch (er) {}
+      window.DASession.start(response.user, response.token);
+
+      if (rememberMe) {
+        localStorage.setItem('DA_user', JSON.stringify({ username, rememberMe }));
+      }
+      
+      window.location.href = (window.DASession && window.DASession.home) ? window.DASession.home() : 'Dashboard.dc.html';
+    } catch (err) {
+      this.setState({ errorMessage: err.message || 'Erro ao fazer login. Tente novamente.' });
+    } finally {
+      this.setState({ isLoading: false });
+    }
+  };
+
+  toggleTheme = () => {
+    if (window.theme) {
+      window.theme.toggle();
+    }
+  };
+
+  renderVals() {
+    return {
+      isDarkMode: this.state.isDarkMode,
+      username: this.state.username,
+      password: this.state.password,
+      showPassword: this.state.showPassword,
+      rememberMe: this.state.rememberMe,
+      isLoading: this.state.isLoading,
+      errorMessage: this.state.errorMessage,
+      handleUsernameChange: this.handleUsernameChange,
+      handlePasswordChange: this.handlePasswordChange,
+      togglePasswordVisibility: this.togglePasswordVisibility,
+      handleRememberMeChange: this.handleRememberMeChange,
+      handleLogin: this.handleLogin,
+      toggleTheme: this.toggleTheme,
+      passwordInputType: this.state.showPassword ? 'text' : 'password',
+      passwordToggleIcon: this.state.showPassword ? '🔓' : '🔒',
+      loginButtonLabel: this.state.isLoading ? 'Entrando...' : 'Entrar',
+      themeIcon: this.state.isDarkMode ? '☀️' : '🌙'
+    };
+  }
+}
+
+</script>
+</body>
+</html>

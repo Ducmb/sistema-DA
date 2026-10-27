@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <script src="./theme.js"></script>
+  <script src="./config.js"></script>
+  <script src="./session.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema DA - Módulo de RH</title>
+  <script src="./calendar-feed.js"></script>
+  <script src="./api.js"></script>
+  <script src="./sectors.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #FAFAFA;
+      color: #1D1D1B;
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</helmet>
+
+<div style="display: flex; min-height: 100vh; background-color: #FFFFFF; position: relative;">
+  <sc-if value="{{ navOverlayVisible }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ navClose }}" style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); z-index: 40;"></div>
+  </sc-if>
+  <aside style="background-color: #1C543A; color: #FFFFFF; width: 250px; flex-shrink: 0; display: flex; flex-direction: column; padding: 22px 16px; gap: 22px; position: {{ navSidebarPosition }}; top: 0; left: 0; height: 100vh; overflow-y: auto; z-index: 50; transform: {{ navSidebarTransform }}; transition: transform 0.3s cubic-bezier(0.34, 1.25, 0.64, 1);">
+      <a href="Dashboard.dc.html" title="Voltar ao Painel de Controle" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: #FFFFFF; padding: 0 4px;">
+        <div style="width: 36px; height: 36px; background-color: #FFFFFF; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; color: #1C543A; flex-shrink: 0;">DA</div>
+        <div>
+          <p style="font-size: 12.5px; font-weight: 700; line-height: 1.3; color: #FFFFFF;">CÂMARA MUNICIPAL</p>
+          <p style="font-size: 9.5px; letter-spacing: 0.4px; color: rgba(255,255,255,0.65); text-transform: uppercase;">Diretoria Administrativa</p>
+        </div>
+      </a>
+      <nav style="display: flex; flex-direction: column; gap: 2px;">
+        <p style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: rgba(255,255,255,0.5); padding: 0 12px; margin-bottom: 6px;">Sistemas &amp; Gestão</p>
+        <a href="Dashboard.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 13px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">▦</span>Painel de Controle</a>
+        <a href="AlmoxarifadoAmostragem.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 13px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">📦</span>Almoxarifado</a>
+        <a href="ComprasModule.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 13px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">🛒</span>Compras &amp; Licitações</a>
+        <a href="MocoesHomenagens.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 13px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">🎗</span>Moções &amp; Homenagens</a>
+        <a href="PatrimonioModule.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 13px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">🏛</span>Patrimônio</a>
+      </nav>
+      <nav style="display: flex; flex-direction: column; gap: 2px;">
+        <p style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: rgba(255,255,255,0.5); padding: 0 12px; margin-bottom: 6px;">Módulos Complementares</p>
+        <a href="AnalyticsModule.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">📈</span>Analytics &amp; Relatórios</a>
+        <a href="RHModule.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; background-color: #FFFFFF; color: #1C543A; font-weight: 700;"><span style="width: 18px; text-align: center; flex-shrink: 0;">🧑‍💼</span>Gestão de Pessoal</a>
+        <a href="Legislacoes.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">⚖</span>Legislações</a>
+        <a href="AuditLog.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">🛡</span>Log e Auditoria</a>
+        <a href="Configuracoes.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">⚙</span>Configurações do Sistema</a>
+      <a href="ProtocoloModule.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">📋</span>Protocolo</a>
+      </nav>
+      <div style="margin-top: auto; display: flex; flex-direction: column; gap: 4px; padding-top: 8px;">
+        <a href="UserProfile.dc.html" style="display: flex; align-items: center; gap: 10px; background-color: rgba(255,255,255,0.08); border-radius: 10px; padding: 12px; text-decoration: none; color: #FFFFFF;" style-hover="background-color: rgba(255,255,255,0.14);">
+          <div style="width: 34px; height: 34px; border-radius: 50%; background-color: #F0B429; color: #1C543A; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; flex-shrink: 0;">RA</div>
+          <div style="min-width: 0;">
+            <p style="font-size: 12.5px; font-weight: 700; color: #FFFFFF;">Dr. Roberto Alencar</p>
+            <p style="font-size: 10.5px; color: rgba(255,255,255,0.6);">DA-2026-948 · Diretoria</p>
+          </div>
+        </a>
+        <div role="group" aria-label="Aparência" style="display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 40px; padding: 0 12px;">
+          <span style="font-size: 11px; font-weight: 600; letter-spacing: 0.3px; color: rgba(255,255,255,0.6);">Aparência</span>
+          <div style="display: flex; padding: 2px; border-radius: 999px; background-color: rgba(0,0,0,0.22);">
+            <button onClick="{{ navThemeLight }}" aria-pressed="{{ navThemeIsLight }}" aria-label="Modo padrão" title="Modo padrão" style="width: 30px; height: 26px; border: none; border-radius: 999px; background-color: {{ navThemeLightBg }}; color: {{ navThemeLightFg }}; font-size: 13px; line-height: 1; cursor: pointer; transition: background-color 0.2s;">☀</button>
+            <button onClick="{{ navThemeDarkSet }}" aria-pressed="{{ navThemeDark }}" aria-label="Modo escuro" title="Modo escuro" style="width: 30px; height: 26px; border: none; border-radius: 999px; background-color: {{ navThemeDarkBg }}; color: {{ navThemeDarkFg }}; font-size: 13px; line-height: 1; cursor: pointer; transition: background-color 0.2s;">☾</button>
+          </div>
+        </div>
+        <a href="Login.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; color: rgba(255,255,255,0.7); text-decoration: none; font-size: 12.5px; font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1); color: #FFFFFF;"><span style="width: 18px; text-align: center; flex-shrink: 0;">⎋</span>Sair do sistema</a>
+      </div>
+    </aside>
+  <div style="flex: 1; min-width: 0; display: flex; flex-direction: column;">
+    <div style="position: sticky; top: 0; z-index: 30; background-color: rgba(255,255,255,0.96); backdrop-filter: blur(6px); border-bottom: 1px solid #E8E8E8; min-height: 64px; padding: 10px {{ navGutter }}; display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+      <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
+        <sc-if value="{{ navIsMobile }}" hint-placeholder-val="{{ false }}">
+          <button onClick="{{ navOpen }}" aria-label="Abrir menu" style="width: 44px; height: 44px; border-radius: 8px; border: 1px solid #E0E0E0; background-color: #FFFFFF; font-size: 18px; color: #1D1D1B; cursor: pointer; flex-shrink: 0;">☰</button>
+          <a href="Dashboard.dc.html" title="Painel de Controle" style="width: 36px; height: 36px; background-color: #1C543A; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 12px; color: #FFFFFF; text-decoration: none; flex-shrink: 0;">DA</a>
+        </sc-if>
+        <sc-if value="{{ navShowBreadcrumb }}" hint-placeholder-val="{{ true }}">
+          <div style="display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: #666666; white-space: nowrap;">
+            <a href="Dashboard.dc.html" style="color: #666666; text-decoration: none;" style-hover="color: #1C543A;">Painel de Controle</a>
+            <span style="color: #CCCCCC;">›</span>
+            <span style="color: #1D1D1B; font-weight: 600;">Gestão de Pessoal</span>
+          </div>
+        </sc-if>
+      </div>
+      <div style="display: flex; align-items: center; gap: 10px; flex: 1; justify-content: flex-end; min-width: 0;">
+        <div style="position: relative; flex: 1; max-width: 340px; min-width: 0;">
+          <input type="search" placeholder="Buscar módulos e telas…" aria-label="Busca global" value="{{ navSearch }}" onInput="{{ navSearchInput }}" onFocus="{{ navSearchFocus }}" onBlur="{{ navSearchBlur }}" onKeyDown="{{ navSearchKey }}" style="width: 100%; height: 44px; padding: 0 12px 0 34px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; color: #1D1D1B; background-color: #F9F9F9;" style-focus="border-color: #1C543A; background-color: #FFFFFF; outline: none;"/>
+          <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 14px; color: #999999; pointer-events: none;">⌕</span>
+          <sc-if value="{{ navSearchOpen }}" hint-placeholder-val="{{ false }}">
+            <div style="position: absolute; top: 50px; right: 0; left: 0; min-width: 240px; background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 8px; box-shadow: 0 12px 32px rgba(0,0,0,0.12); padding: 6px; z-index: 60;">
+              <sc-for list="{{ navSearchResults }}" as="r" hint-placeholder-count="3">
+                <a href="{{ r.href }}" onMouseDown="{{ r.go }}" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 10px; border-radius: 6px; text-decoration: none; color: #1D1D1B; font-size: 13px;" style-hover="background-color: #F2F7F4;">
+                  <span style="width: 20px; text-align: center; flex-shrink: 0;">{{ r.icon }}</span>
+                  <span style="flex: 1; font-weight: 600;">{{ r.label }}</span>
+                  <span style="font-size: 11px; color: #999999;">{{ r.group }}</span>
+                </a>
+              </sc-for>
+              <sc-if value="{{ navSearchEmpty }}" hint-placeholder-val="{{ false }}">
+                <p style="padding: 12px 10px; font-size: 12.5px; color: #999999;">Nenhum resultado para “{{ navSearch }}”</p>
+              </sc-if>
+            </div>
+          </sc-if>
+        </div>
+        <a href="NotificationsModule.dc.html" title="Notificações" style="position: relative; width: 44px; height: 44px; border-radius: 8px; border: 1px solid #E0E0E0; background-color: #FFFFFF; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 16px; flex-shrink: 0;" style-hover="border-color: #1C543A;">🔔<span style="position: absolute; top: 9px; right: 10px; width: 7px; height: 7px; border-radius: 50%; background-color: #DC2626; border: 1.5px solid #FFFFFF;"></span></a>
+      </div>
+    </div>
+    <div style="padding: {{ navHeaderPad }}; display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+      <div>
+        <p style="font-size: 11px; font-weight: 700; letter-spacing: 0.6px; color: #1C543A; text-transform: uppercase;">Sistema de Gestão Integrada &nbsp;•&nbsp; Gestão de Pessoal</p>
+        <h1 style="font-size: {{ navTitleSize }}; font-weight: 800; color: #1D1D1B; margin-top: 6px;">Módulo de Gestão de Pessoal</h1>
+      </div>
+    </div>
+
+  <!-- Tab Navigation -->
+  <div style="background-color: #FFFFFF; border-bottom: 1px solid #E8E8E8; padding: 0 {{ navGutter }}; display: flex; gap: 24px; overflow-x: auto; overflow-x: auto;">
+    <button onClick="{{ tab_employees_go }}" style="padding: 16px 0; background: none; border: none; font-size: 13px; font-weight: 600; color: {{ tab_employees_color }}; cursor: pointer; border-bottom: 2px solid {{ tab_employees_border }}; transition: all 0.2s ease; white-space: nowrap;">
+      Servidores
+    </button>
+        <button onClick="{{ tab_vacation_go }}" style="padding: 16px 0; background: none; border: none; font-size: 13px; font-weight: 600; color: {{ tab_vacation_color }}; cursor: pointer; border-bottom: 2px solid {{ tab_vacation_border }}; transition: all 0.2s ease; white-space: nowrap;">
+      Férias e Licenças
+    </button>
+        <button onClick="{{ tab_analytics_go }}" style="padding: 16px 0; background: none; border: none; font-size: 13px; font-weight: 600; color: {{ tab_analytics_color }}; cursor: pointer; border-bottom: 2px solid {{ tab_analytics_border }}; transition: all 0.2s ease; white-space: nowrap;">
+      Indicadores
+    </button>
+<sc-if value="{{ canUsuarios }}" hint-placeholder-val="{{ true }}">
+        <button onClick="{{ tab_usuarios_go }}" style="padding: 16px 0; background: none; border: none; font-size: 13px; font-weight: 600; color: {{ tab_usuarios_color }}; cursor: pointer; border-bottom: 2px solid {{ tab_usuarios_border }}; transition: all 0.2s ease; white-space: nowrap;">
+      Usuários &amp; Permissões
+    </button>
+    </sc-if>
+  </div>
+
+  <main style="flex: 1; width: 100%; padding: 24px {{ navGutter }} 40px;">
+    <!-- Servidores Tab -->
+    <sc-if value="{{ isEmployeesTab }}" hint-placeholder-val="{{ true }}">
+      <div style="animation: fadeInUp 0.4s ease-out;">
+        <!-- Filter and Add Button -->
+        <div style="background-color: #FFFFFF; padding: 16px; border-radius: 8px; border: 1px solid #E8E8E8; margin-bottom: 16px; display: flex; gap: 12px; flex-wrap: wrap; justify-content: space-between; align-items: center;">
+          <div style="display: flex; gap: 12px; flex-wrap: wrap; flex: 1;">
+            <select style="padding: 8px 12px; border: 1px solid #E8E8E8; border-radius: 6px; font-size: 13px; background-color: #FFFFFF; cursor: pointer;">
+              <option>Todos os Status</option>
+              <option>Ativo</option>
+              <option>Afastado</option>
+              <option>Aposentado</option>
+            </select>
+            <select style="padding: 8px 12px; border: 1px solid #E8E8E8; border-radius: 6px; font-size: 13px; background-color: #FFFFFF; cursor: pointer;">
+              <option>Todos os Setores</option>
+              <sc-for list="{{ sectors }}" as="sec" hint-placeholder-count="3">
+                <option value="{{ sec }}">{{ sec }}</option>
+              </sc-for>
+            </select>
+          </div>
+          <button onClick="{{ openNewEmp }}" style="padding: 8px 16px; background-color: #1C543A; color: #FFFFFF; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap;">
+            + Novo Servidor
+          </button>
+        </div>
+
+        <!-- Employees Table -->
+        <div style="background-color: #FFFFFF; border-radius: 8px; border: 1px solid #E8E8E8; overflow-x: auto;">
+          <div style="min-width: 680px;">
+          <div style="padding: 16px 20px; border-bottom: 1px solid #E8E8E8; display: grid; grid-template-columns: 2fr 1.2fr 1fr 1fr 1fr; gap: 12px; background-color: #F9F9F9; font-weight: 600; font-size: 12px; color: #999999; text-transform: uppercase; letter-spacing: 0.5px;">
+            <div>Servidor</div>
+            <div>Cargo</div>
+            <div>Setor</div>
+            <div>Status</div>
+            <div>Ações</div>
+          </div>
+
+          <sc-for list="{{ employees }}" as="emp" hint-placeholder-count="5">
+            <div style="padding: 16px 20px; border-bottom: 1px solid #E8E8E8; display: grid; grid-template-columns: 2fr 1.2fr 1fr 1fr 1fr; gap: 12px; align-items: center;" style-hover="background-color: #F5F5F5; transition: background-color 0.2s ease;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="width: 32px; height: 32px; border-radius: 50%; background-color: #1C543A22; color: #1C543A; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 12px;">
+                  {{ emp.initials }}
+                </div>
+                <div>
+                  <p style="font-size: 13px; font-weight: 600; color: #1D1D1B;">{{ emp.name }}</p>
+                  <p style="font-size: 11px; color: #999999;">MAT: {{ emp.registration }}</p>
+                </div>
+              </div>
+              <p style="font-size: 13px; color: #666666;">{{ emp.position }}</p>
+              <p style="font-size: 13px; color: #666666;">{{ emp.department }}</p>
+              <div>
+                <span style="padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 600; {{ emp.statusStyle }}">
+                  {{ emp.status }}
+                </span>
+              </div>
+              <div style="display: flex; gap: 6px;">
+                <button onClick="{{ emp.view }}" style="padding: 4px 10px; background-color: #F5F5F5; border: 1px solid #E8E8E8; border-radius: 4px; font-size: 11px; cursor: pointer; transition: all 0.2s ease;" style-hover="background-color: #E8E8E8;">Ver</button>
+                <button onClick="{{ emp.edit }}" style="padding: 4px 10px; background-color: #F5F5F5; border: 1px solid #E8E8E8; border-radius: 4px; font-size: 11px; cursor: pointer; transition: all 0.2s ease;" style-hover="background-color: #E8E8E8;">Editar</button>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+        </div>
+      </div>
+    </sc-if>
+
+    
+    <!-- Férias e Licenças Tab -->
+    <sc-if value="{{ isVacationTab }}" hint-placeholder-val="{{ false }}">
+      <div style="animation: fadeInUp 0.4s ease-out;">
+        <!-- Request Vacation Button -->
+        <div style="margin-bottom: 16px;">
+          <button onClick="{{ openVac }}" style="height: 44px; padding: 0 16px; background-color: #1C543A; color: #FFFFFF; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; transition: background-color 0.2s ease;" style-hover="background-color: #164530;">
+            + Solicitar Férias/Licença
+          </button>
+        </div>
+
+        <!-- Vacation Requests -->
+        <div style="background-color: #FFFFFF; border-radius: 8px; border: 1px solid #E8E8E8; overflow-x: auto;">
+          <div style="min-width: 680px;">
+          <div style="padding: 16px 20px; border-bottom: 1px solid #E8E8E8; display: grid; grid-template-columns: 1.5fr 1fr 0.9fr 0.9fr 0.6fr 0.9fr 1fr; gap: 12px; background-color: #F9F9F9; font-weight: 600; font-size: 12px; color: #666666; text-transform: uppercase; letter-spacing: 0.5px;">
+            <div>Servidor</div>
+            <div>Tipo</div>
+            <div>Data Início</div>
+            <div>Data Fim</div>
+            <div>Dias</div>
+            <div>Status</div>
+            <div>Ações</div>
+          </div>
+
+          <sc-for list="{{ vacationRequests }}" as="vac" hint-placeholder-count="5">
+            <div style="padding: 12px 20px; border-bottom: 1px solid #E8E8E8; display: grid; grid-template-columns: 1.5fr 1fr 0.9fr 0.9fr 0.6fr 0.9fr 1fr; gap: 12px; align-items: center;" style-hover="background-color: #F5F5F5;">
+              <p style="font-size: 13px; font-weight: 600; color: #1D1D1B;">{{ vac.employee }}</p>
+              <p style="font-size: 12px; color: #666666;">{{ vac.type }}</p>
+              <p style="font-size: 12px; color: #666666;">{{ vac.startDate }}</p>
+              <p style="font-size: 12px; color: #666666;">{{ vac.endDate }}</p>
+              <p style="font-size: 12px; color: #666666;">{{ vac.days }}</p>
+              <div><span style="padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 600; {{ vac.statusStyle }}">{{ vac.status }}</span></div>
+              <div style="display: flex; gap: 6px;">
+                <sc-if value="{{ vac.isPending }}" hint-placeholder-val="{{ false }}">
+                  <button onClick="{{ vac.approve }}" style="height: 32px; padding: 0 10px; background-color: #1C543A; color: #FFFFFF; border: none; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer;" style-hover="background-color: #164530;">✓ Aprovar</button>
+                  <button onClick="{{ vac.reject }}" aria-label="Recusar" style="height: 32px; padding: 0 10px; background-color: #FFFFFF; color: #DC2626; border: 1px solid #DC2626; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer;" style-hover="background-color: #FDF3F2;">✕</button>
+                </sc-if>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+        </div>
+      </div>
+    </sc-if>
+
+    
+    <!-- Indicadores Tab -->
+    <sc-if value="{{ isAnalyticsTab }}" hint-placeholder-val="{{ false }}">
+      <div style="animation: fadeInUp 0.4s ease-out; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px;">
+        <!-- KPI Cards -->
+        <sc-for list="{{ kpis }}" as="kpi" hint-placeholder-count="4">
+          <div style="background-color: #FFFFFF; padding: 20px; border-radius: 8px; border: 1px solid #E8E8E8; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+            <p style="font-size: 12px; font-weight: 600; color: #999999; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px;">{{ kpi.label }}</p>
+            <p style="font-size: 28px; font-weight: 700; color: #1D1D1B;">{{ kpi.value }}</p>
+            <p style="font-size: 11px; color: #999999; margin-top: 8px;">{{ kpi.detail }}</p>
+            <div style="margin-top: 8px; color: {{ kpi.trendColor }}; font-size: 12px; font-weight: 600;">
+              {{ kpi.trend }}
+            </div>
+          </div>
+        </sc-for>
+
+        <!-- Headcount Chart -->
+        <div style="background-color: #FFFFFF; padding: 20px; border-radius: 8px; border: 1px solid #E8E8E8; grid-column: 1 / -1;">
+          <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 16px; color: #1D1D1B;">Força de Trabalho por Setor</h3>
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <sc-for list="{{ sectorHeadcount }}" as="sh" hint-placeholder-count="3">
+              <div style="display: flex; flex-direction: column; gap: 4px;">
+                <div style="display: flex; justify-content: space-between; gap: 8px; font-size: 12.5px;"><span style="font-weight: 600; color: #1D1D1B;">{{ sh.label }}</span><span style="font-weight: 700; color: #1C543A;">{{ sh.value }}</span></div>
+                <div style="height: 8px; border-radius: 999px; background-color: #EDEDEB;"><div style="height: 8px; border-radius: 999px; background-color: #1C543A; width: {{ sh.bar }};"></div></div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- Controle de Acesso (RBAC) Tab -->
+    <sc-if value="{{ isUsuariosTab }}" hint-placeholder-val="{{ false }}">
+      <dc-import name="PessoalUsuarios" hint-size="100%,1000px"></dc-import>
+      <div style="margin-top: 28px; padding-top: 20px; border-top: 1px solid #1C543A;">
+        <h2 style="font-size: 16px; font-weight: 700; color: #1D1D1B;">Perfis de acesso (por papel)</h2>
+        <p style="font-size: 12.5px; color: #666666; margin: 4px 0 16px;">Permissões padrão de cada papel. As chaves acima ajustam o acesso de cada servidor individualmente.</p>
+
+      <div style="animation: fadeInUp 0.4s ease-out;">
+        <!-- Role Summary Cards -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 20px;">
+          <sc-for list="{{ roles }}" as="role" hint-placeholder-count="4">
+            <div style="background-color: #FFFFFF; padding: 16px; border-radius: 8px; border: 1px solid #E8E8E8; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                <h4 style="font-size: 13px; font-weight: 600; color: #1D1D1B;">{{ role.name }}</h4>
+                <span style="font-size: 11px; font-weight: 600; background-color: {{ role.color }}22; color: {{ role.color }}; padding: 2px 6px; border-radius: 3px;">{{ role.count }} usuários</span>
+              </div>
+              <p style="font-size: 11px; color: #999999; margin-bottom: 10px;">{{ role.description }}</p>
+              <button onClick="{{ goRbac }}" style="width: 100%; padding: 8px; background-color: #F5F5F5; border: 1px solid #E8E8E8; border-radius: 4px; font-size: 12px; cursor: pointer; transition: all 0.2s ease;" style-hover="background-color: #E8E8E8; border-color: #1C543A;">
+                Gerenciar Permissões
+              </button>
+            </div>
+          </sc-for>
+        </div>
+
+        <!-- Permissions Matrix -->
+        <div style="background-color: #FFFFFF; padding: 20px; border-radius: 8px; border: 1px solid #E8E8E8; margin-bottom: 20px;">
+          <h3 style="font-size: 14px; font-weight: 600; margin-bottom: 16px; color: #1D1D1B;">Matriz de Permissões por Função</h3>
+          <div style="overflow-x: auto;">
+            <div style="overflow-x: auto;"><table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+              <thead>
+                <tr style="background-color: #F9F9F9; border-bottom: 2px solid #E8E8E8;">
+                  <th style="padding: 12px; text-align: left; font-weight: 600; color: #999999; text-transform: uppercase; letter-spacing: 0.5px;">Permissão</th>
+                  <sc-for list="{{ roles }}" as="role" hint-placeholder-count="4">
+                    <th style="padding: 12px; text-align: center; font-weight: 600; color: #999999; text-transform: uppercase; letter-spacing: 0.5px; border-left: 1px solid #E8E8E8;">{{ role.name }}</th>
+                  </sc-for>
+                </tr>
+              </thead>
+              <tbody>
+                <sc-for list="{{ permissions }}" as="perm" hint-placeholder-count="8">
+                  <tr style="border-bottom: 1px solid #E8E8E8;" style-hover="background-color: #F9F9F9;">
+                    <td style="padding: 12px; font-weight: 500; color: #1D1D1B;">{{ perm.name }}</td>
+                    <sc-for list="{{ perm.roleCells }}" as="cell" hint-placeholder-count="4">
+                      <td style="padding: 12px; text-align: center; border-left: 1px solid #E8E8E8;">
+                        <input 
+                          type="checkbox" 
+                          checked="{{ cell.checked }}" 
+                          style="width: 18px; height: 18px; cursor: pointer; accent-color: #1C543A;"
+                          onChange="{{ cell.onToggle }}"
+                        />
+                      </td>
+                    </sc-for>
+                  </tr>
+                </sc-for>
+              </tbody>
+            </table></div>
+          </div>
+        </div>
+
+        <!-- User Roles Assignment -->
+        <div style="background-color: #FFFFFF; padding: 20px; border-radius: 8px; border: 1px solid #E8E8E8;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+            <h3 style="font-size: 14px; font-weight: 600; color: #1D1D1B;">Atribuição de Funções aos Usuários</h3>
+            <input 
+              type="text" 
+              placeholder="🔍 Buscar usuário..."
+              style="padding: 8px 12px; border: 1px solid #E8E8E8; border-radius: 4px; font-size: 12px; width: 200px;"
+            />
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px;">
+            <sc-for list="{{ userRoles }}" as="user" hint-placeholder-count="4">
+              <div style="padding: 12px; border: 1px solid #E8E8E8; border-radius: 6px; display: flex; align-items: center; justify-content: space-between;" style-hover="background-color: #F9F9F9;">
+                <div>
+                  <p style="font-size: 12px; font-weight: 600; color: #1D1D1B;">{{ user.name }}</p>
+                  <p style="font-size: 11px; color: #999999;">{{ user.email }}</p>
+                </div>
+                <select style="padding: 6px 10px; border: 1px solid #E8E8E8; border-radius: 4px; font-size: 11px; background-color: #FFFFFF; cursor: pointer;" onChange="{{ user.onAssign }}">
+                  <sc-for list="{{ user.roleOptions }}" as="opt" hint-placeholder-count="4">
+                    <option value="{{ opt.id }}" selected="{{ opt.isSelected }}">{{ opt.name }}</option>
+                  </sc-for>
+                </select>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    
+      </div>
+    </sc-if>
+    
+  </main>
+</div>
+  <sc-if value="{{ vacOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeVac }}" style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 90;">
+      <div onClick="{{ stopProp }}" style="background-color: #FFFFFF; border-radius: 12px; width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.25); animation: fadeInUp 0.3s ease-out;">
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 22px; border-bottom: 1px solid #1C543A;">
+          <div>
+            <h3 style="font-size: 16px; font-weight: 700; color: #1D1D1B;">Solicitar Férias/Licença</h3>
+            <p style="font-size: 12px; color: #666666; margin-top: 2px;">A solicitação entra como Pendente para aprovação da chefia</p>
+          </div>
+          <button onClick="{{ closeVac }}" aria-label="Fechar" style="width: 44px; height: 44px; border-radius: 8px; border: none; background-color: #F5F5F5; font-size: 15px; color: #666666; cursor: pointer; flex-shrink: 0;" style-hover="background-color: #E8E8E8;">✕</button>
+        </div>
+        <div style="padding: 20px 22px; display: flex; flex-direction: column; gap: 14px;">
+          <div><label style="font-size: 12px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">Servidor</label><select value="{{ vacForm.employee }}" onChange="{{ vacEmployee }}" style="width: 100%; height: 44px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; color: #1D1D1B; background-color: #FFFFFF; cursor: pointer;" style-focus="border-color: #1C543A; outline: none;"><sc-for list="{{ employeeNames }}" as="n" hint-placeholder-count="3"><option value="{{ n }}">{{ n }}</option></sc-for></select></div>
+          <div><label style="font-size: 12px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">Tipo</label><select value="{{ vacForm.type }}" onChange="{{ vacType }}" style="width: 100%; height: 44px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; color: #1D1D1B; background-color: #FFFFFF; cursor: pointer;" style-focus="border-color: #1C543A; outline: none;"><option value="Férias">Férias</option><option value="Licença Médica">Licença Médica</option><option value="Licença Maternidade">Licença Maternidade</option><option value="Licença Paternidade">Licença Paternidade</option><option value="Licença Capacitação">Licença Capacitação</option><option value="Licença para Tratar de Interesses Particulares">Licença para Tratar de Interesses Particulares</option></select></div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;">
+          <div><label style="font-size: 12px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">Data de início</label><input type="date" value="{{ vacForm.start }}" onInput="{{ vacStart }}" placeholder="" style="width: 100%; height: 44px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; color: #1D1D1B; background-color: #FFFFFF;" style-focus="border-color: #1C543A; outline: none;"/></div>
+          <div><label style="font-size: 12px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">Data de término</label><input type="date" value="{{ vacForm.end }}" onInput="{{ vacEnd }}" placeholder="" style="width: 100%; height: 44px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; color: #1D1D1B; background-color: #FFFFFF;" style-focus="border-color: #1C543A; outline: none;"/></div>
+          </div>
+          <sc-if value="{{ vacDays }}" hint-placeholder-val="{{ false }}"><p style="font-size: 12.5px; color: #1C543A; font-weight: 600;">Período: {{ vacDays }} dia(s)</p></sc-if>
+          <div><label style="font-size: 12px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">Observações</label><textarea value="{{ vacForm.notes }}" onInput="{{ vacNotes }}" placeholder="Informações complementares (opcional)" rows="3" style="width: 100%; padding: 10px 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; color: #1D1D1B; font-family: inherit; resize: vertical;" style-focus="border-color: #1C543A; outline: none;"></textarea></div>
+          <sc-if value="{{ vacError }}" hint-placeholder-val="{{ false }}"><p style="font-size: 12.5px; color: #DC2626; font-weight: 600;">{{ vacError }}</p></sc-if>
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 10px; padding: 14px 22px 20px; flex-wrap: wrap;">
+          <button onClick="{{ closeVac }}" style="height: 44px; padding: 0 16px; border: 1px solid #E0E0E0; border-radius: 8px; background-color: #FFFFFF; font-size: 13px; font-weight: 600; color: #1D1D1B; cursor: pointer;" style-hover="background-color: #F5F5F5;">Cancelar</button>
+          <button onClick="{{ submitVac }}" style="height: 44px; padding: 0 18px; background-color: #1C543A; color: #FFFFFF; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer;" style-hover="background-color: #164530;" style-disabled="background-color: #CCCCCC; cursor: not-allowed;">Enviar solicitação</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+  <sc-if value="{{ toastVisible }}" hint-placeholder-val="{{ false }}">
+    <div style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background-color: #1C543A; color: #FFFFFF; padding: 12px 22px; border-radius: 999px; font-size: 13px; font-weight: 600; z-index: 100; box-shadow: 0 8px 24px rgba(28,84,58,0.35);">✓ {{ toastMessage }}</div>
+  </sc-if>
+</div>
+
+<sc-if value="{{ empOpen }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ closeEmp }}" style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 95;">
+    <div onClick="{{ stopProp }}" role="dialog" aria-modal="true" style="background-color: #FFFFFF; border-radius: 12px; width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; padding: 22px; display: flex; flex-direction: column; gap: 14px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px;"><h3 style="font-size: 16px; font-weight: 700; color: #1D1D1B;">{{ empTitle }}</h3><button onClick="{{ closeEmp }}" aria-label="Fechar" style="width: 36px; height: 36px; border-radius: 8px; border: 1px solid #E0E0E0; background-color: #FFFFFF; cursor: pointer;">✕</button></div>
+      <div><label style="font-size: 12px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">Nome completo</label><input type="text" value="{{ empForm.name }}" onInput="{{ setEmpName }}" readOnly="{{ empReadOnly }}" style="width: 100%; height: 44px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; color: #1D1D1B; background-color: #FFFFFF;" style-focus="border-color: #1C543A; outline: none;"/></div>
+      <div><label style="font-size: 12px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">Matrícula</label><input type="text" value="{{ empForm.registration }}" onInput="{{ setEmpReg }}" readOnly="{{ empReadOnly }}" style="width: 100%; height: 44px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; color: #1D1D1B; background-color: #FFFFFF;" style-focus="border-color: #1C543A; outline: none;"/></div>
+      <div><label style="font-size: 12px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">Cargo</label><input type="text" value="{{ empForm.position }}" onInput="{{ setEmpPos }}" readOnly="{{ empReadOnly }}" style="width: 100%; height: 44px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; color: #1D1D1B; background-color: #FFFFFF;" style-focus="border-color: #1C543A; outline: none;"/></div>
+      <div><label style="font-size: 12px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">Setor</label><input type="text" list="dl-cc-rhmoduledc1" autocomplete="off" placeholder="Digite ou selecione o centro de custo" value="{{ empForm.department }}" onChange="{{ setEmpDept }}" disabled="{{ empReadOnly }}" style="width: 100%; height: 44px; padding: 0 10px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; background-color: #FFFFFF; color: #1D1D1B;"/><datalist id="dl-cc-rhmoduledc1"><sc-for list="{{ sectors }}" as="sec" hint-placeholder-count="3"><option value="{{ sec }}"></option></sc-for></datalist></div>
+      <div><label style="font-size: 12px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">Situação</label><select value="{{ empForm.status }}" onChange="{{ setEmpStatus }}" disabled="{{ empReadOnly }}" style="width: 100%; height: 44px; padding: 0 10px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; background-color: #FFFFFF; color: #1D1D1B;"><option value="Ativo">Ativo</option><option value="Afastado">Afastado</option><option value="Desligado">Desligado</option></select></div>
+      <div style="display: flex; justify-content: flex-end; gap: 10px;">
+        <button onClick="{{ closeEmp }}" style="height: 44px; padding: 0 16px; border: 1px solid #E0E0E0; border-radius: 8px; background-color: #FFFFFF; font-size: 13px; cursor: pointer;">Fechar</button>
+        <sc-if value="{{ empReadOnly }}" hint-placeholder-val="{{ false }}"><button onClick="{{ empEditFromView }}" style="height: 44px; padding: 0 16px; border: 1px solid #1C543A; border-radius: 8px; background-color: #FFFFFF; color: #1C543A; font-size: 13px; font-weight: 700; cursor: pointer;">Editar</button></sc-if>
+        <sc-if value="{{ empEditable }}" hint-placeholder-val="{{ false }}"><button onClick="{{ saveEmp }}" style="height: 44px; padding: 0 16px; border: none; border-radius: 8px; background-color: {{ empSaveBg }}; color: #FFFFFF; font-size: 13px; font-weight: 700; cursor: pointer;">Salvar</button></sc-if>
+      </div>
+    </div>
+  </div>
+</sc-if>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: &quot;100%&quot;, &quot;height&quot;: &quot;900px&quot;}}">
+class Component extends DCLogic {
+  state = {
+    vacOpen: false,
+    vacError: '',
+    vacForm: { employee: '', type: 'Férias', start: '', end: '', notes: '' },
+    toastVisible: false,
+    toastMessage: '',
+    activeTab: (/[?&]tab=(usuarios|rbac)/.test(window.location.search) ? 'usuarios' : 'employees'),
+    roles: [
+      { id: 'admin', name: 'Administrador', description: 'Acesso total a todas as funções', color: '#DC2626', count: 2 },
+      { id: 'manager', name: 'Gerenciador RH', description: 'Gestão de servidores e férias', color: '#F59E0B', count: 3 },
+      { id: 'analyst', name: 'Analista', description: 'Visualizar e gerar relatórios', color: '#3B82F6', count: 5 },
+      { id: 'viewer', name: 'Visualizador', description: 'Acesso somente leitura', color: '#999999', count: 8 }
+    ],
+    permissions: [
+      { id: 'create_server', name: 'Criar/Editar Servidor', roles: { admin: true, manager: true, analyst: false, viewer: false } },
+      { id: 'delete_server', name: 'Deletar Servidor', roles: { admin: true, manager: false, analyst: false, viewer: false } },
+      { id: 'manage_vacation', name: 'Gerenciar Férias/Licenças', roles: { admin: true, manager: true, analyst: false, viewer: false } },
+      { id: 'approve_vacation', name: 'Aprovar Férias', roles: { admin: true, manager: true, analyst: false, viewer: false } },
+      { id: 'manage_rbac', name: 'Gerenciar Controle de Acesso', roles: { admin: true, manager: false, analyst: false, viewer: false } }
+    ],
+    userRoles: [
+      { id: 1, name: 'Ana Silva Santos', email: 'ana.silva@example.com', role: 'manager' },
+      { id: 2, name: 'Carlos Mendes Oliveira', email: 'carlos.mendes@example.com', role: 'manager' },
+      { id: 3, name: 'Maria Clara Gomes', email: 'maria.clara@example.com', role: 'analyst' },
+      { id: 4, name: 'João Pedro Costa', email: 'joao.costa@example.com', role: 'analyst' },
+      { id: 5, name: 'Patricia de Souza', email: 'patricia.souza@example.com', role: 'viewer' }
+    ],
+    employees: [
+      { name: 'Ana Silva Santos', registration: '2019-001', position: 'Assessor Administrativo', department: 'Serviço de Licitações e Contratos', status: 'Ativo', initials: 'AS' },
+      { name: 'Carlos Mendes Oliveira', registration: '2018-045', position: 'Chefe de Licitações', department: 'Serviço de Licitações e Contratos', status: 'Ativo', initials: 'CM' },
+      { name: 'Maria Clara Gomes', registration: '2020-012', position: 'Analista de RH', department: 'Diretoria Administrativa', status: 'Afastado', initials: 'MG' },
+      { name: 'João Pedro Costa', registration: '2017-089', position: 'Contador', department: 'Diretoria Administrativa', status: 'Ativo', initials: 'JP' },
+      { name: 'Patricia de Souza', registration: '2021-034', position: 'Assistente Administrativo', department: 'Serviço de Almoxarifado e Patrimônio', status: 'Ativo', initials: 'PS' }
+    ],
+        vacationRequests: (() => { try { const s = JSON.parse(localStorage.getItem('DA_rh_ferias_v1')); if (Array.isArray(s)) return s; } catch (e) {} return [
+      { employee: 'Ana Silva Santos', type: 'Férias', startDate: '14/09/2026', endDate: '28/09/2026', status: 'Aprovado' },
+      { employee: 'Carlos Mendes Oliveira', type: 'Licença Médica', startDate: '21/09/2026', endDate: '28/09/2026', status: 'Pendente' },
+      { employee: 'João Pedro Costa', type: 'Férias', startDate: '01/10/2026', endDate: '15/10/2026', status: 'Aprovado' },
+      { employee: 'Patricia de Souza', type: 'Licença Paternidade', startDate: '05/10/2026', endDate: '19/10/2026', status: 'Recusado' },
+      { employee: 'Maria Clara Gomes', type: 'Férias', startDate: '12/10/2026', endDate: '26/10/2026', status: 'Pendente' }
+    ]; })(),
+        kpis: [
+      { label: 'Total de Servidores', value: '94', detail: 'Cadastrados', trend: '↑ 2 novos este ano' },
+      { label: 'Servidores Ativos', value: '88', detail: 'Em operação', trend: '↓ -2 aposentadorias' },
+      { label: 'Taxa de Férias', value: '32%', detail: 'Agendadas', trend: '↑ 5% vs. período anterior' },
+      { label: 'Taxa de Presença', value: '96%', detail: 'Média do trimestre', trend: '→ Estável' }
+    ]
+  };
+
+  setTab = (tab) => {
+    this.setState({ activeTab: tab });
+  };
+
+  togglePermission = (permId, roleId) => {
+    this.setState(s => ({
+      permissions: s.permissions.map(p => 
+        p.id === permId 
+          ? { ...p, roles: { ...p.roles, [roleId]: !p.roles[roleId] } }
+          : p
+      )
+    }));
+  };
+
+  assignUserRole = (userId) => {
+    // Handler for role assignment dropdown
+  };
+
+  _tabVals(keys) {
+    const o = {};
+    for (const k of keys) {
+      o['tab_' + k + '_go'] = () => this.setTab(k);
+      o['tab_' + k + '_color'] = this.state.activeTab === k ? '#1C543A' : '#999999';
+      o['tab_' + k + '_border'] = this.state.activeTab === k ? '#1C543A' : 'transparent';
+    }
+    return o;
+  }
+
+  componentDidMount() {
+    const qTab = new URLSearchParams(location.search).get('tab');
+    if (qTab) this.setState({ activeTab: qTab });
+    setTimeout(() => this._publishCal(), 300);
+    const loadSectors = () => {
+      if (window.DASectors) this.setState({ sectors: window.DASectors.get() });
+      else setTimeout(loadSectors, 200);
+    };
+    loadSectors();
+    this._onSectors = (e) => this.setState({ sectors: e.detail.sectors });
+    window.addEventListener('sectorschange', this._onSectors);
+  }
+  componentWillUnmount() { window.removeEventListener('sectorschange', this._onSectors); }
+
+  showToast = (msg) => {
+    clearTimeout(this._toastTimer);
+    this.setState({ toastVisible: true, toastMessage: msg });
+    this._toastTimer = setTimeout(() => this.setState({ toastVisible: false }), 2500);
+  };
+  stopProp = (e) => { e.stopPropagation(); };
+  _daysBetween(a, b) { if (!a || !b) return 0; const d = (new Date(b) - new Date(a)) / 86400000; return d >= 0 ? d + 1 : 0; }
+  openVac = () => { this.setState({ vacOpen: true, vacError: '', vacForm: { employee: this.state.employees[0].name, type: 'Férias', start: '', end: '', notes: '' } }); };
+  closeVac = () => { this.setState({ vacOpen: false }); };
+  vacEmployee = (e) => { const v = e.target.value; this.setState(s => ({ vacForm: { ...s.vacForm, employee: v } })); };
+  vacType = (e) => { const v = e.target.value; this.setState(s => ({ vacForm: { ...s.vacForm, type: v } })); };
+  vacStart = (e) => { const v = e.target.value; this.setState(s => ({ vacForm: { ...s.vacForm, start: v } })); };
+  vacEnd = (e) => { const v = e.target.value; this.setState(s => ({ vacForm: { ...s.vacForm, end: v } })); };
+  vacNotes = (e) => { const v = e.target.value; this.setState(s => ({ vacForm: { ...s.vacForm, notes: v } })); };
+  submitVac = () => {
+    const toBR = (iso) => { if (!iso) return ''; const p = iso.split('-'); return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : iso; };
+    const f = this.state.vacForm;
+    if (!f.start || !f.end) { this.setState({ vacError: 'Informe as datas de início e término.' }); return; }
+    if (f.end < f.start) { this.setState({ vacError: 'A data de término deve ser posterior ao início.' }); return; }
+    const days = this._daysBetween(f.start, f.end);
+    if (f.type === 'Férias' && days > 30) { this.setState({ vacError: 'Férias não podem exceder 30 dias por período.' }); return; }
+    const req = { employee: f.employee, type: f.type, startDate: toBR(f.start), endDate: toBR(f.end), status: 'Pendente', notes: f.notes };
+    this.setState(s => ({ vacationRequests: [req, ...s.vacationRequests], vacOpen: false }));
+    this.showToast('Solicitação de ' + f.type.toLowerCase() + ' enviada');
+  };
+  setVacStatus = (idx, status) => {
+    this.setState(s => ({ vacationRequests: s.vacationRequests.map((v, i) => i === idx ? { ...v, status: status } : v) }));
+    this.showToast('Solicitação ' + status.toLowerCase());
+  };
+
+  _publishCal() {
+    const iso = (br) => { const p = String(br || '').split('/'); return p.length === 3 ? p[2] + '-' + p[1] + '-' + p[0] : br; };
+    if (window.DACalendar) window.DACalendar.publish('rh', this.state.vacationRequests.filter(v => v.status !== 'Recusado').map(v => ({ title: v.type + ' — ' + v.employee + (v.status === 'Pendente' ? ' (pendente)' : ''), start: iso(v.startDate), end: iso(v.endDate), level: v.status === 'Pendente' ? 'warning' : 'info' })));
+  }
+  componentDidUpdate(pp, ps) { if (ps && ps.vacationRequests !== this.state.vacationRequests) { try { localStorage.setItem('DA_rh_ferias_v1', JSON.stringify(this.state.vacationRequests)); } catch (e) {} } this._publishCal(); }
+
+  _shellVals() {
+    if (!this._navBound) {
+      this._navBound = true;
+      window.addEventListener('resize', () => this.forceUpdate());
+      window.addEventListener('themechange', () => this.forceUpdate());
+    }
+    const st = this.state || {};
+    const isMobile = window.innerWidth < 900;
+    const open = !!st.navMenuOpen && isMobile;
+    const norm = s => String(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    const q = norm((st.navSearch || '').trim());
+    const INDEX = [["Dashboard.dc.html","▦","Painel de Controle","Sistemas & Gestão","painel dashboard indicadores alertas prazos fluxo"],["AlmoxarifadoAmostragem.dc.html","📦","Almoxarifado","Sistemas & Gestão","almoxarifado estoque amostragem materiais contagem"],["MocoesHomenagens.dc.html","🎗","Moções & Homenagens","Sistemas & Gestão","mocoes homenagens galeria vereador portaria"],["PatrimonioModule.dc.html","🏛","Patrimônio","Sistemas & Gestão","patrimonio bens tombamento transferencias ativos"],["UserProfile.dc.html","👤","Meus Dados (Perfil)","Sistemas & Gestão","perfil meus dados telefone email aniversario"],["ComprasModule.dc.html","🛒","Compras & Licitações","Sistemas & Gestão","compras licitacoes requisicoes fornecedores pregao"],["ProtocoloModule.dc.html","📋","Protocolo","Complementares","protocolo documentos processos prazos"],["RHModule.dc.html","🧑‍💼","Gestão de Pessoal","Complementares","rh recursos humanos servidores ferias"],["AnalyticsModule.dc.html","📈","Analytics & Relatórios","Complementares","analytics relatorios metricas indicadores"],["AuditLog.dc.html","🛡","Log e Auditoria","Administração","log auditoria seguranca acessos lgpd logins"],["Configuracoes.dc.html","⚙","Configurações do Sistema","Administração","configuracoes parametros parametrizacao ajustes alertas limites acessos perfis"],["Legislacoes.dc.html","⚖","Legislações","Administração","legislacao leis decretos portarias resolucoes recomendacoes normas"]];
+    const results = q ? INDEX.filter(i => norm(i[2] + ' ' + i[4]).includes(q)).slice(0, 6).map(i => ({ href: i[0], icon: i[1], label: i[2], group: i[3], go: () => { window.location.href = i[0]; } })) : [];
+    return {
+      navIsMobile: isMobile,
+      navOverlayVisible: open,
+      navSidebarPosition: isMobile ? 'fixed' : 'sticky',
+      navSidebarTransform: isMobile ? (open ? 'translateX(0)' : 'translateX(-100%)') : 'translateX(0)',
+      navOpen: () => this.setState({ navMenuOpen: true }),
+      navClose: () => this.setState({ navMenuOpen: false }),
+      navGutter: isMobile ? '16px' : '36px',
+      navHeaderPad: isMobile ? '18px 16px 12px' : '28px 36px 16px',
+      navTitleSize: isMobile ? '24px' : '30px',
+      navShowBreadcrumb: !isMobile,
+      navSearch: st.navSearch || '',
+      navSearchInput: (e) => this.setState({ navSearch: e.target.value, navSearchFocused: true }),
+      navSearchFocus: () => this.setState({ navSearchFocused: true }),
+      navSearchBlur: () => setTimeout(() => this.setState({ navSearchFocused: false }), 150),
+      navSearchKey: (e) => {
+        if (e.key === 'Enter' && results.length) window.location.href = results[0].href;
+        if (e.key === 'Escape') this.setState({ navSearch: '', navSearchFocused: false });
+      },
+      navSearchResults: results,
+      navSearchOpen: !!(st.navSearchFocused && q),
+      navSearchEmpty: !!q && results.length === 0,
+      ...(() => { const dk = !!(window.theme && window.theme.isDark && window.theme.isDark()); return { navThemeDark: dk, navThemeIsLight: !dk, navThemeLightBg: dk ? 'transparent' : 'rgba(255,255,255,0.9)', navThemeLightFg: dk ? 'rgba(255,255,255,0.6)' : '#1C543A', navThemeDarkBg: dk ? 'rgba(255,255,255,0.18)' : 'transparent', navThemeDarkFg: dk ? '#FFFFFF' : 'rgba(255,255,255,0.6)', navThemeLight: () => { if (window.theme) window.theme.set('light'); }, navThemeDarkSet: () => { if (window.theme) window.theme.set('dark'); } }; })()
+    };
+  }
+
+  openNewEmp = () => { this.setState({ empForm: { name: '', registration: '', position: '', department: (this.state.sectors || [])[0] || '', status: 'Ativo' }, empMode: 'new' }); };
+  openEmp = (reg, editable) => { const e = this.state.employees.find(x => x.registration === reg); if (e) this.setState({ empForm: { ...e }, empMode: editable ? 'edit' : 'view', empOrig: reg }); };
+  closeEmp = () => { this.setState({ empForm: null }); };
+  _setEmp(k) { return (ev) => { const v = ev.target.value; this.setState(s => ({ empForm: { ...s.empForm, [k]: v } })); }; }
+  saveEmp = () => {
+    const f = this.state.empForm; if (!f || !f.name.trim() || !f.registration.trim()) return;
+    const parts = f.name.trim().split(/\s+/); const initials = ((parts[0][0] || '') + (parts.length > 1 ? parts[parts.length - 1][0] : '')).toUpperCase();
+    const rec = { ...f, name: f.name.trim(), registration: f.registration.trim(), initials };
+    this.setState(s => ({ employees: s.empMode === 'new' ? [rec].concat(s.employees) : s.employees.map(x => x.registration === s.empOrig ? rec : x), empForm: null }));
+    if (window.DAAudit) window.DAAudit.log(this.state.empMode === 'new' ? 'Servidor cadastrado' : 'Servidor editado', 'rh', rec.name + ' · MAT ' + rec.registration);
+  };
+  goRbac = () => { this.setState({ activeTab: 'rbac' }); window.scrollTo(0, 0); };
+
+  renderVals() {
+    const canUsuarios = !!(window.DASession && window.DASession.can('usuarios'));
+    const tabFlags = { canUsuarios, isUsuariosTab: canUsuarios && this.state.activeTab === 'usuarios', isEmployeesTab: this.state.activeTab === 'employees', isVacationTab: this.state.activeTab === 'vacation', isAnalyticsTab: this.state.activeTab === 'analytics', isRbacTab: this.state.activeTab === 'rbac' };
+    const kpisWithColor = this.state.kpis.map(k => ({ ...k, trendColor: k.trend.includes('↑') ? '#1C543A' : '#DC2626' }));
+    return {
+      stopProp: (e) => e.stopPropagation(),
+      openNewEmp: this.openNewEmp, closeEmp: this.closeEmp, saveEmp: this.saveEmp, goRbac: this.goRbac,
+      empOpen: !!this.state.empForm, empForm: this.state.empForm || {}, empReadOnly: this.state.empMode === 'view', empEditable: this.state.empMode !== 'view',
+      empTitle: this.state.empMode === 'new' ? 'Novo servidor' : this.state.empMode === 'edit' ? 'Editar servidor' : 'Dados do servidor',
+      empEditFromView: () => this.setState({ empMode: 'edit' }),
+      empSaveBg: this.state.empForm && this.state.empForm.name.trim() && this.state.empForm.registration.trim() ? '#1C543A' : '#B8C7BF',
+      setEmpName: this._setEmp('name'), setEmpReg: this._setEmp('registration'), setEmpPos: this._setEmp('position'), setEmpDept: this._setEmp('department'), setEmpStatus: this._setEmp('status'),
+      ...this._shellVals(),
+      vacOpen: this.state.vacOpen, openVac: this.openVac, closeVac: this.closeVac, stopProp: this.stopProp,
+      vacForm: this.state.vacForm, vacEmployee: this.vacEmployee, vacType: this.vacType, vacStart: this.vacStart, vacEnd: this.vacEnd, vacNotes: this.vacNotes,
+      vacDays: this._daysBetween(this.state.vacForm.start, this.state.vacForm.end), vacError: this.state.vacError, submitVac: this.submitVac,
+      employeeNames: this.state.employees.map(e => e.name),
+      toastVisible: this.state.toastVisible, toastMessage: this.state.toastMessage,
+      sectors: this.state.sectors || ['Diretoria Administrativa', 'Serviço de Licitações e Contratos', 'Serviço de Almoxarifado e Patrimônio'],
+      ...this._tabVals(["employees","vacation","analytics","usuarios"]),
+      sectorHeadcount: (() => { const secs = this.state.sectors || (window.DASectors ? window.DASectors.get() : []); const emps = this.state.employees || []; const rows = secs.map(s => [s, emps.filter(e => e.department === s).length]); const mx = Math.max(1, ...rows.map(r => r[1])); return rows.map(([label, n]) => ({ label, value: n + ' servidor(es)', bar: Math.round(n / mx * 100) + '%' })); })(),
+      ...tabFlags,
+      activeTab: this.state.activeTab,
+      employees: this.state.employees.map(e => ({...e, view: () => this.openEmp(e.registration, false), edit: () => this.openEmp(e.registration, true), statusStyle: ({'Ativo':'background-color: #1C543A22; color: #1C543A;','Afastado':'background-color: #F59E0B22; color: #F59E0B;'})[e.status] || 'background-color: #99999922; color: #666666;'})),
+      vacationRequests: this.state.vacationRequests.map((v, vi) => ({...v, isPending: v.status === 'Pendente', approve: () => this.setVacStatus(vi, 'Aprovado'), reject: () => this.setVacStatus(vi, 'Recusado'), days: (() => { const p = s => { const a = s.split('/'); return a[2] + '-' + a[1] + '-' + a[0]; }; return this._daysBetween(p(v.startDate), p(v.endDate)); })(), statusStyle: ({'Aprovado':'background-color: #1C543A22; color: #1C543A;','Pendente':'background-color: #F59E0B22; color: #F59E0B;'})[v.status] || 'background-color: #DC262622; color: #DC2626;'})),
+      kpis: kpisWithColor,
+      roles: this.state.roles,
+      permissions: this.state.permissions.map(pe => ({...pe, roleCells: this.state.roles.map(ro => ({checked: !!pe.roles[ro.id], onToggle: () => this.togglePermission(pe.id, ro.id)}))})),
+      userRoles: this.state.userRoles.map(u => ({...u, onAssign: (e) => { const rid = e.target.value; this.setState(s => ({ userRoles: s.userRoles.map(x => x.id === u.id ? {...x, role: rid} : x) })); }, roleOptions: this.state.roles.map(ro => ({id: ro.id, name: ro.name, isSelected: u.role === ro.id}))})),
+      setTab: this.setTab,
+      togglePermission: this.togglePermission,
+      assignUserRole: this.assignUserRole
+    };
+  }
+}
+
+</script>
+</body>
+</html>

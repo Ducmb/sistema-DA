@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <script src="./theme.js"></script>
+  <script src="./config.js"></script>
+  <script src="./session.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema DA - Módulo de Compras</title>
+  <script src="./exercicio.js"></script>
+  <script src="./liccont.js"></script>
+  <script src="./calendar-feed.js"></script>
+  <script src="./sectors.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #FAFAFA;
+      color: #1D1D1B;
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</helmet>
+
+<div style="display: flex; min-height: 100vh; background-color: #FFFFFF; position: relative;">
+  <sc-if value="{{ navOverlayVisible }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ navClose }}" style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); z-index: 40;"></div>
+  </sc-if>
+  <aside style="background-color: #1C543A; color: #FFFFFF; width: 250px; flex-shrink: 0; display: flex; flex-direction: column; padding: 22px 16px; gap: 22px; position: {{ navSidebarPosition }}; top: 0; left: 0; height: 100vh; overflow-y: auto; z-index: 50; transform: {{ navSidebarTransform }}; transition: transform 0.3s cubic-bezier(0.34, 1.25, 0.64, 1);">
+      <a href="Dashboard.dc.html" title="Voltar ao Painel de Controle" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: #FFFFFF; padding: 0 4px;">
+        <div style="width: 36px; height: 36px; background-color: #FFFFFF; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; color: #1C543A; flex-shrink: 0;">DA</div>
+        <div>
+          <p style="font-size: 12.5px; font-weight: 700; line-height: 1.3; color: #FFFFFF;">CÂMARA MUNICIPAL</p>
+          <p style="font-size: 9.5px; letter-spacing: 0.4px; color: rgba(255,255,255,0.65); text-transform: uppercase;">Diretoria Administrativa</p>
+        </div>
+      </a>
+      <nav style="display: flex; flex-direction: column; gap: 2px;">
+        <p style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: rgba(255,255,255,0.5); padding: 0 12px; margin-bottom: 6px;">Sistemas &amp; Gestão</p>
+        <a href="Dashboard.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 13px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">▦</span>Painel de Controle</a>
+        <a href="AlmoxarifadoAmostragem.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 13px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">📦</span>Almoxarifado</a>
+        <a href="ComprasModule.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 13px; transition: background-color 0.2s; background-color: #FFFFFF; color: #1C543A; font-weight: 700;"><span style="width: 18px; text-align: center; flex-shrink: 0;">🛒</span>Compras &amp; Licitações</a>
+        <a href="MocoesHomenagens.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 13px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">🎗</span>Moções &amp; Homenagens</a>
+        <a href="PatrimonioModule.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 13px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">🏛</span>Patrimônio</a>
+      </nav>
+      <nav style="display: flex; flex-direction: column; gap: 2px;">
+        <p style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: rgba(255,255,255,0.5); padding: 0 12px; margin-bottom: 6px;">Módulos Complementares</p>
+        <a href="AnalyticsModule.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">📈</span>Analytics &amp; Relatórios</a>
+        <a href="RHModule.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">🧑‍💼</span>Gestão de Pessoal</a>
+        <a href="Legislacoes.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">⚖</span>Legislações</a>
+        <a href="AuditLog.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">🛡</span>Log e Auditoria</a>
+        <a href="Configuracoes.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">⚙</span>Configurações do Sistema</a>
+      <a href="ProtocoloModule.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">📋</span>Protocolo</a>
+      </nav>
+      <div style="margin-top: auto; display: flex; flex-direction: column; gap: 4px; padding-top: 8px;">
+        <a href="UserProfile.dc.html" style="display: flex; align-items: center; gap: 10px; background-color: rgba(255,255,255,0.08); border-radius: 10px; padding: 12px; text-decoration: none; color: #FFFFFF;" style-hover="background-color: rgba(255,255,255,0.14);">
+          <div style="width: 34px; height: 34px; border-radius: 50%; background-color: #F0B429; color: #1C543A; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; flex-shrink: 0;">RA</div>
+          <div style="min-width: 0;">
+            <p style="font-size: 12.5px; font-weight: 700; color: #FFFFFF;">Dr. Roberto Alencar</p>
+            <p style="font-size: 10.5px; color: rgba(255,255,255,0.6);">DA-2026-948 · Diretoria</p>
+          </div>
+        </a>
+        <div role="group" aria-label="Aparência" style="display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 40px; padding: 0 12px;">
+          <span style="font-size: 11px; font-weight: 600; letter-spacing: 0.3px; color: rgba(255,255,255,0.6);">Aparência</span>
+          <div style="display: flex; padding: 2px; border-radius: 999px; background-color: rgba(0,0,0,0.22);">
+            <button onClick="{{ navThemeLight }}" aria-pressed="{{ navThemeIsLight }}" aria-label="Modo padrão" title="Modo padrão" style="width: 30px; height: 26px; border: none; border-radius: 999px; background-color: {{ navThemeLightBg }}; color: {{ navThemeLightFg }}; font-size: 13px; line-height: 1; cursor: pointer; transition: background-color 0.2s;">☀</button>
+            <button onClick="{{ navThemeDarkSet }}" aria-pressed="{{ navThemeDark }}" aria-label="Modo escuro" title="Modo escuro" style="width: 30px; height: 26px; border: none; border-radius: 999px; background-color: {{ navThemeDarkBg }}; color: {{ navThemeDarkFg }}; font-size: 13px; line-height: 1; cursor: pointer; transition: background-color 0.2s;">☾</button>
+          </div>
+        </div>
+        <a href="Login.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; color: rgba(255,255,255,0.7); text-decoration: none; font-size: 12.5px; font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1); color: #FFFFFF;"><span style="width: 18px; text-align: center; flex-shrink: 0;">⎋</span>Sair do sistema</a>
+      </div>
+    </aside>
+  <div style="flex: 1; min-width: 0; display: flex; flex-direction: column;">
+    <div style="position: sticky; top: 0; z-index: 30; background-color: rgba(255,255,255,0.96); backdrop-filter: blur(6px); border-bottom: 1px solid #E8E8E8; min-height: 64px; padding: 10px {{ navGutter }}; display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+      <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
+        <sc-if value="{{ navIsMobile }}" hint-placeholder-val="{{ false }}">
+          <button onClick="{{ navOpen }}" aria-label="Abrir menu" style="width: 44px; height: 44px; border-radius: 8px; border: 1px solid #E0E0E0; background-color: #FFFFFF; font-size: 18px; color: #1D1D1B; cursor: pointer; flex-shrink: 0;">☰</button>
+          <a href="Dashboard.dc.html" title="Painel de Controle" style="width: 36px; height: 36px; background-color: #1C543A; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 12px; color: #FFFFFF; text-decoration: none; flex-shrink: 0;">DA</a>
+        </sc-if>
+        <sc-if value="{{ navShowBreadcrumb }}" hint-placeholder-val="{{ true }}">
+          <div style="display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: #666666; white-space: nowrap;">
+            <a href="Dashboard.dc.html" style="color: #666666; text-decoration: none;" style-hover="color: #1C543A;">Painel de Controle</a>
+            <span style="color: #CCCCCC;">›</span>
+            <span style="color: #1D1D1B; font-weight: 600;">Compras &amp; Licitações</span>
+          </div>
+        </sc-if>
+      </div>
+      <div style="display: flex; align-items: center; gap: 10px; flex: 1; justify-content: flex-end; min-width: 0;">
+        <div style="position: relative; flex: 1; max-width: 340px; min-width: 0;">
+          <input type="search" placeholder="Buscar módulos e telas…" aria-label="Busca global" value="{{ navSearch }}" onInput="{{ navSearchInput }}" onFocus="{{ navSearchFocus }}" onBlur="{{ navSearchBlur }}" onKeyDown="{{ navSearchKey }}" style="width: 100%; height: 44px; padding: 0 12px 0 34px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; color: #1D1D1B; background-color: #F9F9F9;" style-focus="border-color: #1C543A; background-color: #FFFFFF; outline: none;"/>
+          <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 14px; color: #999999; pointer-events: none;">⌕</span>
+          <sc-if value="{{ navSearchOpen }}" hint-placeholder-val="{{ false }}">
+            <div style="position: absolute; top: 50px; right: 0; left: 0; min-width: 240px; background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 8px; box-shadow: 0 12px 32px rgba(0,0,0,0.12); padding: 6px; z-index: 60;">
+              <sc-for list="{{ navSearchResults }}" as="r" hint-placeholder-count="3">
+                <a href="{{ r.href }}" onMouseDown="{{ r.go }}" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 10px; border-radius: 6px; text-decoration: none; color: #1D1D1B; font-size: 13px;" style-hover="background-color: #F2F7F4;">
+                  <span style="width: 20px; text-align: center; flex-shrink: 0;">{{ r.icon }}</span>
+                  <span style="flex: 1; font-weight: 600;">{{ r.label }}</span>
+                  <span style="font-size: 11px; color: #999999;">{{ r.group }}</span>
+                </a>
+              </sc-for>
+              <sc-if value="{{ navSearchEmpty }}" hint-placeholder-val="{{ false }}">
+                <p style="padding: 12px 10px; font-size: 12.5px; color: #999999;">Nenhum resultado para “{{ navSearch }}”</p>
+              </sc-if>
+            </div>
+          </sc-if>
+        </div>
+        <a href="NotificationsModule.dc.html" title="Notificações" style="position: relative; width: 44px; height: 44px; border-radius: 8px; border: 1px solid #E0E0E0; background-color: #FFFFFF; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 16px; flex-shrink: 0;" style-hover="border-color: #1C543A;">🔔<span style="position: absolute; top: 9px; right: 10px; width: 7px; height: 7px; border-radius: 50%; background-color: #DC2626; border: 1.5px solid #FFFFFF;"></span></a>
+      </div>
+    </div>
+    <div style="padding: {{ navHeaderPad }}; display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+      <div>
+        <p style="font-size: 11px; font-weight: 700; letter-spacing: 0.6px; color: #1C543A; text-transform: uppercase;">Sistema de Gestão Integrada &nbsp;•&nbsp; Compras &amp; Licitações</p>
+        <h1 style="font-size: {{ navTitleSize }}; font-weight: 800; color: #1D1D1B; margin-top: 6px;">Módulo de Compras</h1>
+      </div>
+      <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+
+        <label style="display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; color: #666666; text-transform: uppercase; letter-spacing: 0.4px;">Exercício fiscal
+          <select value="{{ exercAno }}" onChange="{{ setExerc }}" aria-label="Exercício fiscal" style="height: 44px; padding: 0 12px; border: 1px solid #1C543A; border-radius: 8px; font-size: 14px; font-weight: 700; color: #1C543A; background-color: #FFFFFF; cursor: pointer;">
+            <sc-for list="{{ exercAnos }}" as="ea" hint-placeholder-count="3"><option value="{{ ea }}">{{ ea }}</option></sc-for>
+          </select>
+        </label>
+      </div>
+    </div>
+
+  <!-- Tab Navigation -->
+  <div style="background-color: #FFFFFF; border-bottom: 1px solid #E8E8E8; padding: 0 {{ navGutter }}; display: flex; gap: 24px; overflow-x: auto;">
+    <button onClick="{{ tab_processos_go }}" style="padding: 16px 0; background: none; border: none; font-size: 13px; font-weight: 600; color: {{ tab_processos_color }}; cursor: pointer; border-bottom: 2px solid {{ tab_processos_border }}; white-space: nowrap; flex-shrink: 0;">
+      Controle de Processos
+    </button>
+    <button onClick="{{ tab_suppliers_go }}" style="padding: 16px 0; background: none; border: none; font-size: 13px; font-weight: 600; color: {{ tab_suppliers_color }}; cursor: pointer; border-bottom: 2px solid {{ tab_suppliers_border }}; transition: all 0.2s ease;">
+      Fornecedores
+    </button>
+    <button onClick="{{ tab_contratos_go }}" style="padding: 16px 0; background: none; border: none; font-size: 13px; font-weight: 600; color: {{ tab_contratos_color }}; cursor: pointer; border-bottom: 2px solid {{ tab_contratos_border }}; white-space: nowrap; flex-shrink: 0;">
+      Contratos
+    </button>
+    <button onClick="{{ tab_analytics_go }}" style="padding: 16px 0; background: none; border: none; font-size: 13px; font-weight: 600; color: {{ tab_analytics_color }}; cursor: pointer; border-bottom: 2px solid {{ tab_analytics_border }}; transition: all 0.2s ease; white-space: nowrap; flex-shrink: 0;">
+      Dotação Orçamentária
+    </button>
+    <button onClick="{{ tab_limits_go }}" style="padding: 16px 0; background: none; border: none; font-size: 13px; font-weight: 600; color: {{ tab_limits_color }}; cursor: pointer; border-bottom: 2px solid {{ tab_limits_border }}; transition: all 0.2s ease; white-space: nowrap;">
+      Limites Legais
+    </button>
+  </div>
+
+  <main style="flex: 1; width: 100%; padding: 24px {{ navGutter }} 40px;">
+    <sc-if value="{{ isProcessosTab }}" hint-placeholder-val="{{ false }}">
+      <dc-import name="ComprasProcessos" hint-size="100%,900px"></dc-import>
+    </sc-if>
+    <sc-if value="{{ isContratosTab }}" hint-placeholder-val="{{ false }}">
+      <dc-import name="ComprasContratos" hint-size="100%,800px"></dc-import>
+    </sc-if>
+    
+
+    <!-- Fornecedores Tab -->
+    <sc-if value="{{ isSuppliersTab }}" hint-placeholder-val="{{ false }}">
+      <div style="animation: fadeInUp 0.4s ease-out;">
+        <div style="background-color: #FFFFFF; padding: 16px; border-radius: 8px; border: 1px solid #E8E8E8; margin-bottom: 16px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+          <input type="search" value="{{ supSearch }}" onInput="{{ handleSupSearch }}" placeholder="Buscar por nome ou CNPJ..." style="flex: 1; min-width: 180px; height: 44px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px;" style-focus="border-color: #1C543A; outline: none;"/>
+          <select value="{{ supSegment }}" onChange="{{ handleSupSegment }}" aria-label="Filtrar por segmento" style="height: 44px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; background-color: #FFFFFF; cursor: pointer; min-width: 200px;">
+            <option value="todos">Todos os segmentos</option>
+            <sc-for list="{{ segments }}" as="seg" hint-placeholder-count="3"><option value="{{ seg }}">{{ seg }}</option></sc-for>
+          </select>
+          <select value="{{ supStatus }}" onChange="{{ handleSupStatus }}" aria-label="Filtrar por situação" style="height: 44px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; background-color: #FFFFFF; cursor: pointer;">
+            <option value="ativos">Somente ativos</option>
+            <option value="inativos">Somente inativos</option>
+            <option value="todos">Ativos e inativos</option>
+          </select>
+          <span style="font-size: 12px; color: #666666;">{{ supShown }} fornecedor(es)</span>
+          <div style="display: flex; gap: 8px; margin-left: auto; flex-wrap: wrap;">
+            <button onClick="{{ openExport }}" disabled="{{ exportDisabled }}" style="height: 44px; padding: 0 14px; background-color: #FFFFFF; color: #1C543A; border: 1px solid #1C543A; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap;" style-hover="background-color: #F2F7F4;" style-disabled="color: #999999; border-color: #CCCCCC; cursor: not-allowed;">📧 Exportar e-mails p/ cotação</button>
+            <button onClick="{{ openNewSup }}" style="height: 44px; padding: 0 16px; background-color: #1C543A; color: #FFFFFF; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap;" style-hover="background-color: #164530;">+ Adicionar Fornecedor</button>
+          </div>
+        </div>
+
+        <!-- Suppliers Grid -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px;">
+          <sc-for list="{{ suppliers }}" as="supplier" hint-placeholder-count="6">
+            <div style="background-color: #FFFFFF; padding: 16px; border-radius: 8px; border: 1px solid #E8E8E8; transition: all 0.2s ease; opacity: {{ supplier.cardOpacity }};" style-hover="box-shadow: 0 4px 12px rgba(0,0,0,0.1); transform: translateY(-2px);">
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px;">
+                <span style="font-size: 10.5px; font-weight: 700; padding: 3px 10px; border-radius: 999px; background-color: {{ supplier.statusBg }}; color: {{ supplier.statusColor }};">{{ supplier.statusLabel }}</span>
+                <button onClick="{{ supplier.toggleActive }}" role="switch" aria-checked="{{ supplier.active }}" title="{{ supplier.toggleTitle }}" aria-label="{{ supplier.toggleTitle }}" style="width: 44px; height: 24px; border-radius: 999px; border: none; background-color: {{ supplier.switchBg }}; position: relative; cursor: pointer; flex-shrink: 0; transition: background-color 0.25s;">
+                  <span style="position: absolute; top: 3px; left: {{ supplier.knobLeft }}; width: 18px; height: 18px; border-radius: 50%; background-color: #FFFFFF; box-shadow: 0 1px 3px rgba(0,0,0,0.25); transition: left 0.25s;"></span>
+                </button>
+              </div>
+              <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                <div style="width: 40px; height: 40px; border-radius: 50%; background-color: #1C543A22; color: #1C543A; display: flex; align-items: center; justify-content: center; font-weight: 600;">
+                  {{ supplier.initials }}
+                </div>
+                <div>
+                  <p style="font-size: 13px; font-weight: 600; color: #1D1D1B;">{{ supplier.name }}</p>
+                  <p style="font-size: 11px; color: #999999;">CNPJ: {{ supplier.cnpj }}</p>
+                </div>
+              </div>
+              <div style="font-size: 12px; color: #666666; line-height: 1.6;">
+                <p><strong>Contato:</strong> {{ supplier.contact }}</p>
+                <p><strong>E-mail:</strong> {{ supplier.email }}</p>
+                <div style="display: flex; flex-wrap: wrap; gap: 4px; align-items: center;"><strong>Segmentos:</strong><sc-for list="{{ supplier.segList }}" as="sg" hint-placeholder-count="2"><span style="font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; background-color: #EAF3EE; color: #1C543A;">{{ sg }}</span></sc-for></div>
+                <p><strong>Ativo desde:</strong> {{ supplier.since }}</p>
+              </div>
+              <div style="margin-top: 12px; display: flex; gap: 8px;">
+                <button onClick="{{ supplier.edit }}" style="flex: 1; height: 36px; padding: 0 10px; background-color: #FFFFFF; border: 1px solid #E0E0E0; border-radius: 6px; font-size: 12px; font-weight: 600; color: #1C543A; cursor: pointer;" style-hover="border-color: #1C543A; background-color: #F2F7F4;">✎ Editar</button>
+                <button onClick="{{ supplier.history }}" style="flex: 1; height: 36px; padding: 0 10px; background-color: #FFFFFF; border: 1px solid #E0E0E0; border-radius: 6px; font-size: 12px; font-weight: 600; color: #1C543A; cursor: pointer;" style-hover="border-color: #1C543A; background-color: #F2F7F4;">🕘 Ver Histórico</button>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+        <sc-if value="{{ supEmpty }}" hint-placeholder-val="{{ false }}">
+          <p style="padding: 32px; text-align: center; font-size: 13px; color: #666666; border: 1px dashed #E0E0E0; border-radius: 8px;">Nenhum fornecedor encontrado para o filtro atual.</p>
+        </sc-if>
+      </div>
+    </sc-if>
+    
+
+
+    <!-- Limites Legais Tab -->
+    <sc-if value="{{ isLimitsTab }}" hint-placeholder-val="{{ false }}">
+      <div style="display: flex; flex-direction: column; gap: 16px; animation: fadeInUp 0.4s ease-out;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px;">
+          <sc-for list="{{ legalLimits }}" as="ll" hint-placeholder-count="2">
+            <div style="background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 8px; padding: 20px;">
+              <p style="font-size: 11px; font-weight: 700; color: #666666; text-transform: uppercase; letter-spacing: 0.4px;">{{ ll.article }}</p>
+              <p style="font-size: 24px; font-weight: 800; color: #1C543A; margin: 6px 0 4px;">{{ ll.valueFmt }}</p>
+              <p style="font-size: 12.5px; color: #1D1D1B;">{{ ll.scope }}</p>
+              <p style="font-size: 11.5px; color: #666666; margin-top: 8px;">{{ ll.source }}</p>
+            </div>
+          </sc-for>
+          <div style="background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 8px; padding: 20px;">
+            <h3 style="font-size: 15px; font-weight: 700; color: #1D1D1B; padding-bottom: 10px; margin-bottom: 14px; border-bottom: 1px solid #1C543A;">Verificar Nova Contratação Direta</h3>
+            <div style="display: flex; flex-direction: column; gap: 14px;">
+          <div><label style="font-size: 12px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">Item do catálogo (CATMAT/CATSER)</label><select value="{{ simItem }}" onChange="{{ handleSimItem }}" style="width: 100%; height: 44px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; color: #1D1D1B; background-color: #FFFFFF; cursor: pointer;" style-focus="border-color: #1C543A; outline: none;"><sc-for list="{{ catalogItemOptions }}" as="ci" hint-placeholder-count="3"><option value="{{ ci.code }}">{{ ci.label }}</option></sc-for></select></div>
+          <div><label style="font-size: 12px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">Valor da contratação (R$)</label><input type="text" value="{{ simValue }}" onInput="{{ handleSimValue }}" placeholder="0,00" style="width: 100%; height: 44px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; color: #1D1D1B; background-color: #FFFFFF;" style-focus="border-color: #1C543A; outline: none;"/></div>
+              <sc-if value="{{ simHasResult }}" hint-placeholder-val="{{ false }}">
+                <div style="border: 1px solid {{ simColor }}; border-radius: 8px; padding: 14px; background-color: {{ simBg }};">
+                  <p style="font-size: 13px; font-weight: 700; color: {{ simColor }};">{{ simTitle }}</p>
+                  <p style="font-size: 12.5px; color: #1D1D1B; margin-top: 6px; line-height: 1.5;">{{ simText }}</p>
+                </div>
+              </sc-if>
+            </div>
+          </div>
+        </div>
+        <dc-import name="ComprasDespesas" hint-size="100%,900px"></dc-import>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; align-items: start;">
+          <div style="background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 8px; padding: 20px; display: flex; flex-direction: column; gap: 8px;">
+            <p style="font-size: 11px; font-weight: 700; color: #666666; text-transform: uppercase; letter-spacing: 0.4px;">Catálogo Compras.gov.br</p>
+            <div style="display: flex; align-items: center; gap: 8px;"><span style="width: 8px; height: 8px; border-radius: 50%; background-color: {{ syncDot }};"></span><span style="font-size: 13px; font-weight: 700; color: #1D1D1B;">{{ syncStatus }}</span></div>
+            <p style="font-size: 12px; color: #666666;">Última sincronização: {{ lastSync }}</p>
+            <button onClick="{{ runSync }}" disabled="{{ syncing }}" style="margin-top: auto; height: 44px; background-color: #1C543A; color: #FFFFFF; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer;" style-hover="background-color: #164530;" style-disabled="background-color: #CCCCCC; cursor: wait;">{{ syncLabel }}</button>
+          </div>
+          <div style="background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 8px; padding: 20px;">
+            <h3 style="font-size: 15px; font-weight: 700; color: #1D1D1B; padding-bottom: 10px; margin-bottom: 14px; border-bottom: 1px solid #1C543A;">Base Cadastral Sincronizada</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; margin-bottom: 14px;">
+              <sc-for list="{{ catalogCounts }}" as="cc" hint-placeholder-count="5">
+                <div style="border: 1px solid #E8E8E8; border-radius: 8px; padding: 10px;"><p style="font-size: 10.5px; font-weight: 700; color: #666666; text-transform: uppercase;">{{ cc.label }}</p><p style="font-size: 17px; font-weight: 800; color: #1D1D1B; margin-top: 2px;">{{ cc.value }}</p></div>
+              </sc-for>
+            </div>
+            <p style="font-size: 12px; font-weight: 700; color: #1D1D1B; margin-bottom: 6px;">Endpoints — API de Dados Abertos Compras.gov.br</p>
+            <sc-for list="{{ syncEndpoints }}" as="ep" hint-placeholder-count="5">
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 7px 0; border-bottom: 1px solid #F0F0F0;">
+                <code style="font-size: 11.5px; color: #1D1D1B; word-break: break-all;">{{ ep.path }}</code>
+                <span style="font-size: 11px; font-weight: 700; color: {{ ep.color }}; white-space: nowrap;">{{ ep.status }}</span>
+              </div>
+            </sc-for>
+            <p style="font-size: 11.5px; color: #666666; margin-top: 10px; line-height: 1.5;">Em produção, a sincronização roda no backend (job diário) — a API pública não deve ser consumida diretamente pelo navegador. Base: https://dadosabertos.compras.gov.br</p>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- Análise Tab -->
+    <sc-if value="{{ isAnalyticsTab }}" hint-placeholder-val="{{ false }}">
+      <dc-import name="ComprasDotacao" hint-size="100%,800px"></dc-import>
+    </sc-if>
+  </main>
+
+  <!-- Nova Requisição Modal -->
+  <sc-if value="{{ newReqOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeNewReq }}" style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; padding: 24px; z-index: 90;">
+      <div onClick="{{ stopPropagation }}" style="background-color: #FFFFFF; border-radius: 14px; width: 100%; max-width: 460px; max-height: 88vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.25); animation: fadeInUp 0.3s ease-out;">
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 20px 24px; border-bottom: 1px solid #F0F0F0;">
+          <div>
+            <h3 style="font-size: 16px; font-weight: 700; color: #1D1D1B;">Nova Requisição</h3>
+            <p style="font-size: 12px; color: #999999; margin-top: 2px;">A requisição entra no fluxo com status Pendente</p>
+          </div>
+          <button onClick="{{ closeNewReq }}" style="width: 30px; height: 30px; border-radius: 6px; border: none; background-color: #F5F5F5; font-size: 15px; color: #666666; cursor: pointer; flex-shrink: 0;" style-hover="background-color: #E8E8E8;">✕</button>
+        </div>
+        <div style="padding: 22px 24px; display: flex; flex-direction: column; gap: 14px;">
+          <div>
+            <label style="font-size: 11.5px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">Descrição do item/serviço</label>
+            <input type="text" value="{{ reqForm.description }}" onInput="{{ handleReqDesc }}" placeholder="Ex: Papel A4 80g (10 resmas)" style="width: 100%; padding: 10px 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px;" style-focus="border-color: #1C543A; outline: none;"/>
+          </div>
+          <div>
+            <label style="font-size: 11.5px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">Setor solicitante</label>
+            <input type="text" list="dl-cc-comprasmod1" autocomplete="off" placeholder="Digite ou selecione o centro de custo" value="{{ reqForm.department }}" onChange="{{ handleReqDept }}" style="width: 100%; padding: 10px 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; background-color: #FFFFFF;"/><datalist id="dl-cc-comprasmod1"><sc-for list="{{ sectors }}" as="sec" hint-placeholder-count="3"><option value="{{ sec }}"></option></sc-for></datalist>
+          </div>
+          <div>
+            <label style="font-size: 11.5px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">Valor estimado (R$)</label>
+            <input type="text" value="{{ reqForm.value }}" onInput="{{ handleReqValue }}" placeholder="0,00" style="width: 100%; padding: 10px 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px;" style-focus="border-color: #1C543A; outline: none;"/>
+          </div>
+          <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 6px;">
+            <button onClick="{{ closeNewReq }}" style="padding: 10px 16px; border: 1px solid #E0E0E0; border-radius: 8px; background-color: #FFFFFF; font-size: 13px; cursor: pointer;" style-hover="background-color: #F5F5F5;">Cancelar</button>
+            <button onClick="{{ submitNewReq }}" disabled="{{ reqSubmitDisabled }}" style="padding: 10px 16px; background-color: {{ reqSubmitBg }}; color: #FFFFFF; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: {{ reqSubmitCursor }};">Registrar Requisição</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ supOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeSup }}" style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 90;">
+      <div onClick="{{ stopProp }}" style="background-color: #FFFFFF; border-radius: 12px; width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.25); animation: fadeInUp 0.3s ease-out;">
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 22px; border-bottom: 1px solid #1C543A;">
+          <div>
+            <h3 style="font-size: 16px; font-weight: 700; color: #1D1D1B;">{{ supModalTitle }}</h3>
+            <p style="font-size: 12px; color: #666666; margin-top: 2px;">Cadastro de fornecedores habilitados</p>
+          </div>
+          <button onClick="{{ closeSup }}" aria-label="Fechar" style="width: 44px; height: 44px; border-radius: 8px; border: none; background-color: #F5F5F5; font-size: 15px; color: #666666; cursor: pointer; flex-shrink: 0;" style-hover="background-color: #E8E8E8;">✕</button>
+        </div>
+        <div style="padding: 20px 22px; display: flex; flex-direction: column; gap: 14px;">
+          <div><label style="font-size: 12px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">Razão social</label><input type="text" value="{{ supForm.name }}" onInput="{{ supName }}" placeholder="Ex: Papéis e Cia Ltda" style="width: 100%; height: 44px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; color: #1D1D1B; background-color: #FFFFFF;" style-focus="border-color: #1C543A; outline: none;"/></div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;">
+          <div><label style="font-size: 12px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">CNPJ</label><input type="text" value="{{ supForm.cnpj }}" onInput="{{ supCnpj }}" placeholder="00.000.000/0000-00" style="width: 100%; height: 44px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; color: #1D1D1B; background-color: #FFFFFF;" style-focus="border-color: #1C543A; outline: none;"/></div>
+          <div><label style="font-size: 12px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">Telefone</label><input type="text" value="{{ supForm.contact }}" onInput="{{ supContact }}" placeholder="(00) 0000-0000" style="width: 100%; height: 44px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; color: #1D1D1B; background-color: #FFFFFF;" style-focus="border-color: #1C543A; outline: none;"/></div>
+          </div>
+          <div><label style="font-size: 12px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">E-mail para cotações</label><input type="email" value="{{ supForm.email }}" onInput="{{ supEmail }}" placeholder="cotacao@fornecedor.com.br" style="width: 100%; height: 44px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; color: #1D1D1B; background-color: #FFFFFF;" style-focus="border-color: #1C543A; outline: none;"/></div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;">
+          <div><label style="font-size: 12px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">Segmentos (selecione um ou mais)</label>
+            <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px;"><sc-for list="{{ segChips }}" as="sc" hint-placeholder-count="5"><button type="button" onClick="{{ sc.toggle }}" aria-pressed="{{ sc.on }}" style="height: 34px; padding: 0 12px; border-radius: 999px; border: 1px solid {{ sc.border }}; background-color: {{ sc.bg }}; color: {{ sc.color }}; font-size: 12px; font-weight: 600; cursor: pointer;">{{ sc.label }}</button></sc-for></div>
+            <input type="text" value="{{ supForm.segment }}" onInput="{{ supSeg }}" onKeyDown="{{ supSegKey }}" placeholder="Novo segmento — digite e tecle Enter" style="width: 100%; height: 44px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px;" style-focus="border-color: #1C543A; outline: none;"/></div>
+          <div><label style="font-size: 12px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">Ativo desde (ano)</label><input type="text" value="{{ supForm.since }}" onInput="{{ supSince }}" placeholder="2026" style="width: 100%; height: 44px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; color: #1D1D1B; background-color: #FFFFFF;" style-focus="border-color: #1C543A; outline: none;"/></div>
+          </div>
+          <sc-if value="{{ segmentsHint }}" hint-placeholder-val="{{ false }}"><p style="font-size: 11.5px; color: #666666;">Segmentos existentes: {{ segmentsHint }}</p></sc-if>
+          <sc-if value="{{ supError }}" hint-placeholder-val="{{ false }}"><p style="font-size: 12.5px; color: #DC2626; font-weight: 600;">{{ supError }}</p></sc-if>
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 10px; padding: 14px 22px 20px; flex-wrap: wrap;">
+          <button onClick="{{ closeSup }}" style="height: 44px; padding: 0 16px; border: 1px solid #E0E0E0; border-radius: 8px; background-color: #FFFFFF; font-size: 13px; font-weight: 600; color: #1D1D1B; cursor: pointer;" style-hover="background-color: #F5F5F5;">Cancelar</button>
+          <button onClick="{{ saveSup }}" style="height: 44px; padding: 0 18px; background-color: #1C543A; color: #FFFFFF; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer;" style-hover="background-color: #164530;" style-disabled="background-color: #CCCCCC; cursor: not-allowed;">Salvar fornecedor</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+  <sc-if value="{{ histOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeHist }}" style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 90;">
+      <div onClick="{{ stopProp }}" style="background-color: #FFFFFF; border-radius: 12px; width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.25); animation: fadeInUp 0.3s ease-out;">
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 22px; border-bottom: 1px solid #1C543A;">
+          <div>
+            <h3 style="font-size: 16px; font-weight: 700; color: #1D1D1B;">Histórico do Fornecedor</h3>
+            <p style="font-size: 12px; color: #666666; margin-top: 2px;">Cotações, contratos e ocorrências</p>
+          </div>
+          <button onClick="{{ closeHist }}" aria-label="Fechar" style="width: 44px; height: 44px; border-radius: 8px; border: none; background-color: #F5F5F5; font-size: 15px; color: #666666; cursor: pointer; flex-shrink: 0;" style-hover="background-color: #E8E8E8;">✕</button>
+        </div>
+        <div style="padding: 20px 22px; display: flex; flex-direction: column; gap: 14px;">
+          <div style="display: flex; align-items: center; gap: 12px; padding-bottom: 12px; border-bottom: 1px solid #F0F0F0;">
+            <div style="width: 40px; height: 40px; border-radius: 50%; background-color: #EAF3EE; color: #1C543A; display: flex; align-items: center; justify-content: center; font-weight: 700;">{{ histSupplier.initials }}</div>
+            <div><p style="font-size: 14px; font-weight: 700;">{{ histSupplier.name }}</p><p style="font-size: 12px; color: #666666;">{{ histSegLabel }} · CNPJ {{ histSupplier.cnpj }}</p></div>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+            <sc-for list="{{ histStats }}" as="hs" hint-placeholder-count="3">
+              <div style="border: 1px solid #E8E8E8; border-radius: 8px; padding: 10px;"><p style="font-size: 10.5px; font-weight: 700; color: #666666; text-transform: uppercase;">{{ hs.label }}</p><p style="font-size: 16px; font-weight: 800; color: #1D1D1B; margin-top: 2px;">{{ hs.value }}</p></div>
+            </sc-for>
+          </div>
+          <div style="display: flex; flex-direction: column;">
+            <sc-for list="{{ histEvents }}" as="ev" hint-placeholder-count="4">
+              <div style="display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid #F0F0F0;">
+                <div style="width: 8px; height: 8px; border-radius: 50%; background-color: {{ ev.color }}; margin-top: 6px; flex-shrink: 0;"></div>
+                <div style="flex: 1;"><p style="font-size: 13px; font-weight: 600; color: #1D1D1B;">{{ ev.title }}</p><p style="font-size: 12px; color: #666666; margin-top: 2px;">{{ ev.detail }}</p></div>
+                <span style="font-size: 11.5px; color: #666666; white-space: nowrap;">{{ ev.date }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 10px; padding: 14px 22px 20px; flex-wrap: wrap;">
+          <button onClick="{{ closeHist }}" style="height: 44px; padding: 0 16px; border: 1px solid #E0E0E0; border-radius: 8px; background-color: #FFFFFF; font-size: 13px; font-weight: 600; color: #1D1D1B; cursor: pointer;" style-hover="background-color: #F5F5F5;">Fechar</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+  <sc-if value="{{ exportOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeExport }}" style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 90;">
+      <div onClick="{{ stopProp }}" style="background-color: #FFFFFF; border-radius: 12px; width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.25); animation: fadeInUp 0.3s ease-out;">
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 22px; border-bottom: 1px solid #1C543A;">
+          <div>
+            <h3 style="font-size: 16px; font-weight: 700; color: #1D1D1B;">Exportar e-mails para cotação</h3>
+          </div>
+          <button onClick="{{ closeExport }}" aria-label="Fechar" style="width: 44px; height: 44px; border-radius: 8px; border: none; background-color: #F5F5F5; font-size: 15px; color: #666666; cursor: pointer; flex-shrink: 0;" style-hover="background-color: #E8E8E8;">✕</button>
+        </div>
+        <div style="padding: 20px 22px; display: flex; flex-direction: column; gap: 14px;">
+          <p style="font-size: 12.5px; color: #1D1D1B;">{{ exportCount }} e-mail(s) de fornecedores <strong>ativos</strong> do segmento <strong>{{ exportSegmentLabel }}</strong>, separados por ponto e vírgula — cole no campo Cco (cópia oculta) do e-mail de cotação.</p>
+          <textarea readonly="{{ true }}" value="{{ exportText }}" rows="5" style="width: 100%; padding: 10px 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 12.5px; font-family: ui-monospace, monospace; color: #1D1D1B; background-color: #F9F9F9; resize: vertical;"></textarea>
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 10px; padding: 14px 22px 20px; flex-wrap: wrap;">
+          <button onClick="{{ downloadExportCsv }}" style="height: 44px; padding: 0 16px; border: 1px solid #E0E0E0; border-radius: 8px; background-color: #FFFFFF; font-size: 13px; font-weight: 600; color: #1D1D1B; cursor: pointer;" style-hover="background-color: #F5F5F5;">⬇ Baixar CSV</button>
+          <button onClick="{{ mailtoExport }}" style="height: 44px; padding: 0 16px; border: 1px solid #E0E0E0; border-radius: 8px; background-color: #FFFFFF; font-size: 13px; font-weight: 600; color: #1D1D1B; cursor: pointer;" style-hover="background-color: #F5F5F5;">✉ Abrir no e-mail</button>
+          <button onClick="{{ copyExport }}" style="height: 44px; padding: 0 18px; background-color: #1C543A; color: #FFFFFF; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer;" style-hover="background-color: #164530;" style-disabled="background-color: #CCCCCC; cursor: not-allowed;">📋 Copiar lista</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+  <sc-if value="{{ tenOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeTen }}" style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 90;">
+      <div onClick="{{ stopProp }}" style="background-color: #FFFFFF; border-radius: 12px; width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.25); animation: fadeInUp 0.3s ease-out;">
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 22px; border-bottom: 1px solid #1C543A;">
+          <div>
+            <h3 style="font-size: 16px; font-weight: 700; color: #1D1D1B;">{{ tenModalTitle }}</h3>
+            <p style="font-size: 12px; color: #666666; margin-top: 2px;">Campos conforme Lei nº 14.133/2021</p>
+          </div>
+          <button onClick="{{ closeTen }}" aria-label="Fechar" style="width: 44px; height: 44px; border-radius: 8px; border: none; background-color: #F5F5F5; font-size: 15px; color: #666666; cursor: pointer; flex-shrink: 0;" style-hover="background-color: #E8E8E8;">✕</button>
+        </div>
+        <div style="padding: 20px 22px; display: flex; flex-direction: column; gap: 14px;">
+          <div><label style="font-size: 12px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">Objeto</label><input type="text" value="{{ tenForm.object }}" onInput="{{ tenObject }}" placeholder="Descrição resumida do objeto" style="width: 100%; height: 44px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; color: #1D1D1B; background-color: #FFFFFF;" style-focus="border-color: #1C543A; outline: none;"/></div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;">
+          <div><label style="font-size: 12px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">Modalidade (Lei 14.133/2021)</label><select value="{{ tenForm.type }}" onChange="{{ tenType }}" style="width: 100%; height: 44px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; color: #1D1D1B; background-color: #FFFFFF; cursor: pointer;" style-focus="border-color: #1C543A; outline: none;"><option value="Pregão Eletrônico">Pregão Eletrônico</option><option value="Concorrência">Concorrência</option><option value="Concurso">Concurso</option><option value="Leilão">Leilão</option><option value="Diálogo Competitivo">Diálogo Competitivo</option><option value="Dispensa de Licitação">Dispensa de Licitação</option><option value="Inexigibilidade">Inexigibilidade</option></select></div>
+          <div><label style="font-size: 12px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">Critério de julgamento</label><select value="{{ tenForm.criterion }}" onChange="{{ tenCriterion }}" style="width: 100%; height: 44px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; color: #1D1D1B; background-color: #FFFFFF; cursor: pointer;" style-focus="border-color: #1C543A; outline: none;"><option value="Menor preço">Menor preço</option><option value="Maior desconto">Maior desconto</option><option value="Melhor técnica ou conteúdo artístico">Melhor técnica ou conteúdo artístico</option><option value="Técnica e preço">Técnica e preço</option><option value="Maior retorno econômico">Maior retorno econômico</option></select></div>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;">
+          <div><label style="font-size: 12px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">Valor estimado (R$)</label><input type="text" value="{{ tenForm.value }}" onInput="{{ tenValue }}" placeholder="0,00" style="width: 100%; height: 44px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; color: #1D1D1B; background-color: #FFFFFF;" style-focus="border-color: #1C543A; outline: none;"/></div>
+          <div><label style="font-size: 12px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">Nº do processo</label><input type="text" value="{{ tenForm.process }}" onInput="{{ tenProcess }}" placeholder="PA 000/2026" style="width: 100%; height: 44px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; color: #1D1D1B; background-color: #FFFFFF;" style-focus="border-color: #1C543A; outline: none;"/></div>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;">
+          <div><label style="font-size: 12px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">Setor requisitante</label><input type="text" list="dl-cc-comprasmod2" autocomplete="off" placeholder="Digite ou selecione o centro de custo" value="{{ tenForm.sector }}" onChange="{{ tenSector }}" style="width: 100%; height: 44px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; color: #1D1D1B; background-color: #FFFFFF;" style-focus="border-color: #1C543A; outline: none;"/><datalist id="dl-cc-comprasmod2"><sc-for list="{{ sectors }}" as="sec" hint-placeholder-count="3"><option value="{{ sec }}"></option></sc-for></datalist></div>
+          <div><label style="font-size: 12px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">Data de abertura</label><input type="date" value="{{ tenForm.openDate }}" onInput="{{ tenOpenDate }}" placeholder="" style="width: 100%; height: 44px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; color: #1D1D1B; background-color: #FFFFFF;" style-focus="border-color: #1C543A; outline: none;"/></div>
+          </div>
+          <div><label style="font-size: 12px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">Fase</label><select value="{{ tenForm.phase }}" onChange="{{ tenPhase }}" style="width: 100%; height: 44px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; color: #1D1D1B; background-color: #FFFFFF; cursor: pointer;" style-focus="border-color: #1C543A; outline: none;"><option value="Edital">Edital</option><option value="Julgamento">Julgamento</option><option value="Assinatura">Assinatura</option><option value="Homologação">Homologação</option></select></div>
+          <div><label style="font-size: 12px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">Justificativa / observações</label><textarea value="{{ tenForm.notes }}" onInput="{{ tenNotes }}" placeholder="" rows="3" style="width: 100%; padding: 10px 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; color: #1D1D1B; font-family: inherit; resize: vertical;" style-focus="border-color: #1C543A; outline: none;"></textarea></div>
+          <sc-if value="{{ tenError }}" hint-placeholder-val="{{ false }}"><p style="font-size: 12.5px; color: #DC2626; font-weight: 600;">{{ tenError }}</p></sc-if>
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 10px; padding: 14px 22px 20px; flex-wrap: wrap;">
+          <button onClick="{{ closeTen }}" style="height: 44px; padding: 0 16px; border: 1px solid #E0E0E0; border-radius: 8px; background-color: #FFFFFF; font-size: 13px; font-weight: 600; color: #1D1D1B; cursor: pointer;" style-hover="background-color: #F5F5F5;">Cancelar</button>
+          <button onClick="{{ saveTen }}" style="height: 44px; padding: 0 18px; background-color: #1C543A; color: #FFFFFF; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer;" style-hover="background-color: #164530;" style-disabled="background-color: #CCCCCC; cursor: not-allowed;">{{ tenSaveLabel }}</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+  <sc-if value="{{ detOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeDet }}" style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 90;">
+      <div onClick="{{ stopProp }}" style="background-color: #FFFFFF; border-radius: 12px; width: 100%; max-width: 620px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.25); animation: fadeInUp 0.3s ease-out;">
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 22px; border-bottom: 1px solid #1C543A;">
+          <div>
+            <h3 style="font-size: 16px; font-weight: 700; color: #1D1D1B;">Detalhes da Licitação</h3>
+          </div>
+          <button onClick="{{ closeDet }}" aria-label="Fechar" style="width: 44px; height: 44px; border-radius: 8px; border: none; background-color: #F5F5F5; font-size: 15px; color: #666666; cursor: pointer; flex-shrink: 0;" style-hover="background-color: #E8E8E8;">✕</button>
+        </div>
+        <div style="padding: 20px 22px; display: flex; flex-direction: column; gap: 14px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;">
+            <span style="font-size: 12px; font-weight: 700; color: #1C543A;">{{ detail.id }} · {{ detail.process }}</span>
+            <span style="padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; {{ detail.phaseStyle }}">{{ detail.phase }}</span>
+          </div>
+          <p style="font-size: 16px; font-weight: 700; color: #1D1D1B; font-family: Georgia, 'Times New Roman', serif;">{{ detail.object }}</p>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; padding: 14px 0; border-top: 1px solid #1C543A; border-bottom: 1px solid #F0F0F0;">
+            <div><p style="font-size: 11px; font-weight: 700; color: #666666; text-transform: uppercase; letter-spacing: 0.3px;">Modalidade</p><p style="font-size: 13.5px; color: #1D1D1B; margin-top: 3px;">{{ detail.type }}</p></div>
+            <div><p style="font-size: 11px; font-weight: 700; color: #666666; text-transform: uppercase; letter-spacing: 0.3px;">Critério</p><p style="font-size: 13.5px; color: #1D1D1B; margin-top: 3px;">{{ detail.criterion }}</p></div>
+            <div><p style="font-size: 11px; font-weight: 700; color: #666666; text-transform: uppercase; letter-spacing: 0.3px;">Valor estimado</p><p style="font-size: 13.5px; color: #1D1D1B; margin-top: 3px;">{{ detail.valueFmt }}</p></div>
+            <div><p style="font-size: 11px; font-weight: 700; color: #666666; text-transform: uppercase; letter-spacing: 0.3px;">Setor requisitante</p><p style="font-size: 13.5px; color: #1D1D1B; margin-top: 3px;">{{ detail.sector }}</p></div>
+            <div><p style="font-size: 11px; font-weight: 700; color: #666666; text-transform: uppercase; letter-spacing: 0.3px;">Abertura</p><p style="font-size: 13.5px; color: #1D1D1B; margin-top: 3px;">{{ detail.openDateBR }}</p></div>
+            <div><p style="font-size: 11px; font-weight: 700; color: #666666; text-transform: uppercase; letter-spacing: 0.3px;">Participantes</p><p style="font-size: 13.5px; color: #1D1D1B; margin-top: 3px;">{{ detail.bidders }}</p></div>
+          </div>
+          <div>
+            <p style="font-size: 12px; font-weight: 700; color: #1D1D1B; margin-bottom: 10px;">Progresso</p>
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;">
+              <sc-for list="{{ detail.steps }}" as="st" hint-placeholder-count="4">
+                <div><div style="height: 6px; border-radius: 3px; background-color: {{ st.color }};"></div><p style="font-size: 11px; font-weight: 600; color: {{ st.textColor }}; margin-top: 6px;">{{ st.name }}</p></div>
+              </sc-for>
+            </div>
+          </div>
+          <sc-if value="{{ detail.notes }}" hint-placeholder-val="{{ false }}"><div><p style="font-size: 12px; font-weight: 700; margin-bottom: 4px;">Justificativa</p><p style="font-size: 13px; color: #1D1D1B; line-height: 1.5;">{{ detail.notes }}</p></div></sc-if>
+          <div>
+            <p style="font-size: 12px; font-weight: 700; color: #1D1D1B; margin-bottom: 6px;">Histórico de tramitação</p>
+            <sc-for list="{{ detail.log }}" as="lg" hint-placeholder-count="2">
+              <div style="display: flex; justify-content: space-between; gap: 10px; padding: 8px 0; border-bottom: 1px solid #F0F0F0; font-size: 12.5px;"><span style="color: #1D1D1B;">{{ lg.text }}</span><span style="color: #666666; white-space: nowrap;">{{ lg.date }}</span></div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 10px; padding: 14px 22px 20px; flex-wrap: wrap;">
+          <button onClick="{{ closeDet }}" style="height: 44px; padding: 0 16px; border: 1px solid #E0E0E0; border-radius: 8px; background-color: #FFFFFF; font-size: 13px; font-weight: 600; color: #1D1D1B; cursor: pointer;" style-hover="background-color: #F5F5F5;">Fechar</button>
+          <button onClick="{{ editFromDetail }}" style="height: 44px; padding: 0 18px; background-color: #1C543A; color: #FFFFFF; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer;" style-hover="background-color: #164530;" style-disabled="background-color: #CCCCCC; cursor: not-allowed;">✎ Editar licitação</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- Toast -->
+  <sc-if value="{{ toastVisible }}" hint-placeholder-val="{{ false }}">
+    <div style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background-color: #1C543A; color: #FFFFFF; padding: 12px 22px; border-radius: 999px; font-size: 13px; font-weight: 600; z-index: 100; box-shadow: 0 8px 24px rgba(28,84,58,0.35);">✓ {{ toastMessage }}</div>
+  </sc-if>
+</div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: &quot;100%&quot;, &quot;height&quot;: &quot;900px&quot;}}">
+class Component extends DCLogic {
+  state = {
+    limitCatalog: 'todos', limitLevel: 'classe', limitSearch: '',
+    simItem: '', simValue: '',
+    syncing: false, syncStatus: 'Base local atualizada', lastSync: '23/09/2026 03:00 (job diário)', syncMode: 'ok',
+    endpointState: {},
+    catalogCountsState: { grupos: 79, classes: 663, pdms: 26418, catmat: 168902, catser: 3171 },
+    supSearch: '', supSegment: 'todos', supStatus: 'ativos',
+    supOpen: false, supEditIdx: -1, supError: '', supForm: { name: '', cnpj: '', contact: '', email: '', segment: '', since: '' },
+    histOpen: false, histIdx: -1, exportOpen: false,
+    tenOpen: false, tenEditId: null, tenError: '', tenForm: {},
+    detOpen: false, detId: null, tenSeq: 5,
+    activeTab: 'processos',
+    searchTerm: '',
+    statusFilter: 'todos',
+    sectorFilter: 'todos',
+    sectors: ['Diretoria Administrativa', 'Serviço de Licitações e Contratos', 'Serviço de Almoxarifado e Patrimônio'],
+    newReqOpen: false,
+    reqForm: { description: '', department: '', value: '' },
+    toastVisible: false,
+    toastMessage: '',
+    reqSeq: 6,
+    requisitions: [
+      { id: 'REQ-2025-001', description: 'Papel A4 80g (5 resmas)', department: 'Diretoria Administrativa', value: '250,00', status: 'Aprovado' },
+      { id: 'REQ-2025-002', description: 'Toner para impressoras HP', department: 'Serviço de Almoxarifado e Patrimônio', value: '1.850,00', status: 'Pendente' },
+      { id: 'REQ-2025-003', description: 'Serviços de limpeza (mensal)', department: 'Diretoria Administrativa', value: '3.200,00', status: 'Aprovado' },
+      { id: 'REQ-2025-004', description: 'Equipamento de segurança para vigilância', department: 'Serviço de Licitações e Contratos', value: '8.900,00', status: 'Recusado' },
+      { id: 'REQ-2025-005', description: 'Assinaturas de software de gestão', department: 'Serviço de Licitações e Contratos', value: '12.500,00', status: 'Finalizado' }
+    ],
+    suppliers: [
+      { name: 'Papéis e Cia', active: true, email: 'cotacao@papeisecia.com.br', cnpj: '12.345.678/0001-90', contact: '(85) 3256-1234', segment: 'Suprimentos de Escritório', since: '2018', initials: 'PC' },
+      { name: 'Tech Solutions Ltda', active: true, email: 'comercial@techsolutions.com.br', cnpj: '98.765.432/0001-21', contact: '(85) 98765-4321', segments: ['Tecnologia', 'Suprimentos de Escritório'], segment: 'Tecnologia', since: '2020', initials: 'TS' },
+      { name: 'Limpeza Express', active: true, email: 'vendas@limpezaexpress.com.br', cnpj: '11.222.333/0001-44', contact: '(85) 3333-5555', segment: 'Serviços de Limpeza', since: '2019', initials: 'LE' },
+      { name: 'Segurança Premium', active: true, email: 'contato@segurancapremium.com.br', cnpj: '55.666.777/0001-88', contact: '(85) 3456-7890', segment: 'Segurança e Vigilância', since: '2021', initials: 'SP' },
+      { name: 'Software Enterprise', active: true, email: 'licitacoes@softwareenterprise.com.br', cnpj: '99.888.777/0001-55', contact: '(85) 98888-9999', segment: 'Tecnologia', since: '2017', initials: 'SE' },
+      { name: 'Logística Rápida', active: false, email: 'orcamento@logisticarapida.com.br', cnpj: '44.333.222/0001-11', contact: '(85) 3111-2222', segment: 'Transportes e Logística', since: '2019', initials: 'LR' }
+    ],
+    tenders: [
+      { id: 'LIC-2025-001', criterion: 'Menor preço', sector: 'Diretoria Administrativa', process: 'PA 112/2025', openDate: '2026-09-29', bidders: 3, notes: '', log: [{ text: 'Licitação autuada', date: '10/03/2025' }], object: 'Contratação de serviço de manutenção predial', type: 'Concorrência', value: '45.000,00', phase: 'Edital' },
+      { id: 'LIC-2025-002', criterion: 'Menor preço', sector: 'Serviço de Almoxarifado e Patrimônio', process: 'PA 118/2025', openDate: '2026-10-06', bidders: 5, notes: '', log: [{ text: 'Licitação autuada', date: '24/03/2025' }], object: 'Fornecimento de mobiliário para salas', type: 'Pregão Eletrônico', value: '28.500,00', phase: 'Julgamento' },
+      { id: 'LIC-2025-003', criterion: 'Técnica e preço', sector: 'Diretoria Administrativa', process: 'PA 121/2025', openDate: '2026-09-24', bidders: 4, notes: '', log: [{ text: 'Licitação autuada', date: '02/04/2025' }], object: 'Contratação de consultoria administrativa', type: 'Concorrência', value: '75.000,00', phase: 'Assinatura' },
+      { id: 'LIC-2025-004', criterion: 'Menor preço', sector: 'Serviço de Licitações e Contratos', process: 'PA 127/2025', openDate: '2026-10-13', bidders: 7, notes: '', log: [{ text: 'Licitação autuada', date: '15/04/2025' }], object: 'Fornecimento de equipamentos de TI', type: 'Pregão Eletrônico', value: '156.200,00', phase: 'Edital' }
+    ],
+    kpis: [
+      { label: 'Requisições Processadas', value: '248', detail: 'Este mês', trend: '↑ 12% vs. mês anterior' },
+      { label: 'Valor Gasto', value: 'R$ 524.8K', detail: 'Acumulado', trend: '↑ 8% vs. período anterior' },
+      { label: 'Fornecedores Ativos', value: '34', detail: 'Cadastrados', trend: '↓ -2 desde o trimestre' },
+      { label: 'Taxa de Aprovação', value: '94%', detail: 'Requisições', trend: '↑ 3% vs. média' }
+    ]
+  };
+
+  setTab = (tab) => {
+    this.setState({ activeTab: tab });
+  };
+
+  PHASES = ['Edital', 'Julgamento', 'Assinatura', 'Homologação'];
+
+  componentDidMount() {
+    const qTab = new URLSearchParams(location.search).get('tab');
+    if (qTab) this.setState({ activeTab: qTab });
+    setTimeout(() => this._publishCal(), 300);
+    const loadSectors = () => {
+      if (window.DASectors) this.setState({ sectors: window.DASectors.get() });
+      else setTimeout(loadSectors, 200);
+    };
+    loadSectors();
+    this._onSectors = (e) => this.setState({ sectors: e.detail.sectors });
+    window.addEventListener('sectorschange', this._onSectors);
+  }
+  componentWillUnmount() { window.removeEventListener('sectorschange', this._onSectors); }
+
+  showToast = (msg) => {
+    clearTimeout(this._toastTimer);
+    this.setState({ toastVisible: true, toastMessage: msg });
+    this._toastTimer = setTimeout(() => this.setState({ toastVisible: false }), 2500);
+  };
+
+  handleSearch = (e) => { this.setState({ searchTerm: e.target.value }); };
+  handleStatusFilter = (e) => { this.setState({ statusFilter: e.target.value }); };
+  handleSectorFilter = (e) => { this.setState({ sectorFilter: e.target.value }); };
+
+  openNewReq = () => { this.setState({ newReqOpen: true, reqForm: { description: '', department: this.state.sectors[0], value: '' } }); };
+  closeNewReq = () => { this.setState({ newReqOpen: false }); };
+  stopPropagation = (e) => { e.stopPropagation(); };
+  handleReqDesc = (e) => { const v = e.target.value; this.setState(s => ({ reqForm: { ...s.reqForm, description: v } })); };
+  handleReqDept = (e) => { const v = e.target.value; this.setState(s => ({ reqForm: { ...s.reqForm, department: v } })); };
+  handleReqValue = (e) => { const v = e.target.value; this.setState(s => ({ reqForm: { ...s.reqForm, value: v } })); };
+
+  submitNewReq = () => {
+    const f = this.state.reqForm;
+    if (!f.description.trim() || !f.value.trim()) return;
+    const id = 'REQ-2026-' + String(this.state.reqSeq).padStart(3, '0');
+    const req = { id: id, description: f.description.trim(), department: f.department, value: f.value.trim(), status: 'Pendente' };
+    this.setState(s => ({ requisitions: [req, ...s.requisitions], reqSeq: s.reqSeq + 1, newReqOpen: false }));
+    this.showToast('Requisição ' + id + ' registrada');
+  };
+
+  setReqStatus = (id, status) => {
+    this.setState(s => ({ requisitions: s.requisitions.map(r => r.id === id ? { ...r, status: status } : r) }));
+    this.showToast('Requisição ' + id + ' — ' + status.toLowerCase());
+  };
+
+  returnTender = (id) => {
+    this.setState(s => ({ tenders: s.tenders.map(t => {
+      if (t.id !== id) return t;
+      const i = this.PHASES.indexOf(t.phase);
+      return i > 0 ? { ...t, phase: this.PHASES[i - 1], log: [...(t.log || []), { text: 'Retornou para ' + this.PHASES[i - 1], date: new Date().toLocaleDateString('pt-BR') }] } : t;
+    }) }));
+    this.showToast('Licitação ' + id + ' retornou de fase');
+  };
+
+  advanceTender = (id) => {
+    this.setState(s => ({ tenders: s.tenders.map(t => {
+      if (t.id !== id) return t;
+      const i = this.PHASES.indexOf(t.phase);
+      return i < this.PHASES.length - 1 ? { ...t, phase: this.PHASES[i + 1], log: [...(t.log || []), { text: 'Avançou para ' + this.PHASES[i + 1], date: new Date().toLocaleDateString('pt-BR') }] } : t;
+    }) }));
+    this.showToast('Licitação ' + id + ' avançou de fase');
+  };
+
+  _tabVals(keys) {
+    const o = {};
+    for (const k of keys) {
+      o['tab_' + k + '_go'] = () => this.setTab(k);
+      o['tab_' + k + '_color'] = this.state.activeTab === k ? '#1C543A' : '#999999';
+      o['tab_' + k + '_border'] = this.state.activeTab === k ? '#1C543A' : 'transparent';
+    }
+    return o;
+  }
+
+  stopProp = (e) => { e.stopPropagation(); };
+  _initials(n) { return n.split(/\s+/).filter(w => w.length > 2 || /^[A-Z]/.test(w)).map(w => w[0]).slice(0, 2).join('').toUpperCase(); }
+  _filteredSuppliers() {
+    const q = this.state.supSearch.trim().toLowerCase().replace(/\D/g, '') ? this.state.supSearch.trim().toLowerCase() : this.state.supSearch.trim().toLowerCase();
+    const st = this.state.supStatus;
+    return this.state.suppliers.map((s, i) => ({ ...s, idx: i })).filter(s => (st === 'todos' || (st === 'ativos' ? s.active !== false : s.active === false)) && (this.state.supSegment === 'todos' || this._segs(s).includes(this.state.supSegment)) && (!q || s.name.toLowerCase().includes(q) || s.cnpj.includes(q)));
+  }
+  handleSupSearch = (e) => { this.setState({ supSearch: e.target.value }); };
+  handleSupSegment = (e) => { this.setState({ supSegment: e.target.value }); };
+  openNewSup = () => { this.setState({ supOpen: true, supEditIdx: -1, supError: '', supForm: { name: '', cnpj: '', contact: '', email: '', segment: this.state.supSegment !== 'todos' ? this.state.supSegment : '', since: String(new Date().getFullYear()) } }); };
+  openEditSup = (i) => { this.setState({ supOpen: true, supEditIdx: i, supError: '', supForm: { ...this.state.suppliers[i] } }); };
+  closeSup = () => { this.setState({ supOpen: false }); };
+  supName = (e) => { const v = e.target.value; this.setState(s => ({ supForm: { ...s.supForm, name: v } })); };
+  supCnpj = (e) => { const d = e.target.value.replace(/\D/g, '').slice(0, 14); const m = d.replace(/^(\d{2})(\d)/, '$1.$2').replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3').replace(/\.(\d{3})(\d)/, '.$1/$2').replace(/(\d{4})(\d)/, '$1-$2'); this.setState(s => ({ supForm: { ...s.supForm, cnpj: m } })); };
+  supContact = (e) => { const v = e.target.value; this.setState(s => ({ supForm: { ...s.supForm, contact: v } })); };
+  supEmail = (e) => { const v = e.target.value; this.setState(s => ({ supForm: { ...s.supForm, email: v } })); };
+  supSeg = (e) => { const v = e.target.value; this.setState(s => ({ supForm: { ...s.supForm, segment: v } })); };
+  supSince = (e) => { const v = e.target.value; this.setState(s => ({ supForm: { ...s.supForm, since: v } })); };
+  saveSup = () => {
+    const f = this.state.supForm, idx = this.state.supEditIdx;
+    if (!f.name.trim() || !((f.segments && f.segments.length) || (f.segment || '').trim())) { this.setState({ supError: 'Informe razão social e segmento.' }); return; }
+    if (f.cnpj.replace(/\D/g, '').length !== 14) { this.setState({ supError: 'CNPJ deve ter 14 dígitos.' }); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email)) { this.setState({ supError: 'E-mail inválido.' }); return; }
+    if (this.state.suppliers.some((s, i) => i !== idx && s.cnpj === f.cnpj)) { this.setState({ supError: 'Já existe fornecedor com este CNPJ.' }); return; }
+    const segsF = [...new Set([...(f.segments || []), (f.segment || '').trim()].filter(Boolean))];
+    const rec = { ...f, active: f.active !== false, name: f.name.trim(), segments: segsF, segment: segsF[0] || '', initials: this._initials(f.name.trim()) };
+    this.setState(s => ({ suppliers: idx >= 0 ? s.suppliers.map((x, i) => i === idx ? rec : x) : [...s.suppliers, rec], supOpen: false }));
+    this.showToast(idx >= 0 ? 'Fornecedor atualizado' : 'Fornecedor cadastrado');
+  };
+  openHist = (i) => { this.setState({ histOpen: true, histIdx: i }); };
+  closeHist = () => { this.setState({ histOpen: false }); };
+  _history(s) {
+    const seed = s.cnpj.replace(/\D/g, '').split('').reduce((a, d) => a + Number(d), 0);
+    const y = Number(s.since) || 2020;
+    const ev = [
+      { title: 'Cadastro homologado', detail: 'Documentação de habilitação aprovada (SICAF regular)', date: '15/02/' + y, color: '#1C543A' },
+      { title: 'Cotação respondida', detail: 'Pesquisa de preços — ' + this._segs(s).join(', '), date: '10/0' + (1 + seed % 8) + '/2025', color: '#3B82F6' },
+      { title: 'Contrato nº ' + (100 + seed % 90) + '/2025 assinado', detail: 'Vigência de 12 meses', date: '22/0' + (1 + seed % 6) + '/2025', color: '#1C543A' },
+      { title: 'Cotação respondida', detail: 'Pesquisa de preços — ' + this._segs(s).join(', '), date: '03/0' + (1 + seed % 9) + '/2026', color: '#3B82F6' }
+    ];
+    if (seed % 3 === 0) ev.splice(3, 0, { title: 'Notificação de atraso na entrega', detail: 'Advertência registrada — prazo regularizado em 5 dias', date: '14/11/2025', color: '#F59E0B' });
+    (s.statusLog || []).forEach(l => ev.push({ title: l.title, detail: 'Alteração de situação cadastral', date: l.date, color: l.title.includes('inativ') ? '#DC2626' : '#1C543A' }));
+    return ev.reverse();
+  }
+  openExport = () => { this.setState({ exportOpen: true }); };
+  closeExport = () => { this.setState({ exportOpen: false }); };
+  _exportEmails() { return this._filteredSuppliers().filter(s => s.active !== false).map(s => s.email).filter(Boolean); }
+  _segs(s) { return Array.isArray(s.segments) && s.segments.length ? s.segments : (s.segment ? [s.segment] : []); }
+  handleSupStatus = (e) => { this.setState({ supStatus: e.target.value }); };
+  toggleSupActive = (i) => {
+    const s = this.state.suppliers[i]; const nowActive = s.active === false;
+    this.setState(st => ({ suppliers: st.suppliers.map((x, k) => k === i ? { ...x, active: nowActive, statusLog: [...(x.statusLog || []), { title: nowActive ? 'Fornecedor reativado' : 'Fornecedor inativado', date: new Date().toLocaleDateString('pt-BR') }] } : x) }));
+    this.showToast(s.name + (nowActive ? ' reativado' : ' inativado'));
+  };
+  copyExport = () => { const txt = this._exportEmails().join('; '); if (navigator.clipboard) navigator.clipboard.writeText(txt); this.showToast(this._exportEmails().length + ' e-mails copiados'); };
+  mailtoExport = () => { window.location.href = 'mailto:?bcc=' + encodeURIComponent(this._exportEmails().join(';')) + '&subject=' + encodeURIComponent('Solicitação de cotação — Câmara Municipal'); };
+  downloadExportCsv = () => {
+    const rows = [['Razão social', 'CNPJ', 'Segmento', 'E-mail', 'Telefone']].concat(this._filteredSuppliers().map(s => [s.name, s.cnpj, this._segs(s).join(', '), s.email, s.contact]));
+    const csv = rows.map(r => r.map(x => '"' + String(x).replace(/"/g, '""') + '"').join(';')).join('\n');
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' }));
+    a.download = 'fornecedores_' + (this.state.supSegment === 'todos' ? 'todos' : this.state.supSegment.toLowerCase().replace(/\s+/g, '-')) + '.csv'; a.click();
+  };
+  _emptyTen() { return { object: '', type: 'Pregão Eletrônico', criterion: 'Menor preço', value: '', process: '', sector: this.state.sectors[0], openDate: new Date().toISOString().slice(0, 10), phase: 'Edital', notes: '' }; }
+  openNewTender = () => { this.setState({ tenOpen: true, tenEditId: null, tenError: '', tenForm: this._emptyTen() }); };
+  openEditTender = (id) => { const t = this.state.tenders.find(x => x.id === id); this.setState({ tenOpen: true, detOpen: false, tenEditId: id, tenError: '', tenForm: { ...t } }); };
+  closeTen = () => { this.setState({ tenOpen: false }); };
+  tenObject = (e) => { const v = e.target.value; this.setState(s => ({ tenForm: { ...s.tenForm, object: v } })); };
+  tenType = (e) => { const v = e.target.value; this.setState(s => ({ tenForm: { ...s.tenForm, type: v } })); };
+  tenCriterion = (e) => { const v = e.target.value; this.setState(s => ({ tenForm: { ...s.tenForm, criterion: v } })); };
+  tenValue = (e) => { const v = e.target.value; this.setState(s => ({ tenForm: { ...s.tenForm, value: v } })); };
+  tenProcess = (e) => { const v = e.target.value; this.setState(s => ({ tenForm: { ...s.tenForm, process: v } })); };
+  tenSector = (e) => { const v = e.target.value; this.setState(s => ({ tenForm: { ...s.tenForm, sector: v } })); };
+  tenOpenDate = (e) => { const v = e.target.value; this.setState(s => ({ tenForm: { ...s.tenForm, openDate: v } })); };
+  tenPhase = (e) => { const v = e.target.value; this.setState(s => ({ tenForm: { ...s.tenForm, phase: v } })); };
+  tenNotes = (e) => { const v = e.target.value; this.setState(s => ({ tenForm: { ...s.tenForm, notes: v } })); };
+  saveTen = () => {
+    const f = this.state.tenForm, id = this.state.tenEditId;
+    if (!f.object.trim() || !f.value.trim() || !f.openDate) { this.setState({ tenError: 'Preencha objeto, valor estimado e data de abertura.' }); return; }
+    const today = new Date().toLocaleDateString('pt-BR');
+    if (id) {
+      this.setState(s => ({ tenders: s.tenders.map(t => t.id === id ? { ...t, ...f, log: [...(t.log || []), { text: 'Dados atualizados', date: today }] } : t), tenOpen: false }));
+      this.showToast('Licitação ' + id + ' atualizada');
+    } else {
+      const nid = 'LIC-' + new Date().getFullYear() + '-' + String(this.state.tenSeq).padStart(3, '0');
+      const rec = { ...f, id: nid, object: f.object.trim(), bidders: 0, log: [{ text: 'Licitação autuada', date: today }] };
+      this.setState(s => ({ tenders: [rec, ...s.tenders], tenSeq: s.tenSeq + 1, tenOpen: false }));
+      this.showToast('Licitação ' + nid + ' criada');
+    }
+  };
+  openDetail = (id) => { this.setState({ detOpen: true, detId: id }); };
+  closeDet = () => { this.setState({ detOpen: false }); };
+  editFromDetail = () => { this.openEditTender(this.state.detId); };
+
+  LEGAL = { compras: 65492.11, engenharia: 130984.20 };
+  CATALOG = [
+    { catalog: 'CATMAT', code: '461905', name: 'Papel A4 75g/m² — resma 500 fl', grupo: ['75', 'Utensílios e suprimentos de escritório'], classe: ['7530', 'Artigos de papelaria'], pdm: ['04721', 'Papel A4'], eng: false },
+    { catalog: 'CATMAT', code: '279383', name: 'Caneta esferográfica azul', grupo: ['75', 'Utensílios e suprimentos de escritório'], classe: ['7510', 'Artigos de escritório'], pdm: ['01482', 'Caneta esferográfica'], eng: false },
+    { catalog: 'CATMAT', code: '317025', name: 'Pasta polionda com elástico', grupo: ['75', 'Utensílios e suprimentos de escritório'], classe: ['7510', 'Artigos de escritório'], pdm: ['05530', 'Pasta arquivo'], eng: false },
+    { catalog: 'CATMAT', code: '445381', name: 'Desinfetante hospitalar 5 L', grupo: ['79', 'Equipamentos e materiais para limpeza'], classe: ['7930', 'Produtos de limpeza e polimento'], pdm: ['06287', 'Desinfetante'], eng: false },
+    { catalog: 'CATMAT', code: '350713', name: 'Papel higiênico folha dupla', grupo: ['85', 'Artigos de higiene'], classe: ['8540', 'Artigos de papel para higiene'], pdm: ['02870', 'Papel higiênico'], eng: false },
+    { catalog: 'CATMAT', code: '484411', name: 'Toner para impressora laser', grupo: ['70', 'Equipamentos de TI, software e acessórios'], classe: ['7045', 'Suprimentos de TI'], pdm: ['08902', 'Toner'], eng: false },
+    { catalog: 'CATSER', code: '5380', name: 'Manutenção predial preventiva e corretiva', grupo: ['542', 'Serviços de engenharia'], classe: ['5421', 'Manutenção de edificações'], pdm: ['5380', 'Manutenção predial'], eng: true },
+    { catalog: 'CATSER', code: '3115', name: 'Serviço de chaveiro', grupo: ['871', 'Serviços de manutenção e reparo'], classe: ['8712', 'Reparos em instalações'], pdm: ['3115', 'Chaveiro'], eng: false },
+    { catalog: 'CATSER', code: '26077', name: 'Suporte técnico de TI', grupo: ['871', 'Serviços de manutenção e reparo'], classe: ['8716', 'Manutenção de equipamentos de TI'], pdm: ['26077', 'Suporte de TI'], eng: false }
+  ];
+  DISPENSAS = [
+    { code: '461905', value: 18400 }, { code: '461905', value: 12250.5 }, { code: '279383', value: 4380 }, { code: '317025', value: 9120 },
+    { code: '445381', value: 14700 }, { code: '445381', value: 8900 }, { code: '350713', value: 22150 }, { code: '484411', value: 41300 }, { code: '484411', value: 17650 },
+    { code: '5380', value: 98500 }, { code: '3115', value: 3800 }, { code: '26077', value: 38200 }, { code: '26077', value: 19900 }
+  ];
+  _brl(v) { return 'R$ ' + v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+  _parseBRL(s) { return Number(String(s).replace(/[^\d,]/g, '').replace(',', '.')) || 0; }
+  _key(it, level) { return it.catalog + ':' + it[level][0]; }
+  _spentAt(it, level) { const k = this._key(it, level); return this.DISPENSAS.reduce((a, d) => { const x = this.CATALOG.find(i => i.code === d.code); return x && this._key(x, level) === k ? a + d.value : a; }, 0); }
+  _limitFor(it) { return it.eng ? this.LEGAL.engenharia : this.LEGAL.compras; }
+  handleLimitLevel = (e) => { this.setState({ limitLevel: e.target.value }); };
+  handleLimitSearch = (e) => { this.setState({ limitSearch: e.target.value }); };
+  handleSimItem = (e) => { this.setState({ simItem: e.target.value }); };
+  handleSimValue = (e) => { this.setState({ simValue: e.target.value }); };
+  runSync = async () => {
+    const EP = ['/modulo-material/1_consultarGrupoMaterial', '/modulo-material/2_consultarClasseMaterial', '/modulo-material/3_consultarPdmMaterial', '/modulo-material/4_consultarItemMaterial', '/modulo-servico (grupos, classes e itens CATSER)'];
+    this.setState({ syncing: true, syncStatus: 'Sincronizando…', endpointState: Object.fromEntries(EP.map(e => [e, 'pending'])) });
+    let real = false;
+    try {
+      const ctl = new AbortController(); const to = setTimeout(() => ctl.abort(), 6000);
+      const r = await fetch('https://dadosabertos.compras.gov.br/modulo-material/1_consultarGrupoMaterial?pagina=1', { signal: ctl.signal });
+      clearTimeout(to);
+      if (r.ok) { const j = await r.json(); real = true; if (j && j.totalRegistros) this.setState(s => ({ catalogCountsState: { ...s.catalogCountsState, grupos: j.totalRegistros } })); }
+    } catch (err) { real = false; }
+    for (const e of EP) {
+      await new Promise(res => setTimeout(res, 350));
+      this.setState(s => ({ endpointState: { ...s.endpointState, [e]: 'ok' } }));
+    }
+    this.setState({ syncing: false, syncMode: real ? 'ok' : 'sim', lastSync: new Date().toLocaleString('pt-BR').slice(0, 17), syncStatus: real ? 'Sincronizado via API oficial' : 'Sincronizado (simulação — API sem CORS no navegador)' });
+    this.showToast('Catálogo CATMAT/CATSER sincronizado');
+  };
+
+  _publishCal() {
+    const iso = (br) => { const p = String(br || '').split('/'); return p.length === 3 ? p[2] + '-' + p[1] + '-' + p[0] : br; };
+    if (window.DACalendar) window.DACalendar.publish('compras', []);
+  }
+  componentDidUpdate() { this._publishCal(); }
+
+  _shellVals() {
+    if (!this._navBound) {
+      this._navBound = true;
+      window.addEventListener('resize', () => this.forceUpdate());
+      window.addEventListener('themechange', () => this.forceUpdate());
+    }
+    const st = this.state || {};
+    const isMobile = window.innerWidth < 900;
+    const open = !!st.navMenuOpen && isMobile;
+    const norm = s => String(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    const q = norm((st.navSearch || '').trim());
+    const INDEX = [["Dashboard.dc.html","▦","Painel de Controle","Sistemas & Gestão","painel dashboard indicadores alertas prazos fluxo"],["AlmoxarifadoAmostragem.dc.html","📦","Almoxarifado","Sistemas & Gestão","almoxarifado estoque amostragem materiais contagem"],["MocoesHomenagens.dc.html","🎗","Moções & Homenagens","Sistemas & Gestão","mocoes homenagens galeria vereador portaria"],["PatrimonioModule.dc.html","🏛","Patrimônio","Sistemas & Gestão","patrimonio bens tombamento transferencias ativos"],["UserProfile.dc.html","👤","Meus Dados (Perfil)","Sistemas & Gestão","perfil meus dados telefone email aniversario"],["ComprasModule.dc.html","🛒","Compras & Licitações","Sistemas & Gestão","compras licitacoes requisicoes fornecedores pregao"],["ProtocoloModule.dc.html","📋","Protocolo","Complementares","protocolo documentos processos prazos"],["RHModule.dc.html","🧑‍💼","Gestão de Pessoal","Complementares","rh recursos humanos servidores ferias"],["AnalyticsModule.dc.html","📈","Analytics & Relatórios","Complementares","analytics relatorios metricas indicadores"],["AuditLog.dc.html","🛡","Log e Auditoria","Administração","log auditoria seguranca acessos lgpd logins"],["Configuracoes.dc.html","⚙","Configurações do Sistema","Administração","configuracoes parametros parametrizacao ajustes alertas limites acessos perfis"],["Legislacoes.dc.html","⚖","Legislações","Administração","legislacao leis decretos portarias resolucoes recomendacoes normas"]];
+    const results = q ? INDEX.filter(i => norm(i[2] + ' ' + i[4]).includes(q)).slice(0, 6).map(i => ({ href: i[0], icon: i[1], label: i[2], group: i[3], go: () => { window.location.href = i[0]; } })) : [];
+    return {
+      navIsMobile: isMobile,
+      navOverlayVisible: open,
+      navSidebarPosition: isMobile ? 'fixed' : 'sticky',
+      navSidebarTransform: isMobile ? (open ? 'translateX(0)' : 'translateX(-100%)') : 'translateX(0)',
+      navOpen: () => this.setState({ navMenuOpen: true }),
+      navClose: () => this.setState({ navMenuOpen: false }),
+      navGutter: isMobile ? '16px' : '36px',
+      navHeaderPad: isMobile ? '18px 16px 12px' : '28px 36px 16px',
+      navTitleSize: isMobile ? '24px' : '30px',
+      navShowBreadcrumb: !isMobile,
+      navSearch: st.navSearch || '',
+      navSearchInput: (e) => this.setState({ navSearch: e.target.value, navSearchFocused: true }),
+      navSearchFocus: () => this.setState({ navSearchFocused: true }),
+      navSearchBlur: () => setTimeout(() => this.setState({ navSearchFocused: false }), 150),
+      navSearchKey: (e) => {
+        if (e.key === 'Enter' && results.length) window.location.href = results[0].href;
+        if (e.key === 'Escape') this.setState({ navSearch: '', navSearchFocused: false });
+      },
+      navSearchResults: results,
+      navSearchOpen: !!(st.navSearchFocused && q),
+      navSearchEmpty: !!q && results.length === 0,
+      ...(() => { const dk = !!(window.theme && window.theme.isDark && window.theme.isDark()); return { navThemeDark: dk, navThemeIsLight: !dk, navThemeLightBg: dk ? 'transparent' : 'rgba(255,255,255,0.9)', navThemeLightFg: dk ? 'rgba(255,255,255,0.6)' : '#1C543A', navThemeDarkBg: dk ? 'rgba(255,255,255,0.18)' : 'transparent', navThemeDarkFg: dk ? '#FFFFFF' : 'rgba(255,255,255,0.6)', navThemeLight: () => { if (window.theme) window.theme.set('light'); }, navThemeDarkSet: () => { if (window.theme) window.theme.set('dark'); } }; })()
+    };
+  }
+
+  renderVals() {
+    const tabFlags = { isProcessosTab: this.state.activeTab === 'processos', isContratosTab: this.state.activeTab === 'contratos', isRequestsTab: this.state.activeTab === 'requests', isSuppliersTab: this.state.activeTab === 'suppliers', isTendersTab: this.state.activeTab === 'tenders', isAnalyticsTab: this.state.activeTab === 'analytics', isLimitsTab: this.state.activeTab === 'limits' };
+    const kpisWithColor = this.state.kpis.map(k => ({ ...k, trendColor: k.trend.includes('↑') ? '#1C543A' : '#DC2626' }));
+    const term = this.state.searchTerm.trim().toLowerCase();
+    const filteredReqs = this.state.requisitions.filter(r => {
+      const matchesTerm = !term || r.description.toLowerCase().includes(term) || r.id.toLowerCase().includes(term);
+      const matchesStatus = this.state.statusFilter === 'todos' || r.status === this.state.statusFilter;
+      const matchesSector = this.state.sectorFilter === 'todos' || r.department === this.state.sectorFilter;
+      return matchesTerm && matchesStatus && matchesSector;
+    });
+    const canSubmitReq = !!(this.state.reqForm.description.trim() && this.state.reqForm.value.trim());
+    return {
+      ...this._shellVals(),
+      ...(() => {
+        const level = this.state.limitLevel, cat = this.state.limitCatalog, q = this.state.limitSearch.trim().toLowerCase();
+        const seen = {};
+        const rows = [];
+        this.CATALOG.filter(it => cat === 'todos' || it.catalog === cat).forEach(it => {
+          const k = this._key(it, level); if (seen[k]) return; seen[k] = true;
+          const spent = this._spentAt(it, level), limit = this._limitFor(it), pct = spent / limit * 100;
+          const color = pct >= 100 ? '#DC2626' : pct >= 80 ? '#B45309' : '#1C543A';
+          const path = level === 'grupo' ? 'Grupo' : level === 'classe' ? 'Grupo ' + it.grupo[0] + ' · ' + it.grupo[1] : 'Classe ' + it.classe[0] + ' · ' + it.classe[1];
+          const row = { catalog: it.catalog, code: it[level][0], name: it[level][1], path: path, spentFmt: this._brl(spent), limitFmt: this._brl(limit), pct: pct.toFixed(0) + '%', barWidth: Math.min(pct, 100).toFixed(0) + '%', barColor: color,
+            status: pct >= 100 ? 'Bloqueado' : pct >= 80 ? 'Atenção' : 'Regular', statusBg: pct >= 100 ? '#FDECEC' : pct >= 80 ? '#FEF3C7' : '#EAF3EE',
+            catBg: it.catalog === 'CATMAT' ? '#EAF3EE' : '#EFF6FF', catColor: it.catalog === 'CATMAT' ? '#1C543A' : '#1E40AF', _pct: pct };
+          if (!q || (row.code + ' ' + row.name + ' ' + path).toLowerCase().includes(q)) rows.push(row);
+        });
+        rows.sort((a, b) => b._pct - a._pct);
+        const simIt = this.CATALOG.find(i => i.code === this.state.simItem) || this.CATALOG[0];
+        const simV = this._parseBRL(this.state.simValue);
+        const saldo = Math.min(...['grupo', 'classe', 'pdm'].map(l => this._limitFor(simIt) - this._spentAt(simIt, l)));
+        const bind = this._spentAt(simIt, 'classe');
+        const ok = simV > 0 && simV <= saldo;
+        const es = this.state.endpointState;
+        const EPS = ['/modulo-material/1_consultarGrupoMaterial', '/modulo-material/2_consultarClasseMaterial', '/modulo-material/3_consultarPdmMaterial', '/modulo-material/4_consultarItemMaterial', '/modulo-servico (grupos, classes e itens CATSER)'];
+        const cc = this.state.catalogCountsState;
+        return {
+          legalLimits: [
+            { article: 'Art. 75, I — Lei 14.133/2021', valueFmt: this._brl(this.LEGAL.engenharia), scope: 'Obras, serviços de engenharia e manutenção de veículos', source: 'Decreto nº 12.807/2025 (DOU 30/12/2025) — vigente desde 01/01/2026' },
+            { article: 'Art. 75, II — Lei 14.133/2021', valueFmt: this._brl(this.LEGAL.compras), scope: 'Outros serviços e compras', source: 'Decreto nº 12.807/2025 (DOU 30/12/2025) — vigente desde 01/01/2026' }
+          ],
+          syncing: this.state.syncing, syncStatus: this.state.syncStatus, lastSync: this.state.lastSync, runSync: this.runSync,
+          syncLabel: this.state.syncing ? 'Sincronizando…' : '↻ Sincronizar catálogo', syncDot: this.state.syncing ? '#3B82F6' : this.state.syncMode === 'ok' ? '#1C543A' : '#F59E0B',
+          catalogTypes: [['todos', 'Todos'], ['CATMAT', 'CATMAT'], ['CATSER', 'CATSER']].map(([k, l]) => ({ label: l, bg: cat === k ? '#FFFFFF' : 'transparent', color: cat === k ? '#1C543A' : '#666666', select: () => this.setState({ limitCatalog: k }) })),
+          limitLevel: level, handleLimitLevel: this.handleLimitLevel, limitSearch: this.state.limitSearch, handleLimitSearch: this.handleLimitSearch, limitRows: rows,
+          catalogItemOptions: this.CATALOG.map(i => ({ code: i.code, label: i.catalog + ' ' + i.code + ' — ' + i.name })),
+          simItem: simIt.code, simValue: this.state.simValue, handleSimItem: this.handleSimItem, handleSimValue: this.handleSimValue,
+          simHasResult: simV > 0,
+          simTitle: ok ? '✓ Contratação direta permitida (art. 75)' : '⚠ Excede o limite — licitação obrigatória',
+          simText: 'Saldo disponível no exercício (menor entre grupo, classe e PDM): ' + this._brl(Math.max(saldo, 0)) + '. Já contratado na classe ' + simIt.classe[0] + ': ' + this._brl(bind) + (ok ? '. Saldo após esta contratação: ' + this._brl(saldo - simV) + '.' : '. Contratar este valor por dispensa caracterizaria fracionamento de despesa.'),
+          simColor: ok ? '#1C543A' : '#DC2626', simBg: ok ? '#F2F7F4' : '#FDF3F2',
+          catalogCounts: [{ label: 'Grupos', value: cc.grupos.toLocaleString('pt-BR') }, { label: 'Classes', value: cc.classes.toLocaleString('pt-BR') }, { label: 'PDMs', value: cc.pdms.toLocaleString('pt-BR') }, { label: 'Itens CATMAT', value: cc.catmat.toLocaleString('pt-BR') }, { label: 'Itens CATSER', value: cc.catser.toLocaleString('pt-BR') }],
+          syncEndpoints: EPS.map(p => ({ path: p, status: es[p] === 'pending' ? '⏳ consultando' : es[p] === 'ok' ? '✓ atualizado' : '—', color: es[p] === 'pending' ? '#2563EB' : es[p] === 'ok' ? '#1C543A' : '#666666' }))
+        };
+      })(),
+      ...(() => {
+        const segs = [...new Set(this.state.suppliers.flatMap(s => this._segs(s)))].sort();
+    const fSup = this.state.supForm || {}; const fSegs = fSup.segments || (fSup.segment && this.state.supEditIdx >= 0 ? [fSup.segment] : []);
+        const shown = this._filteredSuppliers();
+        const hs = this.state.suppliers[this.state.histIdx] || { name: '', cnpj: '0', segment: '', initials: '', since: '2020' };
+        const hev = this._history(hs);
+        const PH = ['Edital', 'Julgamento', 'Assinatura', 'Homologação'];
+        const dt = this.state.tenders.find(t => t.id === this.state.detId) || { id: '', object: '', phase: 'Edital', log: [] };
+        const di = PH.indexOf(dt.phase);
+        const emails = this._exportEmails();
+        return {
+          stopProp: this.stopProp, segments: segs, supSearch: this.state.supSearch, supSegment: this.state.supSegment, handleSupSearch: this.handleSupSearch, handleSupSegment: this.handleSupSegment,
+          supShown: shown.length, supEmpty: shown.length === 0, openNewSup: this.openNewSup,
+          supOpen: this.state.supOpen, closeSup: this.closeSup, saveSup: this.saveSup, supForm: this.state.supForm, supError: this.state.supError,
+          supModalTitle: this.state.supEditIdx >= 0 ? 'Editar Fornecedor' : 'Adicionar Fornecedor',
+          supName: this.supName, supCnpj: this.supCnpj, supContact: this.supContact, supEmail: this.supEmail, supSeg: this.supSeg, supSince: this.supSince,
+          segmentsHint: segs.join(' · '),
+      histSegLabel: this._segs(hs).join(' · '),
+      supSegKey: e => { if (e.key !== 'Enter') return; e.preventDefault(); const v = (this.state.supForm.segment || '').trim(); if (!v) return; this.setState(s => ({ supForm: { ...s.supForm, segments: [...new Set([...fSegs, v])], segment: '' } })); },
+      segChips: [...new Set([...segs, ...fSegs])].map(sg => { const on = fSegs.includes(sg); return { label: sg, on, bg: on ? '#1C543A' : '#FFFFFF', color: on ? '#FFFFFF' : '#444444', border: on ? '#1C543A' : '#E0E0E0',
+        toggle: () => this.setState(s => ({ supForm: { ...s.supForm, segment: '', segments: on ? fSegs.filter(x => x !== sg) : [...fSegs, sg] } })) }; }),
+          histOpen: this.state.histOpen, closeHist: this.closeHist, histSupplier: hs, histEvents: hev,
+          histStats: [{ label: 'Cotações', value: hev.filter(e => e.title.startsWith('Cotação')).length }, { label: 'Contratos', value: hev.filter(e => e.title.startsWith('Contrato')).length }, { label: 'Ocorrências', value: hev.filter(e => e.color === '#F59E0B').length }],
+          exportOpen: this.state.exportOpen, openExport: this.openExport, closeExport: this.closeExport, exportDisabled: emails.length === 0,
+          exportText: emails.join('; '), exportCount: emails.length, exportSegmentLabel: this.state.supSegment === 'todos' ? 'Todos' : this.state.supSegment,
+          copyExport: this.copyExport, mailtoExport: this.mailtoExport, downloadExportCsv: this.downloadExportCsv,
+          openNewTender: this.openNewTender, tenOpen: this.state.tenOpen, closeTen: this.closeTen, saveTen: this.saveTen, tenForm: this.state.tenForm, tenError: this.state.tenError,
+          tenModalTitle: this.state.tenEditId ? 'Editar Licitação ' + this.state.tenEditId : 'Nova Licitação', tenSaveLabel: this.state.tenEditId ? 'Salvar alterações' : 'Criar licitação',
+          tenObject: this.tenObject, tenType: this.tenType, tenCriterion: this.tenCriterion, tenValue: this.tenValue, tenProcess: this.tenProcess, tenSector: this.tenSector, tenOpenDate: this.tenOpenDate, tenPhase: this.tenPhase, tenNotes: this.tenNotes,
+          detOpen: this.state.detOpen, closeDet: this.closeDet, editFromDetail: this.editFromDetail,
+          detail: { ...dt, valueFmt: 'R$ ' + (dt.value || '—'), openDateBR: dt.openDate ? dt.openDate.split('-').reverse().join('/') : '—', bidders: String(dt.bidders ?? 0), process: dt.process || '—', criterion: dt.criterion || '—', sector: dt.sector || '—',
+            phaseStyle: ({ 'Edital': 'background-color: #F59E0B22; color: #B45309;', 'Julgamento': 'background-color: #3B82F622; color: #2563EB;' })[dt.phase] || 'background-color: #1C543A22; color: #1C543A;',
+            steps: PH.map((n, i) => ({ name: n, color: i <= di ? '#1C543A' : '#E8E8E8', textColor: i <= di ? '#1C543A' : '#666666' })),
+            log: (dt.log || []).slice().reverse() }
+        };
+      })(),
+      ...this._tabVals(["processos","contratos","suppliers","analytics","limits"]),
+      exercAno: String(window.DAExercicio ? window.DAExercicio.get() : 2026), exercAnos: window.DAExercicio ? window.DAExercicio.anos.map(String) : ['2026'],
+      setExerc: e => { if (window.DAExercicio) window.DAExercicio.set(e.target.value); this.forceUpdate(); },
+      ...tabFlags,
+      activeTab: this.state.activeTab,
+      searchTerm: this.state.searchTerm,
+      handleSearch: this.handleSearch,
+      statusFilter: this.state.statusFilter,
+      sectorFilter: this.state.sectorFilter,
+      handleStatusFilter: this.handleStatusFilter,
+      handleSectorFilter: this.handleSectorFilter,
+      sectors: this.state.sectors,
+      shownCount: filteredReqs.length,
+      totalCount: this.state.requisitions.length,
+      isEmpty: filteredReqs.length === 0,
+      newReqOpen: this.state.newReqOpen,
+      openNewReq: this.openNewReq,
+      closeNewReq: this.closeNewReq,
+      stopPropagation: this.stopPropagation,
+      reqForm: this.state.reqForm,
+      handleReqDesc: this.handleReqDesc,
+      handleReqDept: this.handleReqDept,
+      handleReqValue: this.handleReqValue,
+      submitNewReq: this.submitNewReq,
+      reqSubmitDisabled: !canSubmitReq,
+      reqSubmitBg: canSubmitReq ? '#1C543A' : '#B8C7BF',
+      reqSubmitCursor: canSubmitReq ? 'pointer' : 'not-allowed',
+      toastVisible: this.state.toastVisible,
+      toastMessage: this.state.toastMessage,
+      requisitions: filteredReqs.map(r => ({...r,
+        statusStyle: ({'Aprovado':'background-color: #1C543A22; color: #1C543A;','Pendente':'background-color: #F59E0B22; color: #F59E0B;','Recusado':'background-color: #DC262622; color: #DC2626;'})[r.status] || 'background-color: #3B82F622; color: #3B82F6;',
+        isPending: r.status === 'Pendente',
+        approve: () => this.setReqStatus(r.id, 'Aprovado'),
+        reject: () => this.setReqStatus(r.id, 'Recusado')})),
+      suppliers: this._filteredSuppliers().map(s => { const on = s.active !== false; return { ...s, segList: this._segs(s), edit: () => this.openEditSup(s.idx), history: () => this.openHist(s.idx), toggleActive: () => this.toggleSupActive(s.idx),
+        statusLabel: on ? 'Ativo' : 'Inativo', statusBg: on ? '#EAF3EE' : '#F0F0F0', statusColor: on ? '#1C543A' : '#666666', switchBg: on ? '#1C543A' : '#D9D9D9', knobLeft: on ? '23px' : '3px', cardOpacity: on ? '1' : '0.65', toggleTitle: on ? 'Inativar fornecedor' : 'Reativar fornecedor' }; }),
+      supStatus: this.state.supStatus, handleSupStatus: this.handleSupStatus,
+      tenders: this.state.tenders.map(t => {
+        const idx = this.PHASES.indexOf(t.phase);
+        return {...t,
+          phaseStyle: ({'Edital':'background-color: #F59E0B22; color: #F59E0B;','Julgamento':'background-color: #3B82F622; color: #3B82F6;'})[t.phase] || 'background-color: #1C543A22; color: #1C543A;',
+          phaseSteps: this.PHASES.map((name, i) => ({ name: name, color: i <= idx ? '#1C543A' : '#E8E8E8' })),
+          canAdvance: idx < this.PHASES.length - 1,
+          canReturn: idx > 0,
+          advance: () => this.advanceTender(t.id),
+          view: () => this.openDetail(t.id),
+          edit: () => this.openEditTender(t.id),
+          goBack: () => this.returnTender(t.id)};
+      }),
+      kpis: kpisWithColor,
+      setTab: this.setTab
+    };
+  }
+}
+
+</script>
+</body>
+</html>

@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <script src="./theme.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="design_doc_mode" content="canvas">
+  <title>Backend Integration Analysis - Sistema DA</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background-color: #FAFAFA; color: #1D1D1B; }
+  </style>
+</helmet>
+
+<div style="min-height: 100vh; padding: 40px 20px; background-color: #FAFAFA;">
+  <div style="max-width: 1400px; margin: 0 auto;">
+    <h1 style="font-size: 32px; font-weight: 700; margin-bottom: 8px;">Backend Integration Strategy</h1>
+    <p style="font-size: 14px; color: #999999; margin-bottom: 32px;">Análise Ducmb/studio + Opções de Implementação para Sistema DA</p>
+
+    <!-- Seção 1: O que pode ser aproveitado -->
+    <section style="background-color: #FFFFFF; padding: 24px; border-radius: 8px; border: 1px solid #E8E8E8; margin-bottom: 20px;">
+      <h2 style="font-size: 20px; font-weight: 600; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid #1C543A;">1. O que pode ser Aproveitado do Código Studio</h2>
+      
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+        <div style="padding: 16px; background-color: #F0FDF4; border-radius: 6px; border: 1px solid #86EFAC;">
+          <p style="font-size: 12px; font-weight: 600; color: #166534; margin-bottom: 12px;">✓ TIPOS (types.ts)</p>
+          <ul style="font-size: 11px; color: #166534; line-height: 2;">
+            <li>• User type (id, name, email, role, sector, status)</li>
+            <li>• Contract type (contrato, validade, object)</li>
+            <li>• Licitacao type (fase, prazo)</li>
+            <li>• Cotacao type (responsável, fase)</li>
+            <li>• Ferias type (datas, tipo)</li>
+          </ul>
+        </div>
+        <div style="padding: 16px; background-color: #FEF2F2; border-radius: 6px; border: 1px solid #FCC;">
+          <p style="font-size: 12px; font-weight: 600; color: #C33; margin-bottom: 12px;">⚠ LIMITAÇÕES</p>
+          <ul style="font-size: 11px; color: #C33; line-height: 2;">
+            <li>• Não tem tipos para Produtos/Inventário</li>
+            <li>• Não tem tipos para Protocolo/Documentos</li>
+            <li>• Não inclui Auditoria/Logs</li>
+            <li>• Sem definição de Permissões por módulo</li>
+            <li>• Dados são mock (array local)</li>
+          </ul>
+        </div>
+      </div>
+
+      <div style="background-color: #F9F9F9; padding: 12px; border-radius: 6px; border-left: 3px solid #1C543A; margin-bottom: 16px;">
+        <p style="font-size: 12px; color: #666666; line-height: 1.6;">
+          <strong>data.ts:</strong> Fornece estrutura de dados mockada (users array). Não há API calls, tudo é local. Pode servir como referência de schema, mas requer expansão significativa.
+        </p>
+      </div>
+
+      <div style="background-color: #F9F9F9; padding: 12px; border-radius: 6px; border-left: 3px solid #1C543A;">
+        <p style="font-size: 12px; color: #666666; line-height: 1.6;">
+          <strong>utils.ts:</strong> Apenas utilitário CSS (clsx + twMerge). Não oferece valor para lógica de negócio do Sistema DA.
+        </p>
+      </div>
+    </section>
+
+    <!-- Seção 2: Gaps Identificados -->
+    <section style="background-color: #FFFFFF; padding: 24px; border-radius: 8px; border: 1px solid #E8E8E8; margin-bottom: 20px;">
+      <h2 style="font-size: 20px; font-weight: 600; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid #1C543A;">2. Gaps no Código Studio para Sistema DA</h2>
+      
+      <table style="width: 100%; font-size: 11px; border-collapse: collapse; margin-bottom: 16px;">
+        <thead style="background-color: #F9F9F9; border-bottom: 2px solid #E8E8E8;">
+          <tr>
+            <th style="padding: 10px; text-align: left; font-weight: 600;">Recurso</th>
+            <th style="padding: 10px; text-align: left; font-weight: 600;">Studio Oferece?</th>
+            <th style="padding: 10px; text-align: left; font-weight: 600;">Sistema DA Precisa?</th>
+            <th style="padding: 10px; text-align: left; font-weight: 600;">Solução</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom: 1px solid #E8E8E8;">
+            <td style="padding: 10px;">Tipos de Usuário com Roles</td>
+            <td style="padding: 10px; color: #166534; font-weight: 600;">✓ Básico</td>
+            <td style="padding: 10px; color: #166534; font-weight: 600;">✓ Sim</td>
+            <td style="padding: 10px;">Estender: adicionar permissions[] e department</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #E8E8E8;">
+            <td style="padding: 10px;">Tipos de Produto/Inventário</td>
+            <td style="padding: 10px; color: #DC2626; font-weight: 600;">✗ Não</td>
+            <td style="padding: 10px; color: #166534; font-weight: 600;">✓ Sim</td>
+            <td style="padding: 10px;">Criar novo type: Product { code, name, stock, category }</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #E8E8E8;">
+            <td style="padding: 10px;">Tipos de Protocolo/Documento</td>
+            <td style="padding: 10px; color: #DC2626; font-weight: 600;">✗ Não</td>
+            <td style="padding: 10px; color: #166534; font-weight: 600;">✓ Sim</td>
+            <td style="padding: 10px;">Criar: Document, Process, Deadline types</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #E8E8E8;">
+            <td style="padding: 10px;">Auditoria & Logs</td>
+            <td style="padding: 10px; color: #DC2626; font-weight: 600;">✗ Não</td>
+            <td style="padding: 10px; color: #166534; font-weight: 600;">✓ Sim</td>
+            <td style="padding: 10px;">Criar: AuditLog { userId, action, timestamp, details }</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #E8E8E8;">
+            <td style="padding: 10px;">RBAC com Permissões</td>
+            <td style="padding: 10px; color: #F59E0B; font-weight: 600;">~ Parcial</td>
+            <td style="padding: 10px; color: #166534; font-weight: 600;">✓ Sim</td>
+            <td style="padding: 10px;">Estender User: permissions: { compras, rh, protocolo, almoxarifado }</td>
+          </tr>
+          <tr>
+            <td style="padding: 10px;">API Endpoints</td>
+            <td style="padding: 10px; color: #DC2626; font-weight: 600;">✗ Não</td>
+            <td style="padding: 10px; color: #166534; font-weight: 600;">✓ Sim</td>
+            <td style="padding: 10px;">Definir contratos REST + implementar</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Seção 3: Opções de Implementação -->
+    <section style="background-color: #FFFFFF; padding: 24px; border-radius: 8px; border: 1px solid #E8E8E8; margin-bottom: 20px;">
+      <h2 style="font-size: 20px; font-weight: 600; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid #1C543A;">3. Opções de Implementação Backend</h2>
+      
+      <!-- Opção A -->
+      <div style="padding: 16px; background-color: #F9F9F9; border-radius: 6px; border: 2px solid #1C543A; margin-bottom: 16px;">
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+          <div style="width: 40px; height: 40px; border-radius: 50%; background-color: #1C543A; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 18px;">A</div>
+          <div>
+            <h3 style="font-size: 14px; font-weight: 600; color: #1D1D1B;">Opção A: Expandir Studio + Integração Gradual</h3>
+            <p style="font-size: 11px; color: #999999; margin-top: 2px;">Leveraging existing Studio codebase</p>
+          </div>
+        </div>
+        <div style="margin: 12px 0; padding: 12px; background-color: #FFFFFF; border-radius: 4px;">
+          <p style="font-size: 11px; color: #666666; line-height: 1.8;">
+            <strong>Abordagem:</strong> Estender types.ts com Product, Document, AuditLog. Criar endpoints Node.js/Express que validam contra esses tipos. Integrar gradualmente cada módulo (DC) com chamadas fetch() para a API.<br/><br/>
+            <strong>Vantagens:</strong> Reutiliza scaffold Studio, incremental, baixo risco.<br/>
+            <strong>Desvantagens:</strong> Requer refator significativo dos types Studio. Lentidão no desenvolvimento.
+          </p>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+          <div style="padding: 10px; background-color: #1C543A22; border-radius: 4px;">
+            <p style="font-size: 10px; font-weight: 600; color: #1C543A; margin-bottom: 6px;">✓ Pré-requisitos</p>
+            <ul style="font-size: 10px; color: #1C543A; line-height: 1.6;">
+              <li>• Fork/clone Studio repo</li>
+              <li>• Estender types.ts</li>
+              <li>• Node.js + Express backend</li>
+              <li>• PostgreSQL ou MongoDB</li>
+            </ul>
+          </div>
+          <div style="padding: 10px; background-color: #DC262622; border-radius: 4px;">
+            <p style="font-size: 10px; font-weight: 600; color: #DC2626; margin-bottom: 6px;">Esforço Estimado</p>
+            <p style="font-size: 11px; color: #DC2626; font-weight: 600;">4-6 semanas</p>
+            <p style="font-size: 9px; color: #DC2626; margin-top: 4px;">(types + endpoints + testes)</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Opção B -->
+      <div style="padding: 16px; background-color: #F9F9F9; border-radius: 6px; border: 2px solid #F59E0B; margin-bottom: 16px;">
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+          <div style="width: 40px; height: 40px; border-radius: 50%; background-color: #F59E0B; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 18px;">B</div>
+          <div>
+            <h3 style="font-size: 14px; font-weight: 600; color: #1D1D1B;">Opção B: Fresh Start com Supabase/Firebase</h3>
+            <p style="font-size: 11px; color: #999999; margin-top: 2px;">Backend-as-a-Service approach</p>
+          </div>
+        </div>
+        <div style="margin: 12px 0; padding: 12px; background-color: #FFFFFF; border-radius: 4px;">
+          <p style="font-size: 11px; color: #666666; line-height: 1.8;">
+            <strong>Abordagem:</strong> Descartar Studio backend, usar Supabase (PostgreSQL gerenciado + Auth + RLS) ou Firebase. DCs fazem chamadas diretas ao Supabase via client libs. Zero código backend.<br/><br/>
+            <strong>Vantagens:</strong> Rápido, sem manutenção de servidor, Auth nativa, RLS para RBAC automático.<br/>
+            <strong>Desvantagens:</strong> Vendor lock-in, custo per-user, menos controle sobre lógica.
+          </p>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+          <div style="padding: 10px; background-color: #F59E0B22; border-radius: 4px;">
+            <p style="font-size: 10px; font-weight: 600; color: #F59E0B; margin-bottom: 6px;">✓ Setup</p>
+            <ul style="font-size: 10px; color: #F59E0B; line-height: 1.6;">
+              <li>• Conta Supabase/Firebase</li>
+              <li>• Schema SQL no console</li>
+              <li>• Client SDK no DC</li>
+              <li>• RLS policies</li>
+            </ul>
+          </div>
+          <div style="padding: 10px; background-color: #DC262622; border-radius: 4px;">
+            <p style="font-size: 10px; font-weight: 600; color: #DC2626; margin-bottom: 6px;">Esforço Estimado</p>
+            <p style="font-size: 11px; color: #DC2626; font-weight: 600;">2-3 semanas</p>
+            <p style="font-size: 9px; color: #DC2626; margin-top: 4px;">(setup + schema + integração DC)</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Opção C -->
+      <div style="padding: 16px; background-color: #F9F9F9; border-radius: 6px; border: 2px solid #3B82F6; margin-bottom: 16px;">
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+          <div style="width: 40px; height: 40px; border-radius: 50%; background-color: #3B82F6; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 18px;">C</div>
+          <div>
+            <h3 style="font-size: 14px; font-weight: 600; color: #1D1D1B;">Opção C: Definir API Contract + Mock Ativos Preparados</h3>
+            <p style="font-size: 11px; color: #999999; margin-top: 2px;">Spec-driven development</p>
+          </div>
+        </div>
+        <div style="margin: 12px 0; padding: 12px; background-color: #FFFFFF; border-radius: 4px;">
+          <p style="font-size: 11px; color: #666666; line-height: 1.8;">
+            <strong>Abordagem:</strong> Documentar OpenAPI/Swagger de todos endpoints. DCs continuam com mocks (localStorage), mas estrutura fetch() preparada. Backend implementa depois sem quebrar DC.<br/><br/>
+            <strong>Vantagens:</strong> Parallelização Dev/Backend, contrato claro, testável, backend agnóstico.<br/>
+            <strong>Desvantagens:</strong> Mais planning upfront, requer sincronização Dev/Backend.
+          </p>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+          <div style="padding: 10px; background-color: #3B82F622; border-radius: 4px;">
+            <p style="font-size: 10px; font-weight: 600; color: #3B82F6; margin-bottom: 6px;">✓ Entregáveis</p>
+            <ul style="font-size: 10px; color: #3B82F6; line-height: 1.6;">
+              <li>• OpenAPI spec (YAML)</li>
+              <li>• Mock responses (JSON)</li>
+              <li>• DC fetch() stubs</li>
+              <li>• Error handling guide</li>
+            </ul>
+          </div>
+          <div style="padding: 10px; background-color: #DC262622; border-radius: 4px;">
+            <p style="font-size: 10px; font-weight: 600; color: #DC2626; margin-bottom: 6px;">Esforço Estimado</p>
+            <p style="font-size: 11px; color: #DC2626; font-weight: 600;">1-2 semanas</p>
+            <p style="font-size: 9px; color: #DC2626; margin-top: 4px;">(spec + mocks + DC stubs)</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Seção 4: Recomendação -->
+    <section style="background-color: #F0FDF4; border: 2px solid #86EFAC; padding: 24px; border-radius: 8px;">
+      <h2 style="font-size: 18px; font-weight: 600; color: #166534; margin-bottom: 16px;">✓ Recomendação: Opção B + C Híbrida</h2>
+      
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+        <div>
+          <p style="font-size: 12px; color: #166534; line-height: 1.8; margin-bottom: 12px;">
+            <strong>Fase 1 (1-2 semanas):</strong> Implementar Opção C—definir OpenAPI spec completo (auth, inventory, RBAC, protocolo), criar mock responses, preparar stubs fetch() nos DCs. <strong>Entregas:</strong> Spec YAML, mocks JSON, DC com fetch() condicional (mock || API).
+          </p>
+        </div>
+        <div>
+          <p style="font-size: 12px; color: #166534; line-height: 1.8;">
+            <strong>Fase 2 (3-4 semanas):</strong> Backend paralelo: escolher Supabase (rápido, produção pronta) OU Node.js+Express (controle máximo). Implementar endpoints conforme spec. DCs apontam para API real quando pronto. RBAC nativo (Supabase RLS ou custom middleware).
+          </p>
+        </div>
+      </div>
+
+      <p style="font-size: 12px; color: #166534; margin-top: 16px; padding-top: 16px; border-top: 1px solid #86EFAC;">
+        <strong>Benefícios:</strong> DCs continuam funcionando com mocks durante Fase 1. Backend teams trabalham em paralelo. Integração é just-swap-endpoints. Studio code reutilizado minimamente (types base apenas). Menos risco de quebra.
+      </p>
+    </section>
+
+    <!-- Seção 5: Próximos Passos -->
+    <section style="background-color: #FFFFFF; padding: 24px; border-radius: 8px; border: 1px solid #E8E8E8;">
+      <h2 style="font-size: 18px; font-weight: 600; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid #1C543A;">4. Próximos Passos Imediatos</h2>
+      
+      <ol style="font-size: 12px; color: #666666; line-height: 2; margin-left: 20px;">
+        <li><strong>Escolher opção:</strong> A (estender Studio), B (Supabase), ou C (spec-first).</li>
+        <li><strong>Se Opção C:</strong> Gerar OpenAPI spec completo (endpoints auth, RBAC, inventory, protocolo, RH).</li>
+        <li><strong>Se Opção B:</strong> Criar Supabase project, definir schema SQL (users, products, documents, audit_logs).</li>
+        <li><strong>Se Opção A:</strong> Fork Studio, estender types.ts com novos tipos, criar Node.js boilerplate.</li>
+        <li><strong>Integração DC:</strong> Adicionar fetch() handlers em cada DC conforme fase 2.</li>
+        <li><strong>Testes:</strong> Unit tests para RBAC, validação de dados, audit logging.</li>
+      </ol>
+    </section>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: &quot;100%&quot;, &quot;height&quot;: &quot;100%&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+
+</script>
+</body>
+</html>

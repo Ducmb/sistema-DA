@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <script src="./theme.js"></script>
+  <script src="./exercicio.js"></script>
+  <script src="./liccont.js"></script>
+</helmet>
+<div style="display: flex; flex-direction: column; gap: 16px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #1D1D1B;">
+  <div style="display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; align-items: flex-start;"><div>
+    <h2 style="font-size: 18px; font-weight: 700;">Contratos {{ ano }}</h2>
+    <p style="font-size: 12.5px; color: #666666; margin-top: 2px;">Notas fiscais em ciclo mensal a partir da assinatura: nota não recebida gera aviso no Painel. Avisos de fim de vigência: azul aos 120 dias, amarelo aos 60 e vermelho aos 30. Saldo de empenho abaixo de 20% também gera aviso.</p>
+  </div>
+  <button onClick="{{ openNew }}" style="height: 44px; padding: 0 16px; background-color: #1C543A; color: #FFFFFF; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer;" style-hover="background-color: #153A2E;">+ Adicionar contrato</button>
+  </div>
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px;">
+    <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="4">
+      <div style="background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 8px; padding: 14px;">
+        <p style="font-size: 11px; font-weight: 700; color: #666666; text-transform: uppercase; letter-spacing: 0.3px;">{{ k.label }}</p>
+        <p style="font-size: 22px; font-weight: 800; color: {{ k.color }}; margin-top: 4px;">{{ k.value }}</p>
+      </div>
+    </sc-for>
+  </div>
+  <div style="background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 8px; padding: 14px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
+    <input type="search" value="{{ q }}" onInput="{{ setQ }}" placeholder="Buscar por contratada, contrato ou processo" aria-label="Buscar contrato" style="flex: 1; min-width: 200px; height: 40px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px;" style-focus="border-color: #1C543A; outline: none;"/>
+    <sc-if value="{{ hasSel }}" hint-placeholder-val="{{ false }}">
+      <span style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 6px 0 12px; border-radius: 999px; background-color: #EAF3EE; color: #1C543A; font-size: 12.5px; font-weight: 700;">{{ selOnlyLabel }}<button onClick="{{ clearSel }}" aria-label="Mostrar todos os contratos" style="height: 30px; padding: 0 10px; border: none; border-radius: 999px; background-color: #1C543A; color: #FFFFFF; font-size: 12px; font-weight: 700; cursor: pointer;">Mostrar todos ✕</button></span>
+    </sc-if>
+    <select value="{{ filter }}" onChange="{{ setFilter }}" aria-label="Filtrar contratos" style="height: 40px; padding: 0 10px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; background-color: #FFFFFF;">
+      <option value="todos">Todos</option>
+      <option value="vencer">Vencem em até 120 dias</option>
+      <option value="saldo">Saldo abaixo de 20%</option>
+      <option value="notas">Com nota não recebida</option>
+    </select>
+  </div>
+  <div style="background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 8px; overflow-x: auto;">
+    <div style="min-width: 860px;">
+      <div style="display: grid; grid-template-columns: minmax(0, 2fr) 90px 110px 120px 120px minmax(0, 1.4fr) 130px; gap: 12px; padding: 10px 16px; background-color: #F9F9F9; font-size: 11px; font-weight: 700; color: #666666; text-transform: uppercase; letter-spacing: 0.3px;">
+        <span>Contratada</span><span>Contrato</span><span>Processo DA</span><span>Fim</span><span>Empenhado</span><span>Saldo de empenho</span><span>Aviso</span>
+      </div>
+      <sc-for list="{{ rows }}" as="c" hint-placeholder-count="6">
+        <button onClick="{{ c.select }}" style="width: 100%; text-align: left; border: none; border-top: 1px solid #F0F0F0; background-color: {{ c.rowBg }}; padding: 12px 16px; display: grid; grid-template-columns: minmax(0, 2fr) 90px 110px 120px 120px minmax(0, 1.4fr) 130px; gap: 12px; align-items: center; font-size: 13px; cursor: pointer;" style-hover="background-color: #F7F9F8;">
+          <span style="font-weight: 600; color: #1D1D1B;">{{ c.contratada }}</span>
+          <span style="font-family: ui-monospace, monospace; color: #1C543A; font-weight: 700;">{{ c.contrato }}</span>
+          <span style="color: #666666;">{{ c.processo }}</span>
+          <span><span style="display: block; color: #1D1D1B;">{{ c.fimFmt }}</span><span style="font-size: 11px; color: #666666;">{{ c.diasLabel }}</span></span>
+          <span style="color: #1D1D1B;">{{ c.empFmt }}</span>
+          <span style="display: flex; flex-direction: column; gap: 4px;"><span style="font-weight: 600; color: {{ c.saldoColor }};">{{ c.saldoFmt }} · {{ c.saldoPctFmt }}</span><span style="height: 6px; border-radius: 999px; background-color: #EDEDEB;"><span style="display: block; height: 6px; border-radius: 999px; background-color: {{ c.saldoColor }}; width: {{ c.saldoBar }};"></span></span></span>
+          <span style="display: flex; flex-direction: column; gap: 4px;"><span style="font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 999px; background-color: {{ c.badgeBg }}; color: {{ c.badgeColor }}; width: fit-content;">{{ c.badge }}</span><sc-if value="{{ c.hasNf }}" hint-placeholder-val="{{ false }}"><span style="font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 999px; background-color: #FDF8EC; color: #92400E; width: fit-content;">{{ c.nfLabel }}</span></sc-if></span>
+        </button>
+      </sc-for>
+      <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}"><p style="padding: 30px; text-align: center; font-size: 13px; color: #666666;">Nenhum contrato com esses filtros.</p></sc-if>
+    </div>
+  </div>
+
+  <sc-if value="{{ hasSel }}" hint-placeholder-val="{{ false }}">
+    <div style="background-color: #FFFFFF; border: 1px solid #1C543A; border-radius: 8px; padding: 18px; display: flex; flex-direction: column; gap: 16px;">
+      <div style="display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+        <div><h3 style="font-size: 16px; font-weight: 700;">{{ sel.contratada }}</h3><p style="font-size: 12.5px; color: #666666; margin-top: 2px;">Contrato {{ sel.contrato }} · Processo {{ sel.processo }} · {{ sel.aditLabel }}</p></div>
+        <div style="display: flex; gap: 8px;"><button onClick="{{ sel.edit }}" style="height: 36px; padding: 0 14px; border: 1px solid #1C543A; border-radius: 8px; background-color: #FFFFFF; color: #1C543A; font-size: 12.5px; font-weight: 700; cursor: pointer;">✎ Editar contrato</button><button onClick="{{ clearSel }}" aria-label="Fechar detalhe" style="width: 36px; height: 36px; border-radius: 8px; border: 1px solid #E0E0E0; background-color: #FFFFFF; cursor: pointer;">✕</button></div>
+      </div>
+      <div>
+        <p style="font-size: 12px; font-weight: 700; color: #1C543A; text-transform: uppercase; letter-spacing: 0.4px; padding-bottom: 8px; margin-bottom: 10px; border-bottom: 1px solid #1C543A;">Lançamento das notas {{ ano }} · gasto {{ sel.gastoFmt }} · assinatura {{ sel.assFmt }}</p>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 8px;">
+          <sc-for list="{{ sel.notas }}" as="n" hint-placeholder-count="12">
+            <div style="border: 1px solid {{ n.border }}; background-color: {{ n.bg }}; border-radius: 8px; padding: 8px; display: flex; flex-direction: column; gap: 4px;">
+              <div style="display: flex; justify-content: space-between; gap: 4px;"><span style="font-size: 12px; font-weight: 700; color: #1D1D1B;">{{ n.label }}</span><span style="font-size: 10px; font-weight: 700; color: {{ n.stColor }};">{{ n.st }}</span></div>
+              <input type="number" min="0" step="0.01" value="{{ n.value }}" onChange="{{ n.set }}" aria-label="Valor da nota de {{ n.label }}" placeholder="—" style="width: 100%; height: 34px; padding: 0 8px; border: 1px solid #E0E0E0; border-radius: 6px; font-size: 12.5px; background-color: #FFFFFF;" style-focus="border-color: #1C543A; outline: none;"/>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      <sc-if value="{{ sel.hasHist }}" hint-placeholder-val="{{ false }}">
+        <div>
+          <p style="font-size: 12px; font-weight: 700; color: #1C543A; text-transform: uppercase; letter-spacing: 0.4px; padding-bottom: 8px; margin-bottom: 10px; border-bottom: 1px solid #1C543A;">Histórico 2025</p>
+          <p style="font-size: 12.5px; color: #444444; margin-bottom: 10px;">Assinatura {{ sel.histAss }} · Vigência {{ sel.histIni }} a {{ sel.histFim }} · gasto {{ sel.histGasto }}</p>
+          <div style="display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 6px; align-items: end; height: 80px;">
+            <sc-for list="{{ sel.histMonths }}" as="m" hint-placeholder-count="12">
+              <div title="{{ m.tip }}" style="display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end;">
+                <div style="width: 100%; max-width: 26px; height: {{ m.h }}; background-color: {{ m.color }}; border-radius: 3px 3px 0 0;"></div>
+                <span style="font-size: 10.5px; color: #666666;">{{ m.label }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ formOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeForm }}" style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 95;">
+      <div onClick="{{ stop }}" role="dialog" aria-modal="true" style="background-color: #FFFFFF; border-radius: 12px; width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; padding: 22px; display: flex; flex-direction: column; gap: 12px;">
+        <h3 style="font-size: 16px; font-weight: 700;">{{ formTitle }}</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+          <sc-for list="{{ fields }}" as="f" hint-placeholder-count="7">
+            <div><label style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 6px;">{{ f.label }}</label><input type="{{ f.type }}" value="{{ f.value }}" onInput="{{ f.set }}" style="width: 100%; height: 40px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px;" style-focus="border-color: #1C543A; outline: none;"/></div>
+          </sc-for>
+        </div>
+        <sc-if value="{{ formError }}" hint-placeholder-val="{{ false }}"><p style="font-size: 12px; color: #B91C1C;">{{ formError }}</p></sc-if>
+        <div style="display: flex; justify-content: flex-end; gap: 10px;">
+          <button onClick="{{ closeForm }}" style="height: 40px; padding: 0 16px; border: 1px solid #E0E0E0; border-radius: 8px; background-color: #FFFFFF; font-size: 13px; cursor: pointer;">Cancelar</button>
+          <button onClick="{{ submitForm }}" style="height: 40px; padding: 0 16px; border: none; border-radius: 8px; background-color: #1C543A; color: #FFFFFF; font-size: 13px; font-weight: 700; cursor: pointer;">Salvar</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: &quot;1100px&quot;, &quot;height&quot;: &quot;900px&quot;}}">
+class Component extends DCLogic {
+  FIELDS = [['contratada', 'Contratada', 'text'], ['contrato', 'Nº do contrato', 'text'], ['processo', 'Processo DA', 'text'], ['assinatura', 'Data da assinatura', 'date'], ['fim', 'Final do contrato', 'date'], ['empenhado', 'Valor empenhado (R$)', 'number'], ['aditamentos', 'Aditamentos', 'number']];
+  state = { ready: !!window.DALic, form: null, formError: '', q: '', filter: 'todos', selId: new URLSearchParams(location.search).get('contrato') };
+  componentDidMount() {
+    const wait = () => { if (window.DALic) this.setState({ ready: true }); else setTimeout(wait, 150); };
+    wait(); this._on = () => this.forceUpdate(); window.addEventListener('licchange', this._on); window.addEventListener('exerciciochange', this._on);
+  }
+  componentWillUnmount() { window.removeEventListener('licchange', this._on); window.removeEventListener('exerciciochange', this._on); }
+  renderVals() {
+    const L = window.DALic, st = this.state;
+    const f = st.form || {};
+    const common = { formOpen: !!st.form, formTitle: f.id ? 'Editar contrato' : 'Adicionar contrato', formError: st.formError, stop: e => e.stopPropagation(),
+      closeForm: () => this.setState({ form: null, formError: '' }),
+      openNew: () => this.setState({ form: { contratada: '', contrato: '', processo: '', assinatura: '', fim: '', empenhado: '', aditamentos: '0' }, formError: '' }),
+      fields: this.FIELDS.map(([k, label, type]) => ({ label, type, value: f[k] == null ? '' : String(f[k]), set: e => { const v = e.target.value; this.setState(s => ({ form: { ...s.form, [k]: v } })); } })),
+      submitForm: () => { if (!L) return; if (!String(f.contratada || '').trim() || !String(f.contrato || '').trim() || !f.assinatura || !f.fim) { this.setState({ formError: 'Informe contratada, nº do contrato, assinatura e final.' }); return; }
+        const id = L.saveContract({ ...f, contratada: f.contratada.trim(), contrato: f.contrato.trim(), empenhado: +f.empenhado || 0, aditamentos: +f.aditamentos || 0 }); this.setState({ form: null, selId: id }); },
+      q: st.q, filter: st.filter, setQ: e => this.setState({ q: e.target.value, selId: null }), setFilter: e => this.setState({ filter: e.target.value, selId: null }), clearSel: () => this.setState({ selId: null }) };
+    if (!L) return { ...common, ano: '', kpis: [], rows: [], isEmpty: false, hasSel: false, sel: {} };
+    const M = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+    const BADGE = { critical: ['Vence em ≤ 30 dias', '#FDF3F2', '#B91C1C'], warning: ['Vence em ≤ 60 dias', '#FDF8EC', '#92400E'], info: ['Vence em ≤ 120 dias', '#EEF4FD', '#1E40AF'], vencido: ['Vencido', '#FDF3F2', '#B91C1C'], ok: ['Vigente', '#EAF3EE', '#1C543A'] };
+    const ANO = L.YEAR(); const all = L.get().contracts.filter(c => L.inYear(c, ANO)).map(c => ({ c, ci: L.contractInfo(c) }));
+    const q = st.q.trim().toLowerCase();
+    const list = st.selId && all.some(x => x.c.id === st.selId) ? all.filter(x => x.c.id === st.selId) : all.filter(({ c, ci }) => (!q || (c.contratada + ' ' + c.contrato + ' ' + c.processo).toLowerCase().includes(q)) && (st.filter === 'todos' || (st.filter === 'vencer' && ci.dias <= 120) || (st.filter === 'saldo' && ci.saldoBaixo) || (st.filter === 'notas' && L.notasFaltantes(c).length > 0)));
+    const bars = (arr, color) => { const mx = Math.max(1, ...arr.map(v => v || 0)); return arr.map((v, i) => ({ label: M[i], h: v == null ? '2px' : Math.max(2, Math.round((v || 0) / mx * 90)) + 'px', color: v == null ? '#E8E8E8' : color, tip: M[i] + ': ' + (v == null ? 'não disponível' : L.brl(v)) })); };
+    const pick = all.find(x => x.c.id === st.selId);
+    let sel = {};
+    if (pick) {
+      const { c, ci } = pick; const h = c.hist2025;
+      const miss = L.notasFaltantes(c); const ass = new Date(c.assinatura + 'T12:00:00'), fimD = new Date(c.fim + 'T12:00:00');
+      sel = { ...c, assFmt: L.fmt(c.assinatura), edit: () => this.setState({ form: { ...c }, formError: '' }),
+        notas: c.mensal.map((v, i) => { const active = new Date(ANO, i + 1, 0) >= ass && new Date(ANO, i, 1) <= fimD; const falta = miss.includes(i); const ok = v > 0;
+          return { label: M[i], value: ok ? String(v) : '', st: ok ? 'Lançada' : falta ? 'Não recebida' : active ? 'A receber' : 'Fora da vigência', stColor: ok ? '#1C543A' : falta ? '#B91C1C' : '#666666', border: falta ? '#F5C2C2' : '#E8E8E8', bg: falta ? '#FDF3F2' : ok ? '#F4F9F6' : '#FFFFFF', set: e => L.setNota(c.id, i, e.target.value) }; }),
+        aditLabel: c.aditamentos ? c.aditamentos + ' aditamento(s)' : 'Sem aditamentos', gastoFmt: L.brl(ci.gasto), months: bars(c.mensal, '#1C543A'),
+        hasHist: !!h, histAss: h ? L.fmt(h.assinatura) : '', histIni: h ? L.fmt(h.inicio) : '', histFim: h ? L.fmt(h.fim) : '', histGasto: h ? L.brl(h.mensal.reduce((a, v) => a + (v || 0), 0)) : '', histMonths: h ? bars(h.mensal, '#7FA693') : [] };
+    }
+    const venc = all.filter(x => x.ci.dias <= 120).length, baixo = all.filter(x => x.ci.saldoBaixo).length;
+    return { ...common,
+      kpis: [
+        { label: 'Contratos ativos', value: String(all.length), color: '#1C543A' },
+        { label: 'Vencem em 120 dias', value: String(venc), color: venc ? '#B45309' : '#1C543A' },
+        { label: 'Saldo abaixo de 20%', value: String(baixo), color: baixo ? '#B91C1C' : '#1C543A' },
+        { label: 'Total empenhado', value: L.brl(all.reduce((a, x) => a + x.c.empenhado, 0)), color: '#1D1D1B' }
+      ],
+      rows: list.map(({ c, ci }) => { const b = BADGE[ci.level];
+        return { ...c, fimFmt: L.fmt(c.fim), diasLabel: ci.dias < 0 ? 'vencido há ' + (-ci.dias) + ' dias' : 'em ' + ci.dias + ' dias', empFmt: L.brl(c.empenhado), saldoFmt: L.brl(ci.saldo), saldoPctFmt: Math.round(ci.saldoPct * 100) + '%',
+          saldoBar: Math.max(0, Math.min(100, Math.round(ci.saldoPct * 100))) + '%', saldoColor: ci.saldoBaixo ? '#B91C1C' : '#1C543A', badge: b[0], badgeBg: b[1], badgeColor: b[2],
+          hasNf: L.notasFaltantes(c).length > 0, nfLabel: L.notasFaltantes(c).length + ' nota(s) não recebida(s)',
+          rowBg: st.selId === c.id ? '#F4F9F6' : '#FFFFFF', select: () => this.setState(s => ({ selId: s.selId === c.id ? null : c.id })) }; }),
+      ano: ANO, isEmpty: list.length === 0, hasSel: !!pick, sel, selOnlyLabel: pick ? 'Exibindo apenas o contrato ' + pick.c.contrato + ' — ' + pick.c.contratada : '' };
+  }
+}
+</script>
+</body>
+</html>

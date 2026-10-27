@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <script src="./theme.js"></script>
+  <script>window.location.replace('AlmoxarifadoAmostragem.dc.html?view=inventario');</script>
+  <script src="./config.js"></script>
+  <script src="./session.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema DA - Inventário Rotativo</title>
+  <script src="./api.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #FAFAFA;
+      color: #1D1D1B;
+    }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+  </style>
+</helmet>
+
+<div style="display: flex; min-height: 100vh; background-color: #FFFFFF; position: relative;">
+  <sc-if value="{{ navOverlayVisible }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ navClose }}" style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); z-index: 40;"></div>
+  </sc-if>
+  <aside style="background-color: #1C543A; color: #FFFFFF; width: 250px; flex-shrink: 0; display: flex; flex-direction: column; padding: 22px 16px; gap: 22px; position: {{ navSidebarPosition }}; top: 0; left: 0; height: 100vh; overflow-y: auto; z-index: 50; transform: {{ navSidebarTransform }}; transition: transform 0.3s cubic-bezier(0.34, 1.25, 0.64, 1);">
+      <a href="Dashboard.dc.html" title="Voltar ao Painel de Controle" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: #FFFFFF; padding: 0 4px;">
+        <div style="width: 36px; height: 36px; background-color: #FFFFFF; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; color: #1C543A; flex-shrink: 0;">DA</div>
+        <div>
+          <p style="font-size: 12.5px; font-weight: 700; line-height: 1.3; color: #FFFFFF;">CÂMARA MUNICIPAL</p>
+          <p style="font-size: 9.5px; letter-spacing: 0.4px; color: rgba(255,255,255,0.65); text-transform: uppercase;">Diretoria Administrativa</p>
+        </div>
+      </a>
+      <nav style="display: flex; flex-direction: column; gap: 2px;">
+        <p style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: rgba(255,255,255,0.5); padding: 0 12px; margin-bottom: 6px;">Sistemas &amp; Gestão</p>
+        <a href="Dashboard.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 13px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">▦</span>Painel de Controle</a>
+        <a href="AlmoxarifadoAmostragem.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 13px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">📦</span>Almoxarifado</a>
+        <a href="ComprasModule.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 13px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">🛒</span>Compras &amp; Licitações</a>
+        <a href="MocoesHomenagens.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 13px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">🎗</span>Moções &amp; Homenagens</a>
+        <a href="PatrimonioModule.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 13px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">🏛</span>Patrimônio</a>
+      </nav>
+      <nav style="display: flex; flex-direction: column; gap: 2px;">
+        <p style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: rgba(255,255,255,0.5); padding: 0 12px; margin-bottom: 6px;">Módulos Complementares</p>
+        <a href="AnalyticsModule.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">📈</span>Analytics &amp; Relatórios</a>
+        <a href="RHModule.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">🧑‍💼</span>Gestão de Pessoal</a>
+        <a href="Legislacoes.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">⚖</span>Legislações</a>
+        <a href="AuditLog.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">🛡</span>Log e Auditoria</a>
+        <a href="Configuracoes.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">⚙</span>Configurações do Sistema</a>
+      <a href="ProtocoloModule.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">📋</span>Protocolo</a>
+      </nav>
+      <div style="margin-top: auto; display: flex; flex-direction: column; gap: 4px; padding-top: 8px;">
+        <a href="UserProfile.dc.html" style="display: flex; align-items: center; gap: 10px; background-color: rgba(255,255,255,0.08); border-radius: 10px; padding: 12px; text-decoration: none; color: #FFFFFF;" style-hover="background-color: rgba(255,255,255,0.14);">
+          <div style="width: 34px; height: 34px; border-radius: 50%; background-color: #F0B429; color: #1C543A; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; flex-shrink: 0;">RA</div>
+          <div style="min-width: 0;">
+            <p style="font-size: 12.5px; font-weight: 700; color: #FFFFFF;">Dr. Roberto Alencar</p>
+            <p style="font-size: 10.5px; color: rgba(255,255,255,0.6);">DA-2026-948 · Diretoria</p>
+          </div>
+        </a>
+        <div role="group" aria-label="Aparência" style="display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 40px; padding: 0 12px;">
+          <span style="font-size: 11px; font-weight: 600; letter-spacing: 0.3px; color: rgba(255,255,255,0.6);">Aparência</span>
+          <div style="display: flex; padding: 2px; border-radius: 999px; background-color: rgba(0,0,0,0.22);">
+            <button onClick="{{ navThemeLight }}" aria-pressed="{{ navThemeIsLight }}" aria-label="Modo padrão" title="Modo padrão" style="width: 30px; height: 26px; border: none; border-radius: 999px; background-color: {{ navThemeLightBg }}; color: {{ navThemeLightFg }}; font-size: 13px; line-height: 1; cursor: pointer; transition: background-color 0.2s;">☀</button>
+            <button onClick="{{ navThemeDarkSet }}" aria-pressed="{{ navThemeDark }}" aria-label="Modo escuro" title="Modo escuro" style="width: 30px; height: 26px; border: none; border-radius: 999px; background-color: {{ navThemeDarkBg }}; color: {{ navThemeDarkFg }}; font-size: 13px; line-height: 1; cursor: pointer; transition: background-color 0.2s;">☾</button>
+          </div>
+        </div>
+        <a href="Login.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; color: rgba(255,255,255,0.7); text-decoration: none; font-size: 12.5px; font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1); color: #FFFFFF;"><span style="width: 18px; text-align: center; flex-shrink: 0;">⎋</span>Sair do sistema</a>
+      </div>
+    </aside>
+  <div style="flex: 1; min-width: 0; display: flex; flex-direction: column;">
+    <div style="position: sticky; top: 0; z-index: 30; background-color: rgba(255,255,255,0.96); backdrop-filter: blur(6px); border-bottom: 1px solid #E8E8E8; min-height: 64px; padding: 10px {{ navGutter }}; display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+      <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
+        <sc-if value="{{ navIsMobile }}" hint-placeholder-val="{{ false }}">
+          <button onClick="{{ navOpen }}" aria-label="Abrir menu" style="width: 44px; height: 44px; border-radius: 8px; border: 1px solid #E0E0E0; background-color: #FFFFFF; font-size: 18px; color: #1D1D1B; cursor: pointer; flex-shrink: 0;">☰</button>
+          <a href="Dashboard.dc.html" title="Painel de Controle" style="width: 36px; height: 36px; background-color: #1C543A; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 12px; color: #FFFFFF; text-decoration: none; flex-shrink: 0;">DA</a>
+        </sc-if>
+        <sc-if value="{{ navShowBreadcrumb }}" hint-placeholder-val="{{ true }}">
+          <div style="display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: #666666; white-space: nowrap;">
+            <a href="Dashboard.dc.html" style="color: #666666; text-decoration: none;" style-hover="color: #1C543A;">Painel de Controle</a>
+            <span style="color: #CCCCCC;">›</span>
+            <span style="color: #1D1D1B; font-weight: 600;">Inventário</span>
+          </div>
+        </sc-if>
+      </div>
+      <div style="display: flex; align-items: center; gap: 10px; flex: 1; justify-content: flex-end; min-width: 0;">
+        <div style="position: relative; flex: 1; max-width: 340px; min-width: 0;">
+          <input type="search" placeholder="Buscar módulos e telas…" aria-label="Busca global" value="{{ navSearch }}" onInput="{{ navSearchInput }}" onFocus="{{ navSearchFocus }}" onBlur="{{ navSearchBlur }}" onKeyDown="{{ navSearchKey }}" style="width: 100%; height: 44px; padding: 0 12px 0 34px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; color: #1D1D1B; background-color: #F9F9F9;" style-focus="border-color: #1C543A; background-color: #FFFFFF; outline: none;"/>
+          <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 14px; color: #999999; pointer-events: none;">⌕</span>
+          <sc-if value="{{ navSearchOpen }}" hint-placeholder-val="{{ false }}">
+            <div style="position: absolute; top: 50px; right: 0; left: 0; min-width: 240px; background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 8px; box-shadow: 0 12px 32px rgba(0,0,0,0.12); padding: 6px; z-index: 60;">
+              <sc-for list="{{ navSearchResults }}" as="r" hint-placeholder-count="3">
+                <a href="{{ r.href }}" onMouseDown="{{ r.go }}" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 10px; border-radius: 6px; text-decoration: none; color: #1D1D1B; font-size: 13px;" style-hover="background-color: #F2F7F4;">
+                  <span style="width: 20px; text-align: center; flex-shrink: 0;">{{ r.icon }}</span>
+                  <span style="flex: 1; font-weight: 600;">{{ r.label }}</span>
+                  <span style="font-size: 11px; color: #999999;">{{ r.group }}</span>
+                </a>
+              </sc-for>
+              <sc-if value="{{ navSearchEmpty }}" hint-placeholder-val="{{ false }}">
+                <p style="padding: 12px 10px; font-size: 12.5px; color: #999999;">Nenhum resultado para “{{ navSearch }}”</p>
+              </sc-if>
+            </div>
+          </sc-if>
+        </div>
+        <a href="NotificationsModule.dc.html" title="Notificações" style="position: relative; width: 44px; height: 44px; border-radius: 8px; border: 1px solid #E0E0E0; background-color: #FFFFFF; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 16px; flex-shrink: 0;" style-hover="border-color: #1C543A;">🔔<span style="position: absolute; top: 9px; right: 10px; width: 7px; height: 7px; border-radius: 50%; background-color: #DC2626; border: 1.5px solid #FFFFFF;"></span></a>
+      </div>
+    </div>
+    <div style="padding: {{ navHeaderPad }}; display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+      <div>
+        <p style="font-size: 11px; font-weight: 700; letter-spacing: 0.6px; color: #1C543A; text-transform: uppercase;">Sistema de Gestão Integrada &nbsp;•&nbsp; Inventário</p>
+        <h1 style="font-size: {{ navTitleSize }}; font-weight: 800; color: #1D1D1B; margin-top: 6px;">Inventário Rotativo</h1>
+      </div>
+    </div>
+
+  <main style="flex: 1; width: 100%; padding: 24px {{ navGutter }} 40px;">
+    
+    <!-- Painel de Configuração -->
+    <div style="background-color: #FFFFFF; padding: 20px; border-radius: 8px; border: 1px solid #E8E8E8; margin-bottom: 20px;">
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #E8E8E8;">
+        <span style="font-size: 18px;">⚙️</span>
+        <h2 style="font-size: 16px; font-weight: 600;">Painel de Geração de Amostra</h2>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 16px;">
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <label style="font-size: 11px; font-weight: 600; color: #666666; text-transform: uppercase;">Prioridade</label>
+          <select onChange="{{ setSamplingMethod }}" style="padding: 10px; border: 1px solid #E8E8E8; border-radius: 6px; font-size: 13px; background-color: #FFFFFF;">
+            <option value="alta">Alta Prioridade ({{ highPriorityCount }} itens)</option>
+            <option value="baixa">Baixa Prioridade ({{ lowPriorityCount }} itens)</option>
+            <option value="aleatorio">Todos - Aleatório ({{ totalProductCount }} itens)</option>
+          </select>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <label style="font-size: 11px; font-weight: 600; color: #666666; text-transform: uppercase;">Tamanho da Amostra</label>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <input type="range" min="1" max="10" value="{{ sampleSize }}" onChange="{{ setSampleSize }}" style="flex: 1; cursor: pointer;" />
+            <span style="font-size: 13px; font-weight: 600; background-color: #1C543A22; color: #1C543A; padding: 4px 10px; border-radius: 4px; min-width: 50px; text-align: center;">{{ sampleSize }}</span>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <label style="font-size: 11px; font-weight: 600; color: #666666; text-transform: uppercase;">Responsável</label>
+          <select onChange="{{ setSelectedEmployee }}" style="padding: 10px; border: 1px solid #E8E8E8; border-radius: 6px; font-size: 13px; background-color: #FFFFFF;">
+            <option value="2">Ana Beatriz Silva</option>
+            <option value="3">Carlos Eduardo Costa</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end;">
+        <button onClick="{{ generateSamplingScale }}" style="padding: 10px 20px; background-color: #1C543A; color: #FFFFFF; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer;">
+          🔄 Gerar Folha de Contagem
+        </button>
+      </div>
+    </div>
+
+    <!-- Folha de Contagem -->
+    <sc-if value="{{ hasScale }}" hint-placeholder-val="{{ false }}">
+      <div style="background-color: #FFFFFF; padding: 20px; border-radius: 8px; border: 1px solid #E8E8E8; margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #E8E8E8;">
+          <div>
+            <h2 style="font-size: 16px; font-weight: 600;">Folha de Contagem</h2>
+            <p style="font-size: 12px; color: #999999; margin-top: 4px;">Responsável: {{ selectedResponsible }}</p>
+          </div>
+          <span style="font-size: 11px; font-weight: 600; background-color: #F59E0B22; color: #F59E0B; padding: 6px 12px; border-radius: 4px;">Auditoria Cega</span>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <sc-for list="{{ generatedScale }}" as="item" hint-placeholder-count="3">
+            <div style="padding: 16px; background-color: #F9F9F9; border-radius: 8px; border: 1px solid #E8E8E8; display: grid; grid-template-columns: 1fr auto; gap: 16px;">
+              
+              <div style="display: flex; flex-direction: column; gap: 8px;">
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                  <span style="font-size: 10px; font-family: monospace; font-weight: 600; background-color: #E8E8E8; color: #666666; padding: 4px 8px; border-radius: 3px;">{{ item.code }}</span>
+                  <span style="font-size: 10px; font-weight: 600; padding: 4px 8px; border-radius: 3px; {{ item.priorityStyle }}">Risco {{ item.priority }}</span>
+                </div>
+                <p style="font-size: 13px; font-weight: 600;">{{ item.name }}</p>
+                <div style="font-size: 11px; color: #999999; display: flex; gap: 12px;">
+                  <span>{{ item.category }}</span>
+                  <span>{{ item.frequency }}</span>
+                </div>
+              </div>
+
+              <div style="display: flex; gap: 8px; align-items: flex-start;">
+                <button onClick="{{ item.onScan }}" style="padding: 8px 12px; background-color: #1C543A22; color: #1C543A; border: 1px solid #1C543A22; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;">
+                  📱 Scan
+                </button>
+
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+                  <label style="font-size: 10px; font-weight: 600; color: #666666;">Contagem</label>
+                  <input 
+                    type="number" 
+                    value="{{ item.counted }}"
+                    onChange="{{ item.onCount }}"
+                    disabled="{{ scaleSubmitted }}"
+                    placeholder="0"
+                    style="width: 70px; padding: 8px; text-align: center; font-size: 14px; font-weight: 600; border: 1px solid #E8E8E8; border-radius: 6px;"
+                  />
+                </div>
+
+                <sc-if value="{{ item.hasDivergence }}" hint-placeholder-val="{{ false }}">
+                  <div style="text-align: center; min-width: 60px;">
+                    <p style="font-size: 10px; font-weight: 600; color: #666666;">Resultado</p>
+                    <span style="font-size: 12px; font-weight: 600; padding: 4px 8px; border-radius: 3px; {{ item.divergenceStyle }}">
+                      {{ item.divergenceLabel }}
+                    </span>
+                  </div>
+                </sc-if>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="margin-top: 20px; display: flex; justify-content: flex-end;">
+          <button 
+            onClick="{{ submitAudit }}"
+            disabled="{{ scaleSubmitted }}"
+            style="padding: 12px 24px; background-color: {{ consolidateBg }}; color: {{ consolidateColor }}; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer;"
+          >
+            {{ consolidateLabel }}
+          </button>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- Modal Scanner -->
+    <sc-if value="{{ scannerOpen }}" hint-placeholder-val="{{ false }}">
+      <div style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 50; padding: 20px;">
+        <div style="background-color: #FFFFFF; border-radius: 12px; border: 1px solid #E8E8E8; max-width: 400px; width: 100%; padding: 24px;">
+          
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <h3 style="font-size: 16px; font-weight: 600;">Simulador de Scanner</h3>
+            <button onClick="{{ closeScanner }}" style="background: none; border: none; font-size: 20px; cursor: pointer;">✕</button>
+          </div>
+
+          <p style="font-size: 12px; color: #999999; margin-bottom: 16px;">Digite o código de barras:</p>
+
+          <div style="width: 100%; height: 120px; background-color: #1A1A1A; border-radius: 8px; border: 2px solid #1C543A; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; position: relative;">
+            <div style="position: absolute; width: 100%; height: 1px; background-color: #DC2626; opacity: 0.8;"></div>
+            <p style="font-size: 11px; color: #666666; font-family: monospace;">[ CÂMERA ]</p>
+          </div>
+
+          <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+            <input 
+              type="text"
+              value="{{ scannedCodeInput }}"
+              onChange="{{ setScannedCodeInput }}"
+              placeholder="Código..."
+              style="flex: 1; padding: 10px; border: 1px solid #E8E8E8; border-radius: 6px; font-size: 13px; font-family: monospace;"
+            />
+            <button onClick="{{ handleSimulateScan }}" style="padding: 10px 16px; background-color: #1C543A; color: #FFFFFF; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;">
+              ✓ Validar
+            </button>
+          </div>
+
+          <div style="background-color: #F9F9F9; padding: 10px; border-radius: 6px; border: 1px solid #E8E8E8; margin-bottom: 16px;">
+            <p style="font-size: 10px; color: #999999; margin-bottom: 4px;">Código esperado:</p>
+            <code style="font-size: 12px; color: #1C543A; font-weight: 600; font-family: monospace;">{{ currentItemCode }}</code>
+          </div>
+
+          <sc-if value="{{ scannerError }}" hint-placeholder-val="{{ false }}">
+            <div style="background-color: #DC262622; color: #DC2626; padding: 10px; border-radius: 6px; border: 1px solid #DC262622; margin-bottom: 16px; font-size: 12px;">
+              ⚠ {{ scannerError }}
+            </div>
+          </sc-if>
+
+          <button onClick="{{ closeScanner }}" style="width: 100%; padding: 10px; background-color: #F5F5F5; border: 1px solid #E8E8E8; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; color: #666666;">
+            Fechar
+          </button>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- Tabela Completa -->
+    <div style="background-color: #FFFFFF; padding: 20px; border-radius: 8px; border: 1px solid #E8E8E8;">
+      <h2 style="font-size: 16px; font-weight: 600; margin-bottom: 16px;">Base Completa ({{ totalProductCount }} itens)</h2>
+
+      <div style="overflow-x: auto;">
+        <div style="overflow-x: auto;"><table style="width: 100%; font-size: 12px; border-collapse: collapse;">
+          <thead>
+            <tr style="background-color: #F9F9F9; border-bottom: 2px solid #E8E8E8;">
+              <th style="padding: 12px; text-align: left; font-weight: 600; color: #999999; text-transform: uppercase; letter-spacing: 0.5px;">Código</th>
+              <th style="padding: 12px; text-align: left; font-weight: 600; color: #999999; text-transform: uppercase; letter-spacing: 0.5px;">Descrição</th>
+              <th style="padding: 12px; text-align: center; font-weight: 600; color: #999999; text-transform: uppercase; letter-spacing: 0.5px;">Estoque</th>
+              <th style="padding: 12px; text-align: center; font-weight: 600; color: #999999; text-transform: uppercase; letter-spacing: 0.5px;">Consumo</th>
+              <th style="padding: 12px; text-align: center; font-weight: 600; color: #999999; text-transform: uppercase; letter-spacing: 0.5px;">Prioridade</th>
+              <th style="padding: 12px; text-align: center; font-weight: 600; color: #999999; text-transform: uppercase; letter-spacing: 0.5px;">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <sc-for list="{{ productsList }}" as="prod" hint-placeholder-count="5">
+              <tr style="border-bottom: 1px solid #E8E8E8;" style-hover="background-color: #F9F9F9;">
+                <td style="padding: 12px; font-family: monospace; font-size: 11px; color: #999999;">{{ prod.code }}</td>
+                <td style="padding: 12px;">{{ prod.name }}</td>
+                <td style="padding: 12px; text-align: center; font-weight: 600;">{{ prod.stock }}</td>
+                <td style="padding: 12px; text-align: center; font-size: 11px; color: #666666;">{{ prod.avgConsumptionFmt }}</td>
+                <td style="padding: 12px; text-align: center;">
+                  <span style="font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 3px; {{ prod.priorityStyle }}">
+                    {{ prod.priority }}
+                  </span>
+                </td>
+                <td style="padding: 12px; text-align: center;">
+                  <span style="font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 3px; {{ prod.verifyStyle }}">
+                    {{ prod.verifyLabel }}
+                  </span>
+                </td>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: &quot;100%&quot;, &quot;height&quot;: &quot;1200px&quot;}}">
+class Component extends DCLogic {
+  state = {
+    productsList: [
+      { code: "1 50 05 0024 8", name: "DESINFETANTE PARA USO PROFISSIONAL - 5L", priority: "Alta", frequency: "Semanal", stock: 52, avgConsumption: 10.308, category: "Higiene", verify: true },
+      { code: "1 50 05 0034 5", name: "PAPEL HIGIÊNICO BRANCO, 30M, FOLHA DUPLA, PICOTADO", priority: "Alta", frequency: "Semanal", stock: 68, avgConsumption: 8.273, category: "Higiene", verify: true },
+      { code: "1 50 02 0068 6", name: "PASTA EM POLIONDA LARGA COM ELÁSTICO 245x335x55MM", priority: "Baixa", frequency: "Mensal", stock: 56, avgConsumption: 3.0, category: "Papelaria", verify: true },
+      { code: "1 50 02 0069 4", name: "TESOURA ESCOLAR COM CABO DE PLÁSTICO", priority: "Baixa", frequency: "Mensal", stock: 23, avgConsumption: 1.2, category: "Papelaria", verify: true },
+      { code: "1 50 02 0054 6", name: "CADERNO UNIVERSITÁRIO DE 01 MATÉRIA (80 FOLHAS)", priority: "Alta", frequency: "Semanal", stock: 11, avgConsumption: 2.545, category: "Papelaria", verify: false },
+      { code: "1 50 05 0088 4", name: "ESSÊNCIA AROMATIZANTE 250ML LAVANDA", priority: "Alta", frequency: "Semanal", stock: 12, avgConsumption: 10.083, category: "Higiene", verify: false },
+      { code: "1 50 02 0030 9", name: "CORRETIVO EM FITA", priority: "Baixa", frequency: "Mensal", stock: 10, avgConsumption: 1.8, category: "Papelaria", verify: false },
+      { code: "1 50 02 0031 7", name: "BORRACHA BRANCA ESCOLAR", priority: "Baixa", frequency: "Mensal", stock: 7, avgConsumption: 1.571, category: "Papelaria", verify: false },
+      { code: "1 50 02 0034 1", name: "CANETA MARCA TEXTO ROSA", priority: "Baixa", frequency: "Mensal", stock: 6, avgConsumption: 1.333, category: "Papelaria", verify: false },
+      { code: "1 50 05 0089 2", name: "ESSÊNCIA AROMATIZANTE 250ML BAMBU", priority: "Alta", frequency: "Semanal", stock: 11, avgConsumption: 12.182, category: "Higiene", verify: false }
+    ],
+    samplingMethod: 'alta',
+    sampleSize: 3,
+    selectedEmployee: 2,
+    generatedScale: [],
+    scaleSubmitted: false,
+    scannerOpen: false,
+    scanningIndex: null,
+    scannedCodeInput: "",
+    scannerError: ""
+  };
+
+  generateSamplingScale = () => {
+    const { productsList, samplingMethod, sampleSize, selectedEmployee } = this.state;
+    let filtered = productsList;
+    if (samplingMethod === 'alta') filtered = productsList.filter(p => p.priority === 'Alta');
+    else if (samplingMethod === 'baixa') filtered = productsList.filter(p => p.priority === 'Baixa');
+    
+    const shuffled = [...filtered].sort(() => 0.5 - Math.random());
+    const selected = shuffled.slice(0, Math.min(sampleSize, shuffled.length)).map(item => ({
+      ...item, counted: "", divergence: null, status: "Pendente"
+    }));
+    this.setState({ generatedScale: selected, scaleSubmitted: false });
+  };
+
+  handleCountChange = (index, value) => {
+    const updated = [...this.state.generatedScale];
+    const numVal = parseInt(value, 10);
+    updated[index].counted = value;
+    if (!isNaN(numVal)) {
+      updated[index].divergence = numVal - updated[index].stock;
+      updated[index].status = "Contado";
+    } else {
+      updated[index].divergence = null;
+      updated[index].status = "Pendente";
+    }
+    this.setState({ generatedScale: updated });
+  };
+
+  startScan = (index) => {
+    this.setState({ scannerOpen: true, scanningIndex: index, scannedCodeInput: "", scannerError: "" });
+  };
+
+  handleSimulateScan = () => {
+    const { generatedScale, scanningIndex, scannedCodeInput } = this.state;
+    const item = generatedScale[scanningIndex];
+    const cleanInput = scannedCodeInput.trim().replace(/\s/g, "");
+    const expectedCode = item.code.replace(/\s/g, "");
+    if (cleanInput === expectedCode) {
+      this.setState({ scannerOpen: false, scannerError: "" });
+    } else {
+      this.setState({ scannerError: "Código inválido. Tente novamente." });
+    }
+  };
+
+  submitAudit = () => {
+    const allCounted = this.state.generatedScale.every(item => item.counted !== "");
+    if (!allCounted) { alert("Preencha todos os itens"); return; }
+    const updated = this.state.productsList.map(prod => {
+      const audited = this.state.generatedScale.find(item => item.code === prod.code);
+      return audited ? { ...prod, stock: parseInt(audited.counted, 10), verify: false } : prod;
+    });
+    this.setState({ productsList: updated, scaleSubmitted: true });
+  };
+
+  setSamplingMethod = (e) => this.setState({ samplingMethod: e.target.value });
+  setSampleSize = (e) => this.setState({ sampleSize: parseInt(e.target.value) });
+  setSelectedEmployee = (e) => this.setState({ selectedEmployee: parseInt(e.target.value) });
+  setScannerOpen = (val) => this.setState({ scannerOpen: val });
+  setScannedCodeInput = (e) => this.setState({ scannedCodeInput: e.target.value });
+
+  _shellVals() {
+    if (!this._navBound) {
+      this._navBound = true;
+      window.addEventListener('resize', () => this.forceUpdate());
+      window.addEventListener('themechange', () => this.forceUpdate());
+    }
+    const st = this.state || {};
+    const isMobile = window.innerWidth < 900;
+    const open = !!st.navMenuOpen && isMobile;
+    const norm = s => String(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    const q = norm((st.navSearch || '').trim());
+    const INDEX = [["Dashboard.dc.html","▦","Painel de Controle","Sistemas & Gestão","painel dashboard indicadores alertas prazos fluxo"],["AlmoxarifadoAmostragem.dc.html","📦","Almoxarifado","Sistemas & Gestão","almoxarifado estoque amostragem materiais contagem"],["MocoesHomenagens.dc.html","🎗","Moções & Homenagens","Sistemas & Gestão","mocoes homenagens galeria vereador portaria"],["PatrimonioModule.dc.html","🏛","Patrimônio","Sistemas & Gestão","patrimonio bens tombamento transferencias ativos"],["UserProfile.dc.html","👤","Meus Dados (Perfil)","Sistemas & Gestão","perfil meus dados telefone email aniversario"],["ComprasModule.dc.html","🛒","Compras & Licitações","Sistemas & Gestão","compras licitacoes requisicoes fornecedores pregao"],["ProtocoloModule.dc.html","📋","Protocolo","Complementares","protocolo documentos processos prazos"],["RHModule.dc.html","🧑‍💼","Gestão de Pessoal","Complementares","rh recursos humanos servidores ferias"],["AnalyticsModule.dc.html","📈","Analytics & Relatórios","Complementares","analytics relatorios metricas indicadores"],["AuditLog.dc.html","🛡","Log e Auditoria","Administração","log auditoria seguranca acessos lgpd logins"],["Configuracoes.dc.html","⚙","Configurações do Sistema","Administração","configuracoes parametros parametrizacao ajustes alertas limites acessos perfis"],["Legislacoes.dc.html","⚖","Legislações","Administração","legislacao leis decretos portarias resolucoes recomendacoes normas"]];
+    const results = q ? INDEX.filter(i => norm(i[2] + ' ' + i[4]).includes(q)).slice(0, 6).map(i => ({ href: i[0], icon: i[1], label: i[2], group: i[3], go: () => { window.location.href = i[0]; } })) : [];
+    return {
+      navIsMobile: isMobile,
+      navOverlayVisible: open,
+      navSidebarPosition: isMobile ? 'fixed' : 'sticky',
+      navSidebarTransform: isMobile ? (open ? 'translateX(0)' : 'translateX(-100%)') : 'translateX(0)',
+      navOpen: () => this.setState({ navMenuOpen: true }),
+      navClose: () => this.setState({ navMenuOpen: false }),
+      navGutter: isMobile ? '16px' : '36px',
+      navHeaderPad: isMobile ? '18px 16px 12px' : '28px 36px 16px',
+      navTitleSize: isMobile ? '24px' : '30px',
+      navShowBreadcrumb: !isMobile,
+      navSearch: st.navSearch || '',
+      navSearchInput: (e) => this.setState({ navSearch: e.target.value, navSearchFocused: true }),
+      navSearchFocus: () => this.setState({ navSearchFocused: true }),
+      navSearchBlur: () => setTimeout(() => this.setState({ navSearchFocused: false }), 150),
+      navSearchKey: (e) => {
+        if (e.key === 'Enter' && results.length) window.location.href = results[0].href;
+        if (e.key === 'Escape') this.setState({ navSearch: '', navSearchFocused: false });
+      },
+      navSearchResults: results,
+      navSearchOpen: !!(st.navSearchFocused && q),
+      navSearchEmpty: !!q && results.length === 0,
+      ...(() => { const dk = !!(window.theme && window.theme.isDark && window.theme.isDark()); return { navThemeDark: dk, navThemeIsLight: !dk, navThemeLightBg: dk ? 'transparent' : 'rgba(255,255,255,0.9)', navThemeLightFg: dk ? 'rgba(255,255,255,0.6)' : '#1C543A', navThemeDarkBg: dk ? 'rgba(255,255,255,0.18)' : 'transparent', navThemeDarkFg: dk ? '#FFFFFF' : 'rgba(255,255,255,0.6)', navThemeLight: () => { if (window.theme) window.theme.set('light'); }, navThemeDarkSet: () => { if (window.theme) window.theme.set('dark'); } }; })()
+    };
+  }
+
+  renderVals() {
+    const { productsList, sampleSize, generatedScale, scaleSubmitted, scannerOpen, scannedCodeInput, scanningIndex, scannerError } = this.state;
+    const high = productsList.filter(p => p.priority === 'Alta').length;
+    const low = productsList.filter(p => p.priority === 'Baixa').length;
+    const selectedResponsible = this.state.selectedEmployee === 2 ? "Ana Beatriz Silva" : "Carlos Eduardo Costa";
+    const currentItemCode = scanningIndex !== null ? generatedScale[scanningIndex]?.code : "";
+
+    return {
+      ...this._shellVals(),
+      productsList, generatedScale, sampleSize, scaleSubmitted, scannerOpen, scannedCodeInput, scannerError,
+      highPriorityCount: high, lowPriorityCount: low, totalProductCount: productsList.length,
+      selectedResponsible, currentItemCode, hasScale: generatedScale.length > 0,
+      generatedScale: generatedScale.map((it, idx) => ({...it,
+        priorityStyle: it.priority === 'Alta' ? 'background-color: #DC262622; color: #DC2626;' : 'background-color: #E8E8E8; color: #666666;',
+        onScan: () => this.startScan(idx),
+        onCount: (e) => this.handleCountChange(idx, e.target.value),
+        hasDivergence: it.divergence !== null,
+        divergenceStyle: it.divergence === 0 ? 'background-color: #1C543A22; color: #1C543A;' : it.divergence > 0 ? 'background-color: #3B82F622; color: #3B82F6;' : 'background-color: #DC262622; color: #DC2626;',
+        divergenceLabel: it.divergence === 0 ? 'OK' : it.divergence > 0 ? '+' + it.divergence : String(it.divergence)})),
+      productsList: productsList.map(p => ({...p,
+        avgConsumptionFmt: p.avgConsumption.toFixed(2),
+        priorityStyle: p.priority === 'Alta' ? 'background-color: #DC262622; color: #DC2626;' : 'background-color: #E8E8E8; color: #666666;',
+        verifyStyle: p.verify ? 'background-color: #F59E0B22; color: #F59E0B;' : 'background-color: #1C543A22; color: #1C543A;',
+        verifyLabel: p.verify ? 'Sugerido' : 'OK'})),
+      consolidateBg: scaleSubmitted ? '#E8E8E8' : '#1C543A',
+      consolidateColor: scaleSubmitted ? '#999999' : '#FFFFFF',
+      consolidateLabel: scaleSubmitted ? '✓ Consolidado' : '💾 Consolidar Inventário',
+      closeScanner: () => this.setState({ scannerOpen: false }),
+      startScan: this.startScan,
+      generateSamplingScale: this.generateSamplingScale, handleCountChange: this.handleCountChange,
+      handleSimulateScan: this.handleSimulateScan, submitAudit: this.submitAudit,
+      setSamplingMethod: this.setSamplingMethod, setSampleSize: this.setSampleSize,
+      setSelectedEmployee: this.setSelectedEmployee, setScannerOpen: this.setScannerOpen,
+      setScannedCodeInput: this.setScannedCodeInput
+    };
+  }
+}
+
+</script>
+</body>
+</html>

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <script src="./theme.js"></script>
+  <script src="./exercicio.js"></script>
+  <script src="./liccont.js"></script>
+</helmet>
+<div style="display: flex; flex-direction: column; gap: 16px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #1D1D1B;">
+  <div style="display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; align-items: flex-start;">
+    <div>
+      <h2 style="font-size: 18px; font-weight: 700;">Saldo de Dotação Orçamentária — {{ ano }}</h2>
+      <p style="font-size: 12.5px; color: #666666; margin-top: 2px; max-width: 680px;">Cada dotação (Ficha/Sub) soma automaticamente as despesas empenhadas cadastradas em Limites Legais. Saldo abaixo de 20% fica em atenção; negativo, bloqueado.</p>
+    </div>
+    <button onClick="{{ openNew }}" style="height: 44px; padding: 0 16px; background-color: #1C543A; color: #FFFFFF; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer;" style-hover="background-color: #153A2E;">+ Nova dotação</button>
+  </div>
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px;">
+    <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="4">
+      <div style="background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 8px; padding: 14px;">
+        <p style="font-size: 11px; font-weight: 700; color: #666666; text-transform: uppercase; letter-spacing: 0.3px;">{{ k.label }}</p>
+        <p style="font-size: 20px; font-weight: 800; color: {{ k.color }}; margin-top: 4px;">{{ k.value }}</p>
+      </div>
+    </sc-for>
+  </div>
+  <div style="background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 8px; padding: 14px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+    <input type="search" value="{{ q }}" onInput="{{ setQ }}" placeholder="Buscar ficha, sub ou descrição" aria-label="Buscar dotação" style="flex: 1; min-width: 200px; height: 40px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px;" style-focus="border-color: #1C543A; outline: none;"/>
+    <span style="font-size: 12px; color: #666666;">{{ shown }} dotação(ões)</span>
+  </div>
+  <div style="display: flex; flex-direction: column; gap: 10px;">
+    <sc-for list="{{ rows }}" as="d" hint-placeholder-count="5">
+      <div style="background-color: #FFFFFF; border: 1px solid {{ d.border }}; border-radius: 8px; overflow: hidden;">
+        <button onClick="{{ d.toggle }}" aria-expanded="{{ d.open }}" style="width: 100%; text-align: left; border: none; background: none; padding: 14px 16px; cursor: pointer; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: center;">
+          <div style="min-width: 0; display: flex; flex-direction: column; gap: 6px;">
+            <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;"><span style="font-size: 12.5px; font-weight: 700; color: #1C543A; font-family: ui-monospace, monospace;">Ficha {{ d.ficha }} · Sub {{ d.sub }}</span><span style="font-size: 10.5px; font-weight: 700; padding: 2px 8px; border-radius: 999px; background-color: {{ d.badgeBg }}; color: {{ d.badgeColor }};">{{ d.badge }}</span><span style="font-size: 11.5px; color: #666666;">{{ d.nItens }} item(ns) de despesa</span></div>
+            <p style="font-size: 13.5px; font-weight: 600;">{{ d.descricao }}</p>
+            <div style="height: 8px; border-radius: 999px; background-color: #EDEDEB;"><div style="height: 8px; border-radius: 999px; background-color: {{ d.barColor }}; width: {{ d.bar }};"></div></div>
+          </div>
+          <div style="text-align: right;">
+            <p style="font-size: 11px; color: #666666;">Saldo</p>
+            <p style="font-size: 15px; font-weight: 800; color: {{ d.barColor }};">{{ d.saldoFmt }}</p>
+            <p style="font-size: 11.5px; color: #666666;">{{ d.empFmt }} de {{ d.orcFmt }}</p>
+          </div>
+        </button>
+        <sc-if value="{{ d.open }}" hint-placeholder-val="{{ false }}">
+          <div style="border-top: 1px solid #F0F0F0; padding: 12px 16px; background-color: #FCFCFB; display: flex; flex-direction: column; gap: 8px;">
+            <div style="display: flex; justify-content: flex-end;"><button onClick="{{ d.edit }}" style="height: 36px; padding: 0 14px; border: 1px solid #1C543A; border-radius: 8px; background-color: #FFFFFF; color: #1C543A; font-size: 12.5px; font-weight: 700; cursor: pointer;">✎ Editar dotação</button></div>
+            <sc-for list="{{ d.itens }}" as="it" hint-placeholder-count="3">
+              <div style="display: grid; grid-template-columns: 80px minmax(0, 1fr) 110px 110px; gap: 10px; font-size: 12.5px; padding: 6px 0; border-bottom: 1px solid #F0F0F0;">
+                <span style="font-weight: 700; color: #1C543A;">{{ it.processo }}</span><span>{{ it.objeto }}</span><span style="color: #666666;">{{ it.dataFmt }}</span><span style="font-weight: 600; text-align: right;">{{ it.valorFmt }}</span>
+              </div>
+            </sc-for>
+            <sc-if value="{{ d.semItens }}" hint-placeholder-val="{{ false }}"><p style="font-size: 12px; color: #666666;">Nenhuma despesa vinculada a esta dotação.</p></sc-if>
+          </div>
+        </sc-if>
+      </div>
+    </sc-for>
+  </div>
+
+  <sc-if value="{{ formOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeForm }}" style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 95;">
+      <div onClick="{{ stop }}" role="dialog" aria-modal="true" style="background-color: #FFFFFF; border-radius: 12px; width: 100%; max-width: 460px; padding: 22px; display: flex; flex-direction: column; gap: 12px;">
+        <h3 style="font-size: 16px; font-weight: 700;">{{ formTitle }}</h3>
+        <sc-for list="{{ fields }}" as="f" hint-placeholder-count="4">
+          <div><label style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 6px;">{{ f.label }}</label><input type="{{ f.type }}" value="{{ f.value }}" onInput="{{ f.set }}" style="width: 100%; height: 40px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px;" style-focus="border-color: #1C543A; outline: none;"/></div>
+        </sc-for>
+        <div style="display: flex; justify-content: flex-end; gap: 10px;">
+          <button onClick="{{ closeForm }}" style="height: 40px; padding: 0 16px; border: 1px solid #E0E0E0; border-radius: 8px; background-color: #FFFFFF; font-size: 13px; cursor: pointer;">Cancelar</button>
+          <button onClick="{{ submitForm }}" style="height: 40px; padding: 0 16px; border: none; border-radius: 8px; background-color: #1C543A; color: #FFFFFF; font-size: 13px; font-weight: 700; cursor: pointer;">Salvar</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: &quot;1000px&quot;, &quot;height&quot;: &quot;800px&quot;}}">
+class Component extends DCLogic {
+  FIELDS = [['ficha', 'Ficha', 'text'], ['sub', 'Sub', 'text'], ['descricao', 'Descrição da dotação', 'text'], ['orcado', 'Valor orçado (R$)', 'number']];
+  state = { ready: !!window.DALic, q: '', openId: null, form: null };
+  componentDidMount() {
+    const wait = () => { if (window.DALic) this.setState({ ready: true }); else setTimeout(wait, 150); };
+    wait(); this._on = () => this.forceUpdate(); window.addEventListener('licchange', this._on); window.addEventListener('exerciciochange', this._on);
+  }
+  componentWillUnmount() { window.removeEventListener('licchange', this._on); window.removeEventListener('exerciciochange', this._on); }
+  renderVals() {
+    const L = window.DALic, st = this.state, f = st.form || {};
+    const common = { q: st.q, setQ: e => this.setState({ q: e.target.value }), stop: e => e.stopPropagation(),
+      formOpen: !!st.form, formTitle: f.id ? 'Editar dotação' : 'Nova dotação', closeForm: () => this.setState({ form: null }),
+      openNew: () => this.setState({ form: { ficha: '', sub: '', descricao: '', orcado: '' } }),
+      fields: this.FIELDS.map(([k, label, type]) => ({ label, type, value: f[k] == null ? '' : String(f[k]), set: e => { const v = e.target.value; this.setState(s => ({ form: { ...s.form, [k]: v } })); } })),
+      submitForm: () => { if (!L || !String(f.ficha || '').trim() || !(+f.orcado > 0)) return; L.saveDotacao({ ...f, ficha: String(f.ficha).trim(), sub: String(f.sub || '—').trim() || '—', orcado: +f.orcado }); this.setState({ form: null }); } };
+    if (!L) return { ...common, ano: '', kpis: [], rows: [], shown: 0 };
+    const db = L.get(); const q = st.q.trim().toLowerCase();
+    const ANO = L.YEAR(); const all = db.dotacoes.filter(d => (d.ano || L.DATA_YEAR) === ANO).map(d => ({ d, i: L.dotacaoInfo(d) }));
+    const list = all.filter(({ d }) => !q || (d.ficha + ' ' + d.sub + ' ' + d.descricao).toLowerCase().includes(q)).sort((a, b) => b.i.pct - a.i.pct);
+    const orc = all.reduce((a, x) => a + x.d.orcado, 0), emp = all.reduce((a, x) => a + x.i.empenhado, 0);
+    const crit = all.filter(x => x.i.pct >= 0.8).length;
+    return { ...common, ano: ANO, shown: list.length,
+      kpis: [
+        { label: 'Total orçado', value: L.brl(orc), color: '#1D1D1B' },
+        { label: 'Total empenhado', value: L.brl(emp), color: '#1C543A' },
+        { label: 'Saldo disponível', value: L.brl(orc - emp), color: orc - emp < 0 ? '#B91C1C' : '#1C543A' },
+        { label: 'Dotações em atenção', value: String(crit), color: crit ? '#B45309' : '#1C543A' }
+      ],
+      rows: list.map(({ d, i }) => { const p = i.pct; const lv = p > 1 ? ['Saldo negativo', '#FDF3F2', '#B91C1C'] : p >= 0.8 ? ['Atenção', '#FDF8EC', '#92400E'] : ['Regular', '#EAF3EE', '#1C543A'];
+        return { ...d, open: st.openId === d.id, toggle: () => this.setState(s => ({ openId: s.openId === d.id ? null : d.id })), edit: () => this.setState({ form: { ...d } }),
+          nItens: i.itens.length, semItens: !i.itens.length, saldoFmt: L.brl(i.saldo), empFmt: L.brl(i.empenhado), orcFmt: L.brl(d.orcado),
+          bar: Math.min(100, Math.round(p * 100)) + '%', barColor: lv[2], badge: lv[0], badgeBg: lv[1], badgeColor: lv[2], border: p >= 0.8 ? '#F3D9A4' : '#E8E8E8',
+          itens: i.itens.map(x => ({ processo: x.processo, objeto: x.objeto, dataFmt: L.fmt(x.dataEmpenho), valorFmt: L.brl(x.empenhado) })) }; }) };
+  }
+}
+</script>
+</body>
+</html>

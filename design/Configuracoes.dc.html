@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+  <script src="./theme.js"></script>
+  <script src="./config.js"></script>
+  <script src="./sectors.js"></script>
+  <script src="./session.js"></script>
+  <script src="./liccont.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema DA - Configurações do Sistema</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #FFFFFF;
+      color: #1D1D1B;
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</helmet>
+
+<div style="display: flex; min-height: 100vh; background-color: #FFFFFF; position: relative;">
+
+  <sc-if value="{{ navOverlayVisible }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ navClose }}" style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); z-index: 40;"></div>
+  </sc-if>
+
+  <!-- Sidebar -->
+  <aside style="background-color: #1C543A; color: #FFFFFF; width: 250px; flex-shrink: 0; display: flex; flex-direction: column; padding: 22px 16px; gap: 22px; position: {{ navSidebarPosition }}; top: 0; left: 0; height: 100vh; overflow-y: auto; z-index: 50; transform: {{ navSidebarTransform }}; transition: transform 0.3s cubic-bezier(0.34, 1.25, 0.64, 1);">
+      <a href="Dashboard.dc.html" title="Voltar ao Painel de Controle" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: #FFFFFF; padding: 0 4px;">
+        <div style="width: 36px; height: 36px; background-color: #FFFFFF; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; color: #1C543A; flex-shrink: 0;">DA</div>
+        <div>
+          <p style="font-size: 12.5px; font-weight: 700; line-height: 1.3; color: #FFFFFF;">CÂMARA MUNICIPAL</p>
+          <p style="font-size: 9.5px; letter-spacing: 0.4px; color: rgba(255,255,255,0.65); text-transform: uppercase;">Diretoria Administrativa</p>
+        </div>
+      </a>
+      <nav style="display: flex; flex-direction: column; gap: 2px;">
+        <p style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: rgba(255,255,255,0.5); padding: 0 12px; margin-bottom: 6px;">Sistemas &amp; Gestão</p>
+        <a href="Dashboard.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">▦</span>Painel de Controle</a>
+        <sc-for list="{{ navLinks }}" as="link" hint-placeholder-count="4">
+          <a href="{{ link.href }}" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 13px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">{{ link.icon }}</span>{{ link.label }}</a>
+        </sc-for>
+      </nav>
+      <nav style="display: flex; flex-direction: column; gap: 2px;">
+        <p style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: rgba(255,255,255,0.5); padding: 0 12px; margin-bottom: 6px;">Módulos Complementares</p>
+        <a href="AnalyticsModule.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">📈</span>Analytics &amp; Relatórios</a>
+        <a href="RHModule.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">🧑‍💼</span>Gestão de Pessoal</a>
+        <a href="Legislacoes.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">⚖</span>Legislações</a>
+        <a href="Configuracoes.dc.html" aria-current="page" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 13px; transition: background-color 0.2s; background-color: #FFFFFF; color: #1C543A; font-weight: 700;"><span style="width: 18px; text-align: center; flex-shrink: 0;">⚙</span>Configurações do Sistema</a>
+        <a href="AuditLog.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">🛡</span>Log e Auditoria</a>
+      <a href="ProtocoloModule.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">📋</span>Protocolo</a>
+      </nav>
+      <div style="margin-top: auto; display: flex; flex-direction: column; gap: 4px; padding-top: 8px;">
+        <a href="UserProfile.dc.html" style="display: flex; align-items: center; gap: 10px; background-color: rgba(255,255,255,0.08); border-radius: 10px; padding: 12px; text-decoration: none; color: #FFFFFF;" style-hover="background-color: rgba(255,255,255,0.14);">
+          <div style="width: 34px; height: 34px; border-radius: 50%; background-color: #F0B429; color: #1C543A; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; flex-shrink: 0;">RA</div>
+          <div style="min-width: 0;">
+            <p style="font-size: 12.5px; font-weight: 700; color: #FFFFFF;">Dr. Roberto Alencar</p>
+            <p style="font-size: 10.5px; color: rgba(255,255,255,0.6);">DA-2026-948 · Diretoria</p>
+          </div>
+        </a>
+        <div role="group" aria-label="Aparência" style="display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 40px; padding: 0 12px;">
+          <span style="font-size: 11px; font-weight: 600; letter-spacing: 0.3px; color: rgba(255,255,255,0.6);">Aparência</span>
+          <div style="display: flex; padding: 2px; border-radius: 999px; background-color: rgba(0,0,0,0.22);">
+            <button onClick="{{ navThemeLight }}" aria-pressed="{{ navThemeIsLight }}" aria-label="Modo padrão" title="Modo padrão" style="width: 30px; height: 26px; border: none; border-radius: 999px; background-color: {{ navThemeLightBg }}; color: {{ navThemeLightFg }}; font-size: 13px; line-height: 1; cursor: pointer; transition: background-color 0.2s;">☀</button>
+            <button onClick="{{ navThemeDarkSet }}" aria-pressed="{{ navThemeDark }}" aria-label="Modo escuro" title="Modo escuro" style="width: 30px; height: 26px; border: none; border-radius: 999px; background-color: {{ navThemeDarkBg }}; color: {{ navThemeDarkFg }}; font-size: 13px; line-height: 1; cursor: pointer; transition: background-color 0.2s;">☾</button>
+          </div>
+        </div>
+        <a href="Login.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; color: rgba(255,255,255,0.7); text-decoration: none; font-size: 12.5px; font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1); color: #FFFFFF;"><span style="width: 18px; text-align: center; flex-shrink: 0;">⎋</span>Sair do sistema</a>
+      </div>
+    </aside>
+
+  <!-- Main -->
+  <div style="flex: 1; min-width: 0; display: flex; flex-direction: column;">
+    <div style="position: sticky; top: 0; z-index: 30; background-color: rgba(255,255,255,0.96); backdrop-filter: blur(6px); border-bottom: 1px solid #E8E8E8; min-height: 64px; padding: 10px {{ navGutter }}; display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+      <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
+        <sc-if value="{{ navIsMobile }}" hint-placeholder-val="{{ false }}">
+          <button onClick="{{ navOpen }}" aria-label="Abrir menu" style="width: 44px; height: 44px; border-radius: 8px; border: 1px solid #E0E0E0; background-color: #FFFFFF; font-size: 18px; color: #1D1D1B; cursor: pointer; flex-shrink: 0;">☰</button>
+          <a href="Dashboard.dc.html" title="Painel de Controle" style="width: 36px; height: 36px; background-color: #1C543A; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 12px; color: #FFFFFF; text-decoration: none; flex-shrink: 0;">DA</a>
+        </sc-if>
+        <sc-if value="{{ navShowBreadcrumb }}" hint-placeholder-val="{{ true }}">
+          <div style="display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: #666666; white-space: nowrap;">
+            <a href="Dashboard.dc.html" style="color: #666666; text-decoration: none;" style-hover="color: #1C543A;">Painel de Controle</a>
+            <span style="color: #CCCCCC;">›</span>
+            <span style="color: #1D1D1B; font-weight: 600;">Configurações do Sistema</span>
+          </div>
+        </sc-if>
+      </div>
+      <div style="display: flex; align-items: center; gap: 10px; flex: 1; justify-content: flex-end; min-width: 0;">
+        <div style="position: relative; flex: 1; max-width: 340px; min-width: 0;">
+          <input type="search" placeholder="Buscar módulos e telas…" aria-label="Busca global" value="{{ navSearch }}" onInput="{{ navSearchInput }}" onFocus="{{ navSearchFocus }}" onBlur="{{ navSearchBlur }}" onKeyDown="{{ navSearchKey }}" style="width: 100%; height: 44px; padding: 0 12px 0 34px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; color: #1D1D1B; background-color: #F9F9F9;" style-focus="border-color: #1C543A; background-color: #FFFFFF; outline: none;"/>
+          <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 14px; color: #999999; pointer-events: none;">⌕</span>
+          <sc-if value="{{ navSearchOpen }}" hint-placeholder-val="{{ false }}">
+            <div style="position: absolute; top: 50px; right: 0; left: 0; min-width: 240px; background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 8px; box-shadow: 0 12px 32px rgba(0,0,0,0.12); padding: 6px; z-index: 60;">
+              <sc-for list="{{ navSearchResults }}" as="r" hint-placeholder-count="3">
+                <a href="{{ r.href }}" onMouseDown="{{ r.go }}" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 10px; border-radius: 6px; text-decoration: none; color: #1D1D1B; font-size: 13px;" style-hover="background-color: #F2F7F4;">
+                  <span style="width: 20px; text-align: center; flex-shrink: 0;">{{ r.icon }}</span>
+                  <span style="flex: 1; font-weight: 600;">{{ r.label }}</span>
+                  <span style="font-size: 11px; color: #999999;">{{ r.group }}</span>
+                </a>
+              </sc-for>
+              <sc-if value="{{ navSearchEmpty }}" hint-placeholder-val="{{ false }}">
+                <p style="padding: 12px 10px; font-size: 12.5px; color: #999999;">Nenhum resultado para “{{ navSearch }}”</p>
+              </sc-if>
+            </div>
+          </sc-if>
+        </div>
+        <a href="NotificationsModule.dc.html" title="Notificações" style="position: relative; width: 44px; height: 44px; border-radius: 8px; border: 1px solid #E0E0E0; background-color: #FFFFFF; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 16px; flex-shrink: 0;" style-hover="border-color: #1C543A;">🔔<span style="position: absolute; top: 9px; right: 10px; width: 7px; height: 7px; border-radius: 50%; background-color: #DC2626; border: 1.5px solid #FFFFFF;"></span></a>
+      </div>
+    </div>
+    <main style="flex: 1; padding: {{ mainPadding }}; display: flex; flex-direction: column; gap: 20px; background-color: #FFFFFF; min-width: 0;">
+    <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+      <div>
+        <p style="font-size: 11px; font-weight: 700; letter-spacing: 0.6px; color: #1C543A; text-transform: uppercase;">Administração do sistema</p>
+        <h1 style="font-size: {{ titleFontSize }}; font-weight: 800; color: #1D1D1B; margin-top: 6px;">Configurações do Sistema</h1>
+        <p style="font-size: 13px; color: #666666; margin-top: 4px; max-width: 680px;">Parâmetros de cada módulo, agrupados por tema. As alterações são salvas na hora e ficam registradas no Log e Auditoria. Disponível apenas para o administrador.</p>
+      </div>
+      <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+        <input type="search" value="{{ q }}" onInput="{{ setQ }}" placeholder="Buscar configuração…" aria-label="Buscar configuração" style="min-width: 220px; height: 44px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px;" style-focus="border-color: #1C543A; outline: none;"/>
+        <sc-if value="{{ showReset }}" hint-placeholder-val="{{ true }}"><button onClick="{{ resetTab }}" style="height: 44px; padding: 0 16px; border: 1px solid #E0E0E0; border-radius: 8px; background-color: #FFFFFF; color: #1D1D1B; font-size: 13px; font-weight: 600; cursor: pointer;" style-hover="background-color: #F5F5F5;">{{ resetLabel }}</button></sc-if>
+      </div>
+    </div>
+
+    <div role="tablist" aria-label="Módulos" style="display: flex; gap: 6px; overflow-x: auto; border-bottom: 2px solid #E8E8E8; padding-bottom: 0;">
+      <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="8">
+        <button role="tab" aria-selected="{{ t.active }}" onClick="{{ t.go }}" style="display: flex; align-items: center; gap: 6px; padding: 12px 14px; border: none; background: none; font-size: 13px; font-weight: 600; white-space: nowrap; flex-shrink: 0; cursor: pointer; color: {{ t.color }}; border-bottom: 2px solid {{ t.border }}; margin-bottom: -2px;"><span>{{ t.icon }}</span>{{ t.label }}<sc-if value="{{ t.hasChanges }}" hint-placeholder-val="{{ false }}"><span style="font-size: 10px; font-weight: 700; padding: 1px 7px; border-radius: 999px; background-color: #EAF3EE; color: #1C543A;">{{ t.changes }}</span></sc-if></button>
+      </sc-for>
+    </div>
+
+    <sc-if value="{{ isSearching }}" hint-placeholder-val="{{ false }}">
+      <p style="font-size: 12.5px; color: #666666;">{{ searchLabel }}</p>
+    </sc-if>
+
+    <sc-if value="{{ isAccessTab }}" hint-placeholder-val="{{ false }}">
+      <div style="background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 14px;">
+        <div style="display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; align-items: flex-end; padding-bottom: 10px; border-bottom: 1px solid #1C543A;">
+          <div>
+            <h3 style="font-size: 15px; font-weight: 700; color: #1D1D1B;">Perfis e acessos por módulo</h3>
+            <p style="font-size: 12px; color: #666666; margin-top: 2px;">O perfil Administrativo vê tudo e não pode ser alterado. Permissões individuais definidas em Gestão de Pessoal › Usuários prevalecem sobre o perfil.</p>
+          </div>
+          <button onClick="{{ resetAccess }}" style="height: 40px; padding: 0 14px; border: 1px solid #E0E0E0; border-radius: 8px; background-color: #FFFFFF; font-size: 12.5px; font-weight: 600; cursor: pointer;" style-hover="background-color: #F5F5F5;">Restaurar acessos padrão</button>
+        </div>
+        <div style="overflow-x: auto;">
+          <table style="width: 100%; min-width: 760px; border-collapse: collapse; font-size: 13px;">
+            <thead>
+              <tr>
+                <th style="text-align: left; padding: 10px; font-size: 11px; font-weight: 700; color: #666666; text-transform: uppercase; letter-spacing: 0.3px;">Módulo</th>
+                <sc-for list="{{ roleCols }}" as="rc" hint-placeholder-count="6"><th style="text-align: center; padding: 10px; font-size: 11px; font-weight: 700; color: #666666; text-transform: uppercase; letter-spacing: 0.3px;">{{ rc }}</th></sc-for>
+              </tr>
+            </thead>
+            <tbody>
+              <sc-for list="{{ accessRows }}" as="ar" hint-placeholder-count="10">
+                <tr style="border-top: 1px solid #F0F0F0;">
+                  <td style="padding: 10px; font-weight: 600; color: #1D1D1B;">{{ ar.label }}</td>
+                  <sc-for list="{{ ar.cells }}" as="c" hint-placeholder-count="6">
+                    <td style="padding: 8px; text-align: center;">
+                      <button onClick="{{ c.toggle }}" disabled="{{ c.locked }}" role="switch" aria-checked="{{ c.on }}" aria-label="{{ c.aria }}" title="{{ c.title }}" style="width: 44px; height: 24px; border-radius: 999px; border: none; background-color: {{ c.bg }}; position: relative; cursor: {{ c.cursor }}; opacity: {{ c.opacity }}; transition: background-color 0.25s;"><span style="position: absolute; top: 3px; left: {{ c.knob }}; width: 18px; height: 18px; border-radius: 50%; background-color: #FFFFFF; box-shadow: 0 1px 3px rgba(0,0,0,0.25); transition: left 0.25s;"></span></button>
+                    </td>
+                  </sc-for>
+                </tr>
+              </sc-for>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isCcTab }}" hint-placeholder-val="{{ false }}">
+      <div style="background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 14px;">
+        <div style="padding-bottom: 10px; border-bottom: 1px solid #1C543A;">
+          <h3 style="font-size: 15px; font-weight: 700; color: #1D1D1B;">Centros de custo</h3>
+          <p style="font-size: 12px; color: #666666; margin-top: 2px;">Fonte única dos campos de setor e requisitante. <strong>Padrão</strong>: usados em Compras, Protocolo, Gestão de Pessoal e Usuários. <strong>Patrimônio</strong>: usados apenas no módulo de Patrimônio (localização dos bens e termos de responsabilidade). Centros arquivados deixam de aparecer nas buscas, mas o histórico é mantido.</p>
+        </div>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; padding: 12px; border-radius: 8px; background-color: #F7F9F8;">
+          <div><label for="cc-tipo" style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 6px;">Tipo</label><select id="cc-tipo" value="{{ ccForm.tipo }}" onChange="{{ setCcTipo }}" style="height: 40px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; background-color: #FFFFFF;"><option value="padrao">Padrão</option><option value="patrimonio">Patrimônio</option></select></div>
+          <div><label for="cc-cod" style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 6px;">Código</label><input id="cc-cod" type="text" value="{{ ccForm.codigo }}" onInput="{{ setCcCodigo }}" placeholder="{{ ccNextCode }}" style="width: 120px; height: 40px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px;" style-focus="border-color: #1C543A; outline: none;"/></div>
+          <div style="flex: 1; min-width: 220px;"><label for="cc-nome" style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 6px;">Nome do centro de custo</label><input id="cc-nome" type="text" value="{{ ccForm.nome }}" onInput="{{ setCcNome }}" placeholder="Ex.: Ouvidoria" style="width: 100%; height: 40px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px;" style-focus="border-color: #1C543A; outline: none;"/></div>
+          <button onClick="{{ saveCc }}" style="height: 40px; padding: 0 16px; background-color: #1C543A; color: #FFFFFF; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer;" style-hover="background-color: #153A2E;">{{ ccSaveLabel }}</button>
+          <sc-if value="{{ ccEditing }}" hint-placeholder-val="{{ false }}"><button onClick="{{ cancelCc }}" style="height: 40px; padding: 0 14px; border: 1px solid #E0E0E0; border-radius: 8px; background-color: #FFFFFF; font-size: 13px; cursor: pointer;">Cancelar</button></sc-if>
+        </div>
+        <sc-if value="{{ ccError }}" hint-placeholder-val="{{ false }}"><p role="alert" style="font-size: 12.5px; color: #B91C1C;">{{ ccError }}</p></sc-if>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+          <input type="search" value="{{ ccQ }}" onInput="{{ setCcQ }}" placeholder="Buscar por código ou nome" aria-label="Buscar centro de custo" style="flex: 1; min-width: 200px; height: 40px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px;" style-focus="border-color: #1C543A; outline: none;"/>
+          <select value="{{ ccTipoFilter }}" onChange="{{ setCcTipoFilter }}" aria-label="Tipo" style="height: 40px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; background-color: #FFFFFF;">
+            <option value="todos">Todos os tipos</option>
+            <option value="padrao">Padrão</option>
+            <option value="patrimonio">Patrimônio</option>
+          </select>
+          <select value="{{ ccFilter }}" onChange="{{ setCcFilter }}" aria-label="Situação" style="height: 40px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; background-color: #FFFFFF;">
+            <option value="ativos">Ativos</option>
+            <option value="arquivados">Arquivados</option>
+            <option value="todos">Todos</option>
+          </select>
+          <span style="font-size: 12px; color: #666666;">{{ ccCount }}</span>
+        </div>
+        <div style="display: flex; flex-direction: column;">
+          <sc-for list="{{ ccRows }}" as="cc" hint-placeholder-count="6">
+            <div style="display: flex; align-items: center; gap: 12px; padding: 10px 4px; border-top: 1px solid #F0F0F0; opacity: {{ cc.opacity }}; flex-wrap: wrap;">
+              <span style="font-size: 12.5px; font-weight: 700; color: #1C543A; font-family: ui-monospace, monospace; min-width: 70px;">{{ cc.codigo }}</span>
+              <span style="flex: 1; min-width: 160px; font-size: 13px; font-weight: 600; color: #1D1D1B;">{{ cc.nome }}</span>
+              <span style="font-size: 10.5px; font-weight: 700; padding: 3px 10px; border-radius: 999px; background-color: {{ cc.tipoBg }}; color: {{ cc.tipoColor }};">{{ cc.tipoLabel }}</span>
+              <span style="font-size: 10.5px; font-weight: 700; padding: 3px 10px; border-radius: 999px; background-color: {{ cc.badgeBg }}; color: {{ cc.badgeColor }};">{{ cc.badge }}</span>
+              <button onClick="{{ cc.edit }}" style="min-height: 36px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 6px; background-color: #FFFFFF; color: #1C543A; font-size: 12px; font-weight: 600; cursor: pointer;" style-hover="background-color: #F4F9F6;">Editar</button>
+              <button onClick="{{ cc.toggle }}" style="min-height: 36px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 6px; background-color: #FFFFFF; color: {{ cc.toggleColor }}; font-size: 12px; font-weight: 600; cursor: pointer;" style-hover="background-color: #F5F5F5;">{{ cc.toggleLabel }}</button>
+            </div>
+          </sc-for>
+          <sc-if value="{{ ccEmpty }}" hint-placeholder-val="{{ false }}"><p style="padding: 24px; text-align: center; font-size: 13px; color: #666666;">Nenhum centro de custo encontrado.</p></sc-if>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ showGroups }}" hint-placeholder-val="{{ true }}">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 16px; align-items: start;">
+        <sc-for list="{{ groups }}" as="g" hint-placeholder-count="3">
+          <section style="background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 4px;">
+            <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 10px; padding-bottom: 10px; margin-bottom: 6px; border-bottom: 1px solid #1C543A;">
+              <h3 style="font-size: 15px; font-weight: 700; color: #1D1D1B;">{{ g.title }}</h3>
+              <span style="font-size: 11px; color: #666666;">{{ g.meta }}</span>
+            </div>
+            <sc-for list="{{ g.fields }}" as="f" hint-placeholder-count="3">
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 10px 0; border-bottom: 1px solid #F4F4F2; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 200px;">
+                  <label for="{{ f.id }}" style="font-size: 13px; font-weight: 600; color: #1D1D1B; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">{{ f.label }}<sc-if value="{{ f.changed }}" hint-placeholder-val="{{ false }}"><span style="font-size: 10px; font-weight: 700; padding: 1px 7px; border-radius: 999px; background-color: #EAF3EE; color: #1C543A;">Alterado</span></sc-if></label>
+                  <sc-if value="{{ f.hasHint }}" hint-placeholder-val="{{ false }}"><p style="font-size: 11.5px; color: #666666; margin-top: 2px;">{{ f.hint }}</p></sc-if>
+                  <sc-if value="{{ f.showTab }}" hint-placeholder-val="{{ false }}"><p style="font-size: 11px; color: #1C543A; margin-top: 2px; font-weight: 600;">{{ f.tabLabel }}</p></sc-if>
+                  <sc-if value="{{ f.hasError }}" hint-placeholder-val="{{ false }}"><p role="alert" style="font-size: 11.5px; color: #B91C1C; margin-top: 2px;">{{ f.error }}</p></sc-if>
+                </div>
+                <sc-if value="{{ f.isNumber }}" hint-placeholder-val="{{ false }}">
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <input id="{{ f.id }}" type="number" value="{{ f.value }}" min="{{ f.min }}" max="{{ f.max }}" step="{{ f.step }}" onInput="{{ f.onDraft }}" onBlur="{{ f.onNumber }}" onKeyDown="{{ f.onKey }}" style="width: 120px; height: 40px; padding: 0 10px; border: 1px solid {{ f.border }}; border-radius: 8px; font-size: 13px; text-align: right;" style-focus="border-color: #1C543A; outline: none;"/>
+                    <span style="font-size: 12px; color: #666666; min-width: 60px;">{{ f.unit }}</span>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ f.isToggle }}" hint-placeholder-val="{{ false }}">
+                  <button id="{{ f.id }}" onClick="{{ f.onToggle }}" role="switch" aria-checked="{{ f.on }}" style="width: 44px; height: 24px; border-radius: 999px; border: none; background-color: {{ f.switchBg }}; position: relative; cursor: pointer; flex-shrink: 0; transition: background-color 0.25s;"><span style="position: absolute; top: 3px; left: {{ f.knob }}; width: 18px; height: 18px; border-radius: 50%; background-color: #FFFFFF; box-shadow: 0 1px 3px rgba(0,0,0,0.25); transition: left 0.25s;"></span></button>
+                </sc-if>
+                <sc-if value="{{ f.isSelect }}" hint-placeholder-val="{{ false }}">
+                  <select id="{{ f.id }}" value="{{ f.value }}" onChange="{{ f.onText }}" style="min-width: 180px; height: 40px; padding: 0 10px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; background-color: #FFFFFF; color: #1D1D1B;">
+                    <sc-for list="{{ f.options }}" as="o" hint-placeholder-count="3"><option value="{{ o.value }}">{{ o.label }}</option></sc-for>
+                  </select>
+                </sc-if>
+                <sc-if value="{{ f.isText }}" hint-placeholder-val="{{ false }}">
+                  <input id="{{ f.id }}" type="text" value="{{ f.value }}" onChange="{{ f.onText }}" style="width: 260px; max-width: 100%; height: 40px; padding: 0 10px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px;" style-focus="border-color: #1C543A; outline: none;"/>
+                </sc-if>
+              </div>
+            </sc-for>
+          </section>
+        </sc-for>
+      </div>
+      <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}"><p style="padding: 30px; text-align: center; font-size: 13px; color: #666666; border: 1px solid #E8E8E8; border-radius: 12px;">Nenhuma configuração encontrada.</p></sc-if>
+    </sc-if>
+
+    <sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+      <div role="status" style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background-color: #1C543A; color: #FFFFFF; padding: 12px 22px; border-radius: 999px; font-size: 13px; font-weight: 600; z-index: 100; box-shadow: 0 8px 24px rgba(28,84,58,0.35);">✓ {{ toast }}</div>
+    </sc-if>
+    </main>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: &quot;100%&quot;, &quot;height&quot;: &quot;900px&quot;}}">
+class Component extends DCLogic {
+  state = { tab: 'geral', q: '', toast: '', errors: {}, drafts: {}, tick: 0, ccQ: '', ccFilter: 'ativos', ccForm: { codigo: '', nome: '', tipo: 'padrao' }, ccEditId: null, ccError: '', ccTipoFilter: 'todos' };
+  componentDidMount() {
+    this._on = () => this.setState(s => ({ tick: s.tick + 1 }));
+    window.addEventListener('configchange', this._on); window.addEventListener('storage', this._on); window.addEventListener('costcenterschange', this._on);
+    const w = () => { if (window.DAConfig) this._on(); else setTimeout(w, 150); }; w();
+  }
+  componentWillUnmount() { window.removeEventListener('configchange', this._on); window.removeEventListener('storage', this._on); clearTimeout(this._t); }
+  _toast(m) { clearTimeout(this._t); this.setState({ toast: m }); this._t = setTimeout(() => this.setState({ toast: '' }), 2200); }
+  _save(f, v, tabLabel) {
+    const C = window.DAConfig; const old = C.get(f.key); if (String(old) === String(v)) return;
+    C.set(f.key, v);
+    if (window.DAAudit) window.DAAudit.log('Configuração alterada', 'configuracoes', tabLabel + ' · ' + f.label + ': ' + this._show(f, old) + ' → ' + this._show(f, v));
+    this._toast('Configuração salva');
+  }
+  _show(f, v) { return f.type === 'toggle' ? (v ? 'Sim' : 'Não') : (f.unit === 'R$' ? 'R$ ' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : String(v) + (f.unit ? ' ' + f.unit : '')); }
+  _norm(s) { return String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase(); }
+  _shellVals() {
+    if (!this._navBound) {
+      this._navBound = true;
+      window.addEventListener('resize', () => this.forceUpdate());
+      window.addEventListener('themechange', () => this.forceUpdate());
+    }
+    const st = this.state || {};
+    const isMobile = window.innerWidth < 900;
+    const open = !!st.navMenuOpen && isMobile;
+    const norm = s => String(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    const q = norm((st.navSearch || '').trim());
+    const INDEX = [["Dashboard.dc.html","▦","Painel de Controle","Sistemas & Gestão","painel dashboard indicadores alertas prazos fluxo"],["AlmoxarifadoAmostragem.dc.html","📦","Almoxarifado","Sistemas & Gestão","almoxarifado estoque amostragem materiais contagem"],["MocoesHomenagens.dc.html","🎗","Moções & Homenagens","Sistemas & Gestão","mocoes homenagens galeria vereador portaria"],["PatrimonioModule.dc.html","🏛","Patrimônio","Sistemas & Gestão","patrimonio bens tombamento transferencias ativos"],["UserProfile.dc.html","👤","Meus Dados (Perfil)","Sistemas & Gestão","perfil meus dados telefone email aniversario"],["ComprasModule.dc.html","🛒","Compras & Licitações","Sistemas & Gestão","compras licitacoes requisicoes fornecedores pregao"],["ProtocoloModule.dc.html","📋","Protocolo","Complementares","protocolo documentos processos prazos"],["RHModule.dc.html","🧑‍💼","Gestão de Pessoal","Complementares","rh recursos humanos servidores ferias"],["AnalyticsModule.dc.html","📈","Analytics & Relatórios","Complementares","analytics relatorios metricas indicadores"],["AuditLog.dc.html","🛡","Log e Auditoria","Administração","log auditoria seguranca acessos lgpd logins"],["Legislacoes.dc.html","⚖","Legislações","Administração","legislacao leis decretos portarias resolucoes recomendacoes normas"]];
+    const results = q ? INDEX.filter(i => norm(i[2] + ' ' + i[4]).includes(q)).slice(0, 6).map(i => ({ href: i[0], icon: i[1], label: i[2], group: i[3], go: () => { window.location.href = i[0]; } })) : [];
+    return {
+      navIsMobile: isMobile,
+      navOverlayVisible: open,
+      navSidebarPosition: isMobile ? 'fixed' : 'sticky',
+      navSidebarTransform: isMobile ? (open ? 'translateX(0)' : 'translateX(-100%)') : 'translateX(0)',
+      navOpen: () => this.setState({ navMenuOpen: true }),
+      navClose: () => this.setState({ navMenuOpen: false }),
+      navGutter: isMobile ? '16px' : '36px',
+      navHeaderPad: isMobile ? '18px 16px 12px' : '28px 36px 16px',
+      navTitleSize: isMobile ? '24px' : '30px',
+      navShowBreadcrumb: !isMobile,
+      navSearch: st.navSearch || '',
+      navSearchInput: (e) => this.setState({ navSearch: e.target.value, navSearchFocused: true }),
+      navSearchFocus: () => this.setState({ navSearchFocused: true }),
+      navSearchBlur: () => setTimeout(() => this.setState({ navSearchFocused: false }), 150),
+      navSearchKey: (e) => {
+        if (e.key === 'Enter' && results.length) window.location.href = results[0].href;
+        if (e.key === 'Escape') this.setState({ navSearch: '', navSearchFocused: false });
+      },
+      navSearchResults: results,
+      navSearchOpen: !!(st.navSearchFocused && q),
+      navSearchEmpty: !!q && results.length === 0,
+      ...(() => { const dk = !!(window.theme && window.theme.isDark && window.theme.isDark()); return { navThemeDark: dk, navThemeIsLight: !dk, navThemeLightBg: dk ? 'transparent' : 'rgba(255,255,255,0.9)', navThemeLightFg: dk ? 'rgba(255,255,255,0.6)' : '#1C543A', navThemeDarkBg: dk ? 'rgba(255,255,255,0.18)' : 'transparent', navThemeDarkFg: dk ? '#FFFFFF' : 'rgba(255,255,255,0.6)', navThemeLight: () => { if (window.theme) window.theme.set('light'); }, navThemeDarkSet: () => { if (window.theme) window.theme.set('dark'); } }; })()
+    };
+  }
+
+  getNavLinksForRole = (role) => {
+    const can = m => !window.DASession || !window.DASession.get() || window.DASession.can(m);
+    const access = { compras: can('compras'), motions: can('mocoes'), almoxarifado: can('almoxarifado'), patrimonio: can('patrimonio'), users: can('rh') };
+    return [
+      { label: 'Almoxarifado', href: 'AlmoxarifadoAmostragem.dc.html', icon: '📦', key: 'almoxarifado' },
+      { label: 'Compras & Licitações', href: 'ComprasModule.dc.html', icon: '🛒', key: 'compras' },
+      { label: 'Moções & Homenagens', href: 'MocoesHomenagens.dc.html', icon: '🎗', key: 'motions' },
+      { label: 'Patrimônio', href: 'PatrimonioModule.dc.html', icon: '🏛', key: 'patrimonio' }
+    ].filter(l => access[l.key]).sort((a, b) => a.label.localeCompare(b.label, 'pt-BR', { sensitivity: 'base' }));
+  };
+
+
+  renderVals() {
+    const st = this.state, isMobile = window.innerWidth < 900, C = window.DAConfig;
+    const base = { ...this._shellVals(), navLinks: this.getNavLinksForRole((window.DASession && window.DASession.role && window.DASession.role()) || 'Visualizador'),
+      mainPadding: isMobile ? '18px 16px 32px' : '28px 36px 40px', titleFontSize: isMobile ? '24px' : '30px',
+      q: st.q, setQ: e => this.setState({ q: e.target.value }), toast: st.toast };
+    if (!C) return { ...base, tabs: [], groups: [], accessRows: [], roleCols: [], isAccessTab: false, isCcTab: false, showReset: true, ccRows: [], ccForm: {}, showGroups: true, isEmpty: false, resetLabel: 'Restaurar padrão', resetTab: () => {}, resetAccess: () => {}, isSearching: false, searchLabel: '' };
+    const TABS = [{ key: 'geral', label: 'Geral', icon: '⚙' }, { key: 'acessos', label: 'Perfis e Acessos', icon: '🔐' }, { key: 'centros', label: 'Centros de Custo', icon: '🏷' }].concat(C.SCHEMA.filter(t => t.key !== 'geral').map(t => ({ key: t.key, label: t.label, icon: t.icon })));
+    const changesIn = t => { const s = C.SCHEMA.find(x => x.key === t.key); if (!s) return 0; let n = 0; s.groups.forEach(g => g.fields.forEach(f => { if (!C.isDefault(f.key)) n++; })); return n; };
+    const q = this._norm(st.q.trim());
+    const mkField = (f, tab) => {
+      const v = C.get(f.key), id = 'cfg-' + f.key.replace(/\W/g, '-'), err = st.errors[f.key];
+      return { id, label: f.label, hint: f.hint, hasHint: !!f.hint, unit: f.unit, changed: !C.isDefault(f.key), error: err || '', hasError: !!err,
+        showTab: !!q, tabLabel: tab.label,
+        isNumber: f.type === 'number', isToggle: f.type === 'toggle', isSelect: f.type === 'select', isText: f.type === 'text',
+        value: Object.prototype.hasOwnProperty.call(st.drafts, f.key) ? st.drafts[f.key] : v, min: f.min, max: f.max, step: f.unit === 'R$' ? '0.01' : (String(f.def).includes('.') ? '0.5' : '1'), border: err ? '#DC2626' : '#E0E0E0',
+        on: !!v, switchBg: v ? '#1C543A' : '#D9D9D9', knob: v ? '23px' : '3px',
+        options: (f.options || []).map(o => ({ value: o, label: f.key === 'analytics.periodo' ? 'Últimos ' + o + ' dias' : ({ alta: 'Foco em alta prioridade', media: 'Foco em média prioridade', baixa: 'Foco em baixa prioridade', balanceado: 'Aleatório balanceado' }[o] || o) })),
+        onToggle: () => this._save(f, !v, tab.label),
+        onText: e => this._save(f, e.target.value, tab.label),
+        onDraft: e => { const val = e.target.value; this.setState(s => ({ drafts: { ...s.drafts, [f.key]: val } })); },
+        onKey: e => { if (e.key === 'Enter') e.target.blur(); if (e.key === 'Escape') { this.setState(s => { const d = { ...s.drafts }, er = { ...s.errors }; delete d[f.key]; delete er[f.key]; return { drafts: d, errors: er }; }); } },
+        onNumber: e => { if (!Object.prototype.hasOwnProperty.call(this.state.drafts, f.key)) return; const n = parseFloat(String(e.target.value).replace(',', '.')); const errs = { ...this.state.errors };
+          if (!isFinite(n) || (f.min != null && n < f.min) || (f.max != null && n > f.max)) { errs[f.key] = 'Informe um valor entre ' + f.min + ' e ' + f.max + '.'; this.setState({ errors: errs }); return; }
+          delete errs[f.key]; const dr = { ...this.state.drafts }; delete dr[f.key]; this.setState({ errors: errs, drafts: dr }); this._save(f, n, tab.label); } };
+    };
+    let groups = [];
+    if (q) {
+      C.SCHEMA.forEach(t => t.groups.forEach(g => { const fs = g.fields.filter(f => this._norm(f.label + ' ' + f.hint + ' ' + g.title + ' ' + t.label).includes(q)); if (fs.length) groups.push({ title: g.title + ' · ' + t.label, meta: fs.length + ' item(ns)', fields: fs.map(f => mkField(f, t)) }); }));
+    } else {
+      const t = C.SCHEMA.find(x => x.key === st.tab);
+      if (t) groups = t.groups.map(g => { const n = g.fields.filter(f => !C.isDefault(f.key)).length; return { title: g.title, meta: n ? n + ' alterado(s)' : g.fields.length + ' item(ns)', fields: g.fields.map(f => mkField(f, t)) }; });
+    }
+    const isAccess = !q && st.tab === 'acessos';
+    const isCc = !q && st.tab === 'centros';
+    const CC = window.DACostCenters;
+    const ccQ = this._norm(st.ccQ.trim());
+    const ccAll = CC ? CC.all() : [];
+    const ccList = ccAll.filter(x => (st.ccTipoFilter === 'todos' || (x.tipo || 'padrao') === st.ccTipoFilter) && (st.ccFilter === 'todos' || (st.ccFilter === 'ativos' ? x.ativo : !x.ativo)) && (!ccQ || this._norm(x.codigo + ' ' + x.nome).includes(ccQ))).sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+    const ccVals = {
+      isCcTab: isCc, ccQ: st.ccQ, ccFilter: st.ccFilter, ccForm: st.ccForm, ccError: st.ccError, ccEditing: !!st.ccEditId, ccSaveLabel: st.ccEditId ? 'Salvar alterações' : '+ Adicionar',
+      ccNextCode: CC ? CC.nextCode(st.ccForm.tipo) : 'CC-001', ccTipoFilter: st.ccTipoFilter, setCcTipoFilter: e => this.setState({ ccTipoFilter: e.target.value }),
+      setCcTipo: e => { const v = e.target.value; this.setState(s => ({ ccForm: { ...s.ccForm, tipo: v }, ccError: '' })); }, ccCount: ccList.length + ' de ' + ccAll.length + ' centro(s)', ccEmpty: ccList.length === 0,
+      setCcQ: e => this.setState({ ccQ: e.target.value }), setCcFilter: e => this.setState({ ccFilter: e.target.value }),
+      setCcCodigo: e => { const v = e.target.value; this.setState(s => ({ ccForm: { ...s.ccForm, codigo: v }, ccError: '' })); },
+      setCcNome: e => { const v = e.target.value; this.setState(s => ({ ccForm: { ...s.ccForm, nome: v }, ccError: '' })); },
+      cancelCc: () => this.setState({ ccEditId: null, ccForm: { codigo: '', nome: '', tipo: 'padrao' }, ccError: '' }),
+      saveCc: () => { if (!CC) return; const f = st.ccForm; const r = st.ccEditId ? CC.update(st.ccEditId, f.codigo, f.nome, f.tipo) : CC.add(f.codigo, f.nome, f.tipo);
+        if (!r.ok) { this.setState({ ccError: r.msg }); return; }
+        if (window.DAAudit) window.DAAudit.log(st.ccEditId ? 'Centro de custo editado' : 'Centro de custo criado', 'configuracoes', (f.codigo || '') + ' ' + f.nome);
+        this.setState({ ccEditId: null, ccForm: { codigo: '', nome: '', tipo: 'padrao' }, ccError: '' }); this._toast(st.ccEditId ? 'Centro de custo atualizado' : 'Centro de custo adicionado'); },
+      ccRows: ccList.map(x => ({ ...x, opacity: x.ativo ? '1' : '0.6', badge: x.ativo ? 'Ativo' : 'Arquivado', badgeBg: x.ativo ? '#EAF3EE' : '#F0F0F0', badgeColor: x.ativo ? '#1C543A' : '#666666',
+        toggleLabel: x.ativo ? 'Arquivar' : 'Desarquivar', toggleColor: x.ativo ? '#B45309' : '#1C543A',
+        tipoLabel: x.tipo === 'patrimonio' ? 'Patrimônio' : 'Padrão', tipoBg: x.tipo === 'patrimonio' ? '#F3EEFD' : '#EEF4FD', tipoColor: x.tipo === 'patrimonio' ? '#5B21B6' : '#1E40AF',
+        edit: () => this.setState({ ccEditId: x.id, ccForm: { codigo: x.codigo, nome: x.nome, tipo: x.tipo || 'padrao' }, ccError: '' }),
+        toggle: () => { CC.setActive(x.id, !x.ativo); if (window.DAAudit) window.DAAudit.log(x.ativo ? 'Centro de custo arquivado' : 'Centro de custo desarquivado', 'configuracoes', x.codigo + ' · ' + x.nome, x.ativo ? 'warning' : 'info'); this._toast(x.nome + (x.ativo ? ' arquivado' : ' desarquivado')); } }))
+    };
+    const acc = C.access();
+    const roleCols = C.ROLES;
+    const accessRows = C.MODULES.map(([k, label]) => ({ label, cells: C.ROLES.map(r => { const on = acc[r].indexOf(k) >= 0, locked = r === 'Administrativo';
+      return { on, locked, bg: on ? '#1C543A' : '#D9D9D9', knob: on ? '23px' : '3px', cursor: locked ? 'not-allowed' : 'pointer', opacity: locked ? '0.6' : '1',
+        aria: r + ' — ' + label, title: locked ? 'Administrativo vê tudo' : (on ? 'Remover acesso' : 'Conceder acesso'),
+        toggle: () => { if (locked) return; C.setAccess(r, k, !on); if (window.DAAudit) window.DAAudit.log(on ? 'Acesso Revogado' : 'Acesso Concedido', 'configuracoes', 'Perfil ' + r + ' · ' + label, on ? 'warning' : 'info'); this._toast((on ? 'Acesso removido: ' : 'Acesso concedido: ') + r + ' › ' + label); } }; }) }));
+    const curTab = TABS.find(t => t.key === st.tab) || TABS[0];
+    return { ...base,
+      tabs: TABS.map(t => { const n = changesIn(t), act = !q && t.key === st.tab; return { ...t, active: act, color: act ? '#1C543A' : '#666666', border: act ? '#1C543A' : 'transparent', hasChanges: n > 0, changes: n, go: () => this.setState({ tab: t.key, q: '' }) }; }),
+      ...ccVals,
+      isAccessTab: isAccess, showGroups: !isAccess && !isCc, groups, isEmpty: !isAccess && !isCc && groups.length === 0,
+      isSearching: !!q, searchLabel: groups.reduce((s, g) => s + g.fields.length, 0) + ' configuração(ões) encontrada(s) em todos os módulos',
+      roleCols, accessRows,
+      showReset: !isCc, resetLabel: isAccess ? 'Restaurar acessos padrão' : 'Restaurar padrão de ' + curTab.label,
+      resetAccess: () => { C.resetAccess(); if (window.DAAudit) window.DAAudit.log('Acessos restaurados', 'configuracoes', 'Matriz de perfis voltou ao padrão', 'warning'); this._toast('Acessos padrão restaurados'); },
+      resetTab: () => { if (isCc) return; if (isAccess) { C.resetAccess(); this._toast('Acessos padrão restaurados'); return; } C.resetTab(st.tab); this.setState({ errors: {} }); if (window.DAAudit) window.DAAudit.log('Configurações restauradas', 'configuracoes', curTab.label, 'warning'); this._toast(curTab.label + ': padrão restaurado'); }
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <script src="./theme.js"></script>
+  <script src="./exercicio.js"></script>
+  <script src="./liccont.js"></script>
+</helmet>
+<div style="display: flex; flex-direction: column; gap: 16px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #1D1D1B;">
+  <div style="background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 8px; padding: 18px;">
+    <h3 style="font-size: 15px; font-weight: 700; padding-bottom: 10px; margin-bottom: 6px; border-bottom: 1px solid #1C543A;">Acumulado por Classe (CATMAT) e Grupo (CATSER) — {{ ano }}</h3>
+    <p style="font-size: 12px; color: #666666; margin-bottom: 14px;">Soma das despesas empenhadas e da Verbinha no exercício, comparada ao limite de dispensa ({{ fonte }}): compras e serviços {{ limCompras }} · obras e serviços de engenharia {{ limEng }}.</p>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px;">
+      <sc-for list="{{ groups }}" as="g" hint-placeholder-count="5">
+        <div style="border: 1px solid {{ g.border }}; border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 6px;">
+          <div style="display: flex; justify-content: space-between; gap: 8px; align-items: center;"><span style="font-size: 12.5px; font-weight: 700; color: #1C543A; font-family: ui-monospace, monospace;">{{ g.chave }}</span><span style="font-size: 10.5px; font-weight: 700; padding: 2px 8px; border-radius: 999px; background-color: {{ g.badgeBg }}; color: {{ g.badgeColor }};">{{ g.badge }}</span></div>
+          <p style="font-size: 12px; color: #444444;">{{ g.descricao }}</p>
+          <div style="height: 8px; border-radius: 999px; background-color: #EDEDEB;"><div style="height: 8px; border-radius: 999px; background-color: {{ g.barColor }}; width: {{ g.bar }};"></div></div>
+          <p style="font-size: 12px; color: #1D1D1B;"><strong>{{ g.totalFmt }}</strong> de {{ g.limFmt }} ({{ g.pctFmt }})</p>
+          <p style="font-size: 11px; color: #666666;">Despesas {{ g.despFmt }} · Verbinha {{ g.verbFmt }}</p>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 8px; padding: 18px;">
+    <div style="display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; align-items: center; padding-bottom: 10px; margin-bottom: 12px; border-bottom: 1px solid #1C543A;">
+      <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;"><h3 style="font-size: 15px; font-weight: 700;">Despesas {{ ano }}</h3><sc-if value="{{ hasTcnPend }}" hint-placeholder-val="{{ false }}"><span style="font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 999px; background-color: #FDF8EC; color: #92400E;">{{ tcnPendLabel }}</span></sc-if></div>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+      <input type="search" value="{{ q }}" onInput="{{ setQ }}" placeholder="Buscar objeto, processo ou código" aria-label="Buscar despesa" style="min-width: 220px; height: 38px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px;" style-focus="border-color: #1C543A; outline: none;"/>
+      <button onClick="{{ openNew }}" style="height: 38px; padding: 0 14px; background-color: #1C543A; color: #FFFFFF; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer;" style-hover="background-color: #153A2E;">+ Incluir despesa</button>
+      </div>
+    </div>
+    <div style="overflow-x: auto;">
+      <div style="min-width: 1540px;">
+        <div style="display: grid; grid-template-columns: 90px minmax(240px, 2fr) 150px 100px 110px 90px 80px 130px 130px 150px 160px; gap: 10px; padding: 8px 10px; background-color: #F9F9F9; font-size: 10.5px; font-weight: 700; color: #666666; text-transform: uppercase; letter-spacing: 0.3px;">
+          <span>Proc.</span><span>Objeto</span><span>Código</span><span>Modalidade</span><span>Empenhado</span><span>Empenho</span><span>Ficha/Sub</span><span>AUDESP</span><span>TCN</span><span>Contrato</span><span>Acumulado na data</span>
+        </div>
+        <sc-for list="{{ rows }}" as="d" hint-placeholder-count="8">
+          <div style="display: grid; grid-template-columns: 90px minmax(240px, 2fr) 150px 100px 110px 90px 80px 130px 130px 150px 160px; gap: 10px; padding: 10px; border-top: 1px solid #F0F0F0; align-items: center; font-size: 12.5px;">
+            <button onClick="{{ d.open }}" title="Ver e editar despesa" aria-label="Ver e editar a despesa do processo {{ d.processo }}" style="justify-self: start; min-height: 36px; padding: 0; border: none; background: none; color: #1C543A; font-size: 13px; font-weight: 700; cursor: pointer; text-align: left;" style-hover="text-decoration: underline;">{{ d.processo }}</button>
+            <span style="min-width: 0; overflow-wrap: anywhere;"><span style="display: block; font-weight: 600; color: #1D1D1B; text-wrap: pretty;">{{ d.objeto }}</span><span style="font-size: 11px; color: #666666;">{{ d.descricao }}</span></span>
+            <span style="min-width: 0; font-size: 11.5px; color: #444444; font-family: ui-monospace, monospace; overflow-wrap: anywhere;">{{ d.codigo }}</span>
+            <span style="color: #444444;">{{ d.modalidade }}</span>
+            <span style="font-weight: 600;">{{ d.empFmt }}</span>
+            <span style="color: #666666;">{{ d.dataFmt }}</span>
+            <span style="color: #444444;">{{ d.fichaSub }}</span>
+            <select value="{{ d.audespVal }}" onChange="{{ d.setAudesp }}" aria-label="Preenchimento AUDESP" style="height: 32px; padding: 0 6px; border: 1px solid #E0E0E0; border-radius: 6px; font-size: 12px; background-color: {{ d.audespBg }};">
+              <option value="">Pendente</option>
+              <option value="Enviado">Enviado</option>
+              <option value="NA">Não se aplica</option>
+            </select>
+            <select value="{{ d.tcn }}" onChange="{{ d.setTcn }}" aria-label="TCN" style="height: 32px; padding: 0 6px; border: 1px solid #E0E0E0; border-radius: 6px; font-size: 12px; background-color: {{ d.tcnBg }};">
+              <option value="">Pendente</option>
+              <option value="Enviado">Enviado</option>
+              <option value="NA">Não se aplica</option>
+            </select>
+            <select value="{{ d.contrato }}" onChange="{{ d.setContrato }}" aria-label="Contrato vinculado" style="height: 32px; padding: 0 6px; border: 1px solid #E0E0E0; border-radius: 6px; font-size: 12px; background-color: #FFFFFF;">
+              <option value="">Sem contrato</option>
+              <sc-for list="{{ contractOptions }}" as="co" hint-placeholder-count="5"><option value="{{ co.value }}">{{ co.label }}</option></sc-for>
+            </select>
+            <span style="display: flex; flex-direction: column; gap: 3px;"><span style="font-size: 11.5px; font-weight: 600; color: {{ d.accColor }};">{{ d.accFmt }} · {{ d.accPct }}</span><span style="height: 5px; border-radius: 999px; background-color: #EDEDEB;"><span style="display: block; height: 5px; border-radius: 999px; background-color: {{ d.accColor }}; width: {{ d.accBar }};"></span></span></span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+
+  <div style="background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 8px; padding: 18px;">
+    <h3 style="font-size: 15px; font-weight: 700; padding-bottom: 10px; margin-bottom: 12px; border-bottom: 1px solid #1C543A;">Verbinha (adiantamentos) — {{ verbTotal }}</h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 8px;">
+      <sc-for list="{{ verb }}" as="v" hint-placeholder-count="6">
+        <div style="border: 1px solid #E8E8E8; border-radius: 8px; padding: 10px; display: flex; flex-direction: column; gap: 2px;">
+          <span style="font-size: 11px; color: #666666;">{{ v.origem }} · {{ v.dataFmt }}</span>
+          <span style="font-size: 12px; font-weight: 700; color: #1C543A; font-family: ui-monospace, monospace;">{{ v.codigo }}</span>
+          <span style="font-size: 13px; font-weight: 600;">{{ v.valorFmt }}</span>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <sc-if value="{{ formOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeForm }}" style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 95;">
+      <div onClick="{{ stop }}" role="dialog" aria-modal="true" style="background-color: #FFFFFF; border-radius: 12px; width: 100%; max-width: 620px; max-height: 90vh; overflow-y: auto; padding: 22px; display: flex; flex-direction: column; gap: 12px;">
+        <h3 style="font-size: 16px; font-weight: 700;">{{ formTitle }}</h3>
+        <p style="font-size: 12px; color: #666666;">Informe a Classe (CATMAT) para materiais ou o Grupo (CATSER) para serviços. O acumulado é recalculado automaticamente.</p>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px;">
+          <sc-for list="{{ fields }}" as="f" hint-placeholder-count="12">
+            <div><label style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 6px;">{{ f.label }}</label><input type="{{ f.type }}" value="{{ f.value }}" onInput="{{ f.set }}" style="width: 100%; height: 40px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px;" style-focus="border-color: #1C543A; outline: none;"/></div>
+          </sc-for>
+        </div>
+        <sc-if value="{{ formError }}" hint-placeholder-val="{{ false }}"><p style="font-size: 12px; color: #B91C1C;">{{ formError }}</p></sc-if>
+        <div style="display: flex; justify-content: flex-end; gap: 10px;">
+          <button onClick="{{ closeForm }}" style="height: 40px; padding: 0 16px; border: 1px solid #E0E0E0; border-radius: 8px; background-color: #FFFFFF; font-size: 13px; cursor: pointer;">Cancelar</button>
+          <button onClick="{{ submitForm }}" style="height: 40px; padding: 0 16px; border: none; border-radius: 8px; background-color: #1C543A; color: #FFFFFF; font-size: 13px; font-weight: 700; cursor: pointer;">{{ submitLabel }}</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: &quot;1100px&quot;, &quot;height&quot;: &quot;900px&quot;}}">
+class Component extends DCLogic {
+  FIELDS = [['processo', 'Processo', 'text'], ['objeto', 'Objeto', 'text'], ['descricao', 'Descrição', 'text'], ['catmat', 'CATMAT', 'text'], ['classe', 'Classe', 'text'], ['catser', 'CATSER', 'text'], ['grupo', 'Grupo', 'text'], ['modalidade', 'Modalidade', 'text'], ['empenhado', 'Valor empenhado (R$)', 'number'], ['dataEmpenho', 'Data do empenho', 'date'], ['ficha', 'Ficha', 'text'], ['sub', 'Sub', 'text']];
+  state = { ready: !!window.DALic, q: '', form: null, formError: '' };
+  componentDidMount() {
+    const wait = () => { if (window.DALic) this.setState({ ready: true }); else setTimeout(wait, 150); };
+    wait(); this._on = () => this.forceUpdate(); window.addEventListener('licchange', this._on); window.addEventListener('exerciciochange', this._on);
+  }
+  componentWillUnmount() { window.removeEventListener('licchange', this._on); window.removeEventListener('exerciciochange', this._on); }
+  renderVals() {
+    const L = window.DALic, st = this.state;
+    const f = st.form || {};
+    const common = { q: st.q, setQ: e => this.setState({ q: e.target.value }), formOpen: !!st.form, formError: st.formError, formTitle: f.id ? 'Despesa — processo ' + (f.processo || '') : 'Incluir despesa', submitLabel: f.id ? 'Salvar alterações' : 'Incluir', stop: e => e.stopPropagation(),
+      openNew: () => this.setState({ form: { modalidade: 'Dispensa', dataEmpenho: new Date().toISOString().slice(0, 10) }, formError: '' }), closeForm: () => this.setState({ form: null }),
+      fields: this.FIELDS.map(([k, label, type]) => ({ label, type, value: f[k] == null ? '' : String(f[k]), set: e => { const v = e.target.value; this.setState(s => ({ form: { ...s.form, [k]: v } })); } })),
+      submitForm: () => { if (!L) return; if (!String(f.processo || '').trim() || !String(f.objeto || '').trim() || !(+f.empenhado > 0) || !(f.classe || f.grupo)) { this.setState({ formError: 'Informe processo, objeto, valor e a Classe ou o Grupo.' }); return; }
+        if (f.id) { L.saveExpense({ ...f, empenhado: +f.empenhado, data: f.data || f.dataEmpenho }); if (window.DAAudit) window.DAAudit.log('Despesa editada', 'compras', f.processo + ' · ' + f.objeto); this.setState({ form: null }); return; }
+        L.addExpense({ ...f, empenhado: +f.empenhado, reserva: +f.empenhado, data: f.dataEmpenho, audesp: '', tcn: /dispensa/i.test(f.modalidade || '') ? '' : 'NA', contrato: '' }); this.setState({ form: null }); } };
+    if (!L) return { ...common, groups: [], rows: [], verb: [], contractOptions: [] };
+    const ANO = L.YEAR(); const db0 = L.get(); const db = { ...db0, expenses: db0.expenses.filter(e => L.yr(e.dataEmpenho || e.data) === ANO), verbinha: db0.verbinha.filter(v => L.yr(v.data) === ANO) };
+    const color = p => p >= 1 ? '#B91C1C' : p >= L.LEGAL.atencao ? '#B45309' : '#1C543A';
+    const pctF = p => (p * 100).toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + '%';
+    const code = e => e.classe ? 'CATMAT ' + e.catmat + ' · Cl. ' + e.classe : (e.grupo ? 'CATSER ' + e.catser + ' · Gr. ' + e.grupo : '—');
+    const seen = {}; const groups = [];
+    db.expenses.forEach(e => { const a = L.accumulated({ ...e, dataEmpenho: ANO + '-12-31' }); if (!a || seen[a.chave]) return; seen[a.chave] = 1;
+      const st2 = a.pct >= 1 ? ['Bloqueado', '#FDF3F2', '#B91C1C'] : a.pct >= L.LEGAL.atencao ? ['Atenção', '#FDF8EC', '#92400E'] : ['Regular', '#EAF3EE', '#1C543A'];
+      groups.push({ chave: a.chave, descricao: e.descricao + (a.eng ? ' (engenharia)' : ''), totalFmt: L.brl(a.total), limFmt: L.brl(a.limite), pctFmt: pctF(a.pct), despFmt: L.brl(a.despesas), verbFmt: L.brl(a.verbinha),
+        bar: Math.min(100, Math.round(a.pct * 100)) + '%', barColor: color(a.pct), badge: st2[0], badgeBg: st2[1], badgeColor: st2[2], border: a.pct >= L.LEGAL.atencao ? '#F3D9A4' : '#E8E8E8', pct: a.pct }); });
+    groups.sort((a, b) => b.pct - a.pct);
+    const q = st.q.trim().toLowerCase();
+    const rows = db.expenses.filter(e => !q || (e.objeto + ' ' + e.processo + ' ' + code(e)).toLowerCase().includes(q)).map(e => { const a = L.accumulated(e);
+      return { ...e, codigo: code(e), empFmt: L.brl(e.empenhado), dataFmt: L.fmt(e.dataEmpenho), fichaSub: (e.ficha || '—') + ' / ' + (e.sub || '—'),
+        audespVal: e.audesp || '', audespBg: e.audesp === 'Enviado' ? '#EAF3EE' : e.audesp === 'NA' ? '#F0F0F0' : '#FFFFFF',
+        setAudesp: ev => L.saveExpense({ ...e, audesp: ev.target.value }),
+        tcn: e.tcn || '', tcnBg: e.tcn === 'Enviado' ? '#EAF3EE' : e.tcn === 'NA' ? '#F0F0F0' : '#FDF8EC',
+        setTcn: ev => L.saveExpense({ ...e, tcn: ev.target.value }),
+        open: () => this.setState({ form: { ...e }, formError: '' }),
+        setContrato: ev => L.saveExpense({ ...e, contrato: ev.target.value }),
+        accFmt: a ? L.brl(a.total) : '—', accPct: a ? pctF(a.pct) : '', accColor: a ? color(a.pct) : '#666666', accBar: a ? Math.min(100, Math.round(a.pct * 100)) + '%' : '0%' }; });
+    const tcnPend = db.expenses.filter(e => e.tcn === '').length;
+    return { ...common, ano: ANO, hasTcnPend: tcnPend > 0, tcnPendLabel: tcnPend + ' TCN pendente(s) — alerta no Painel após 5 dias úteis do empenho', fonte: L.LEGAL.fonte, limCompras: L.brl(L.LEGAL.compras), limEng: L.brl(L.LEGAL.engenharia), groups, rows,
+      contractOptions: db.contracts.map(c => ({ value: c.contrato, label: c.contrato + ' — ' + c.contratada.split(' ')[0] })),
+      verbTotal: L.brl(db.verbinha.reduce((a, v) => a + v.valor, 0)),
+      verb: db.verbinha.map(v => ({ ...v, dataFmt: L.fmt(v.data), codigo: v.classe ? 'Classe ' + v.classe : 'Grupo ' + v.grupo, valorFmt: L.brl(v.valor) })) };
+  }
+}
+</script>
+</body>
+</html>

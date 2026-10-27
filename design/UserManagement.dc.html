@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+  <script src="./theme.js"></script>
+  <script>window.location.replace('RHModule.dc.html?tab=usuarios');</script>
+  <script src="./exercicio.js"></script>
+  <script src="./config.js"></script>
+  <script src="./session.js"></script>
+  <script src="./sectors.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema DA - Gestão de Usuários e Segurança</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #FFFFFF; color: #1D1D1B; }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes toastIn { from { opacity: 0; transform: translate(-50%, -12px); } to { opacity: 1; transform: translate(-50%, 0); } }
+    a { color: #1C543A; }
+    a:hover { color: #164530; }
+  </style>
+</helmet>
+
+<div style="display: flex; min-height: 100vh; background-color: #FFFFFF; position: relative;">
+
+  <sc-if value="{{ navOverlayVisible }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ navClose }}" style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); z-index: 40;"></div>
+  </sc-if>
+
+  <!-- Sidebar -->
+  <aside style="background-color: #1C543A; color: #FFFFFF; width: 250px; flex-shrink: 0; display: flex; flex-direction: column; padding: 22px 16px; gap: 22px; position: {{ navSidebarPosition }}; top: 0; left: 0; height: 100vh; overflow-y: auto; z-index: 50; transform: {{ navSidebarTransform }}; transition: transform 0.3s cubic-bezier(0.34, 1.25, 0.64, 1);">
+      <a href="Dashboard.dc.html" title="Voltar ao Painel de Controle" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: #FFFFFF; padding: 0 4px;">
+        <div style="width: 36px; height: 36px; background-color: #FFFFFF; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; color: #1C543A; flex-shrink: 0;">DA</div>
+        <div>
+          <p style="font-size: 12.5px; font-weight: 700; line-height: 1.3; color: #FFFFFF;">CÂMARA MUNICIPAL</p>
+          <p style="font-size: 9.5px; letter-spacing: 0.4px; color: rgba(255,255,255,0.65); text-transform: uppercase;">Diretoria Administrativa</p>
+        </div>
+      </a>
+      <nav style="display: flex; flex-direction: column; gap: 2px;">
+        <p style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: rgba(255,255,255,0.5); padding: 0 12px; margin-bottom: 6px;">Sistemas &amp; Gestão</p>
+        <a href="Dashboard.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 13px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">▦</span>Painel de Controle</a>
+        <a href="AlmoxarifadoAmostragem.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 13px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">📦</span>Almoxarifado</a>
+        <a href="ComprasModule.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 13px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">🛒</span>Compras &amp; Licitações</a>
+        <a href="MocoesHomenagens.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 13px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">🎗</span>Moções &amp; Homenagens</a>
+        <a href="PatrimonioModule.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 13px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">🏛</span>Patrimônio</a>
+      </nav>
+      <nav style="display: flex; flex-direction: column; gap: 2px;">
+        <p style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: rgba(255,255,255,0.5); padding: 0 12px; margin-bottom: 6px;">Módulos Complementares</p>
+        <a href="AnalyticsModule.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">📈</span>Analytics &amp; Relatórios</a>
+        <a href="RHModule.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">🧑‍💼</span>Gestão de Pessoal</a>
+        <a href="Legislacoes.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">⚖</span>Legislações</a>
+        <a href="AuditLog.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">🛡</span>Log e Auditoria</a>
+        <a href="Configuracoes.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">⚙</span>Configurações do Sistema</a>
+      <a href="ProtocoloModule.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">📋</span>Protocolo</a>
+      </nav>
+      <div style="margin-top: auto; display: flex; flex-direction: column; gap: 4px; padding-top: 8px;">
+        <a href="UserProfile.dc.html" style="display: flex; align-items: center; gap: 10px; background-color: rgba(255,255,255,0.08); border-radius: 10px; padding: 12px; text-decoration: none; color: #FFFFFF;" style-hover="background-color: rgba(255,255,255,0.14);">
+          <div style="width: 34px; height: 34px; border-radius: 50%; background-color: #F0B429; color: #1C543A; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; flex-shrink: 0;">RA</div>
+          <div style="min-width: 0;">
+            <p style="font-size: 12.5px; font-weight: 700; color: #FFFFFF;">Dr. Roberto Alencar</p>
+            <p style="font-size: 10.5px; color: rgba(255,255,255,0.6);">DA-2026-948 · Diretoria</p>
+          </div>
+        </a>
+        <div role="group" aria-label="Aparência" style="display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 40px; padding: 0 12px;">
+          <span style="font-size: 11px; font-weight: 600; letter-spacing: 0.3px; color: rgba(255,255,255,0.6);">Aparência</span>
+          <div style="display: flex; padding: 2px; border-radius: 999px; background-color: rgba(0,0,0,0.22);">
+            <button onClick="{{ navThemeLight }}" aria-pressed="{{ navThemeIsLight }}" aria-label="Modo padrão" title="Modo padrão" style="width: 30px; height: 26px; border: none; border-radius: 999px; background-color: {{ navThemeLightBg }}; color: {{ navThemeLightFg }}; font-size: 13px; line-height: 1; cursor: pointer; transition: background-color 0.2s;">☀</button>
+            <button onClick="{{ navThemeDarkSet }}" aria-pressed="{{ navThemeDark }}" aria-label="Modo escuro" title="Modo escuro" style="width: 30px; height: 26px; border: none; border-radius: 999px; background-color: {{ navThemeDarkBg }}; color: {{ navThemeDarkFg }}; font-size: 13px; line-height: 1; cursor: pointer; transition: background-color 0.2s;">☾</button>
+          </div>
+        </div>
+        <a href="Login.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; color: rgba(255,255,255,0.7); text-decoration: none; font-size: 12.5px; font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1); color: #FFFFFF;"><span style="width: 18px; text-align: center; flex-shrink: 0;">⎋</span>Sair do sistema</a>
+      </div>
+    </aside>
+
+  <!-- Main -->
+  <div style="flex: 1; min-width: 0; display: flex; flex-direction: column;">
+    <div style="position: sticky; top: 0; z-index: 30; background-color: rgba(255,255,255,0.96); backdrop-filter: blur(6px); border-bottom: 1px solid #E8E8E8; min-height: 64px; padding: 10px {{ navGutter }}; display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+      <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
+        <sc-if value="{{ navIsMobile }}" hint-placeholder-val="{{ false }}">
+          <button onClick="{{ navOpen }}" aria-label="Abrir menu" style="width: 44px; height: 44px; border-radius: 8px; border: 1px solid #E0E0E0; background-color: #FFFFFF; font-size: 18px; color: #1D1D1B; cursor: pointer; flex-shrink: 0;">☰</button>
+          <a href="Dashboard.dc.html" title="Painel de Controle" style="width: 36px; height: 36px; background-color: #1C543A; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 12px; color: #FFFFFF; text-decoration: none; flex-shrink: 0;">DA</a>
+        </sc-if>
+        <sc-if value="{{ navShowBreadcrumb }}" hint-placeholder-val="{{ true }}">
+          <div style="display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: #666666; white-space: nowrap;">
+            <a href="Dashboard.dc.html" style="color: #666666; text-decoration: none;" style-hover="color: #1C543A;">Painel de Controle</a>
+            <span style="color: #CCCCCC;">›</span>
+            <span style="color: #1D1D1B; font-weight: 600;">Usuários &amp; Permissões</span>
+          </div>
+        </sc-if>
+      </div>
+      <div style="display: flex; align-items: center; gap: 10px; flex: 1; justify-content: flex-end; min-width: 0;">
+        <div style="position: relative; flex: 1; max-width: 340px; min-width: 0;">
+          <input type="search" placeholder="Buscar módulos e telas…" aria-label="Busca global" value="{{ navSearch }}" onInput="{{ navSearchInput }}" onFocus="{{ navSearchFocus }}" onBlur="{{ navSearchBlur }}" onKeyDown="{{ navSearchKey }}" style="width: 100%; height: 44px; padding: 0 12px 0 34px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; color: #1D1D1B; background-color: #F9F9F9;" style-focus="border-color: #1C543A; background-color: #FFFFFF; outline: none;"/>
+          <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 14px; color: #999999; pointer-events: none;">⌕</span>
+          <sc-if value="{{ navSearchOpen }}" hint-placeholder-val="{{ false }}">
+            <div style="position: absolute; top: 50px; right: 0; left: 0; min-width: 240px; background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 8px; box-shadow: 0 12px 32px rgba(0,0,0,0.12); padding: 6px; z-index: 60;">
+              <sc-for list="{{ navSearchResults }}" as="r" hint-placeholder-count="3">
+                <a href="{{ r.href }}" onMouseDown="{{ r.go }}" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 10px; border-radius: 6px; text-decoration: none; color: #1D1D1B; font-size: 13px;" style-hover="background-color: #F2F7F4;">
+                  <span style="width: 20px; text-align: center; flex-shrink: 0;">{{ r.icon }}</span>
+                  <span style="flex: 1; font-weight: 600;">{{ r.label }}</span>
+                  <span style="font-size: 11px; color: #999999;">{{ r.group }}</span>
+                </a>
+              </sc-for>
+              <sc-if value="{{ navSearchEmpty }}" hint-placeholder-val="{{ false }}">
+                <p style="padding: 12px 10px; font-size: 12.5px; color: #999999;">Nenhum resultado para “{{ navSearch }}”</p>
+              </sc-if>
+            </div>
+          </sc-if>
+        </div>
+        <a href="NotificationsModule.dc.html" title="Notificações" style="position: relative; width: 44px; height: 44px; border-radius: 8px; border: 1px solid #E0E0E0; background-color: #FFFFFF; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 16px; flex-shrink: 0;" style-hover="border-color: #1C543A;">🔔<span style="position: absolute; top: 9px; right: 10px; width: 7px; height: 7px; border-radius: 50%; background-color: #DC2626; border: 1.5px solid #FFFFFF;"></span></a>
+      </div>
+    </div>
+    <main style="flex: 1; padding: {{ mainPadding }}; display: flex; flex-direction: column; gap: 24px; min-width: 0;">
+
+    
+
+    <!-- Page header -->
+    <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+      <div>
+        <p style="font-size: 11px; font-weight: 700; letter-spacing: 0.6px; color: #1C543A; text-transform: uppercase;">Sistema de Gestão Integrada &nbsp;•&nbsp; Users</p>
+        <h1 style="font-size: {{ titleFontSize }}; font-weight: 800; color: #1D1D1B; margin-top: 6px;">Gestão de Usuários e Segurança</h1>
+      </div>
+      <label style="display: inline-flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; color: #1D1D1B; background-color: #FFFFFF; border: 1px solid #E0E0E0; border-radius: 8px; padding: 0 6px 0 14px; min-height: 44px; white-space: nowrap; font-family: 'SF Mono', ui-monospace, monospace;">Exercício Fiscal:
+        <select value="{{ exercicio }}" onChange="{{ setExercicio }}" aria-label="Selecionar exercício fiscal" style="height: 34px; padding: 0 8px; border: 1px solid #E0E0E0; border-radius: 6px; font-size: 12.5px; font-weight: 700; color: #1C543A; background-color: #FFFFFF; cursor: pointer;" style-focus="border-color: #1C543A; outline: none;">
+          <sc-for list="{{ exercicioAnos }}" as="ano" hint-placeholder-count="3"><option value="{{ ano }}">{{ ano }}</option></sc-for>
+        </select>
+      </label>
+    </div>
+
+    <!-- RBAC Matrix card -->
+    <div style="background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 12px; padding: 24px; animation: fadeInUp 0.5s ease-out both;">
+      <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 24px;">
+        <div>
+          <h2 style="font-size: 16px; font-weight: 700; color: #1D1D1B;">Matriz de Controle de Acesso (RBAC)</h2>
+          <p style="font-size: 12.5px; color: #999999; margin-top: 4px;">Configurações e privilégios de acesso aos módulos no servidor</p>
+        </div>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <button onClick="{{ openSectors }}" style="display: flex; align-items: center; gap: 8px; padding: 10px 16px; background-color: #FFFFFF; color: #1C543A; border: 1px solid #1C543A; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap;" style-hover="background-color: #F4F9F6;">🏢 Setores</button>
+          <button onClick="{{ openNewUser }}" style="display: flex; align-items: center; gap: 8px; padding: 10px 16px; background-color: #1C543A; color: #FFFFFF; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap;" style-hover="background-color: #164530;">👤⁺ Novo Servidor</button>
+        </div>
+      </div>
+
+      <!-- Search & Filter -->
+      <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 20px;">
+        <div style="position: relative; flex: 1; min-width: 200px;">
+          <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 13px; color: #999999; pointer-events: none;">🔍</span>
+          <input type="text" value="{{ searchTerm }}" onInput="{{ handleSearchInput }}" placeholder="Buscar por nome ou setor..." style="width: 100%; padding: 10px 12px 10px 34px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px;" style-focus="border-color: #1C543A; outline: none;"/>
+        </div>
+        <div style="display: flex; gap: 6px; background-color: #F5F5F5; border-radius: 8px; padding: 4px;">
+          <sc-for list="{{ roleFilters }}" as="rf" hint-placeholder-count="3">
+            <button onClick="{{ rf.onSelect }}" style="padding: 7px 14px; border: none; border-radius: 6px; font-size: 12.5px; font-weight: 600; cursor: pointer; background-color: {{ rf.bg }}; color: {{ rf.color }};">{{ rf.label }}</button>
+          </sc-for>
+        </div>
+      </div>
+
+      <!-- Results count -->
+      <p style="font-size: 12px; color: #999999; margin-bottom: 14px;">{{ resultLabel }}</p>
+
+      <!-- Empty state -->
+      <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+        <div style="border: 1px dashed #D9D9D9; border-radius: 12px; padding: 40px 20px; text-align: center;">
+          <p style="font-size: 26px; margin-bottom: 8px;">🔍</p>
+          <p style="font-size: 14px; font-weight: 700; color: #1D1D1B;">Nenhum servidor encontrado</p>
+          <p style="font-size: 12.5px; color: #999999; margin-top: 4px;">Ajuste a busca ou o filtro de perfil.</p>
+        </div>
+      </sc-if>
+
+      <!-- User cards -->
+      <div style="display: flex; flex-direction: column; gap: 18px;">
+        <sc-for list="{{ users }}" as="user" hint-placeholder-count="3">
+          <div style="border: 1px solid #E8E8E8; border-radius: 12px; padding: 20px 22px;">
+
+            <!-- User row -->
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+              <div style="display: flex; align-items: center; gap: 14px; min-width: 0;">
+                <div style="width: 42px; height: 42px; border-radius: 50%; background-color: {{ user.avatarBg }}; color: {{ user.avatarColor }}; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; flex-shrink: 0;">{{ user.initials }}</div>
+                <div style="min-width: 0;">
+                  <p style="font-size: 15px; font-weight: 700; color: #1D1D1B;">{{ user.name }}</p>
+                  <p style="font-size: 12.5px; color: #999999; margin-top: 2px;">Setor: {{ user.department }}</p>
+                </div>
+                <span style="font-size: 10.5px; font-weight: 700; letter-spacing: 0.3px; padding: 5px 12px; border-radius: 999px; background-color: {{ user.cargoBg }}; color: {{ user.cargoColor }}; white-space: nowrap;">{{ user.cargo }}</span>
+              </div>
+              <span style="font-size: 10.5px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase; padding: 6px 14px; border-radius: 999px; background-color: {{ user.badgeBg }}; color: {{ user.badgeColor }}; white-space: nowrap;">Perfil: {{ user.role }}</span>
+            </div>
+
+            <!-- Divider -->
+            <div style="height: 1px; background-color: #F0F0F0; margin: 18px 0;"></div>
+
+            <!-- Module permission toggles -->
+            <div style="display: grid; grid-template-columns: {{ moduleGridColumns }}; gap: 12px;">
+              <sc-for list="{{ user.perms }}" as="perm" hint-placeholder-count="5">
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; border: 1px solid #E8E8E8; border-radius: 8px; padding: 12px 14px;">
+                  <span style="font-size: 12.5px; font-weight: 600; color: #1D1D1B; min-width: 0;">{{ perm.label }}</span>
+                  <div onClick="{{ perm.onToggle }}" role="switch" aria-checked="{{ perm.on }}" style="width: 44px; height: 24px; border-radius: 999px; background-color: {{ perm.trackColor }}; position: relative; cursor: pointer; flex-shrink: 0; transition: background-color 0.25s ease;">
+                    <div style="width: 18px; height: 18px; border-radius: 50%; background-color: #FFFFFF; position: absolute; top: 3px; left: 3px; transform: {{ perm.knobTransform }}; transition: transform 0.25s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.25);"></div>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <!-- Audit Log -->
+    <div style="background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 12px; padding: 24px; animation: fadeInUp 0.5s ease-out 0.2s both;">
+      <h2 style="font-size: 16px; font-weight: 700; color: #1D1D1B; margin-bottom: 4px;">Auditoria de Alterações</h2>
+      <p style="font-size: 12.5px; color: #999999; margin-bottom: 18px;">Histórico de modificações de permissões e configurações de acesso</p>
+      
+      <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+          <thead>
+            <tr style="border-bottom: 1px solid #E8E8E8; background-color: #F9F9F9;">
+              <th style="padding: 12px 16px; text-align: left; font-weight: 700; color: #999999; text-transform: uppercase; font-size: 11px; letter-spacing: 0.4px;">Administrador</th>
+              <th style="padding: 12px 16px; text-align: left; font-weight: 700; color: #999999; text-transform: uppercase; font-size: 11px; letter-spacing: 0.4px;">Data &amp; Hora</th>
+              <th style="padding: 12px 16px; text-align: left; font-weight: 700; color: #999999; text-transform: uppercase; font-size: 11px; letter-spacing: 0.4px;">Ação</th>
+              <th style="padding: 12px 16px; text-align: left; font-weight: 700; color: #999999; text-transform: uppercase; font-size: 11px; letter-spacing: 0.4px;">Usuário Afetado</th>
+              <th style="padding: 12px 16px; text-align: left; font-weight: 700; color: #999999; text-transform: uppercase; font-size: 11px; letter-spacing: 0.4px;">Detalhe</th>
+            </tr>
+          </thead>
+          <tbody>
+            <sc-for list="{{ auditLog }}" as="log" hint-placeholder-count="5">
+              <tr style="border-bottom: 1px solid #F0F0F0;">
+                <td style="padding: 12px 16px; color: #1D1D1B; font-weight: 600;">{{ log.admin }}</td>
+                <td style="padding: 12px 16px; color: #666666; font-family: 'SF Mono', monospace; font-size: 12px;">{{ log.timestamp }}</td>
+                <td style="padding: 12px 16px;">
+                  <span style="padding: 4px 10px; border-radius: 4px; font-size: 11.5px; font-weight: 600; background-color: {{ log.actionBg }}; color: {{ log.actionColor }};">{{ log.action }}</span>
+                </td>
+                <td style="padding: 12px 16px; color: #1D1D1B;">{{ log.targetUser }}</td>
+                <td style="padding: 12px 16px; color: #666666;">{{ log.detail }}</td>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+  </div>
+
+  <!-- Novo Servidor Modal -->
+  <sc-if value="{{ newUserOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeNewUser }}" style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; padding: 24px; z-index: 90;">
+      <div onClick="{{ stopPropagation }}" style="background-color: #FFFFFF; border-radius: 14px; width: 100%; max-width: 460px; max-height: 88vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.25); animation: fadeInUp 0.3s ease-out;">
+
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 20px 24px; border-bottom: 1px solid #F0F0F0;">
+          <div>
+            <h3 style="font-size: 16px; font-weight: 700; color: #1D1D1B;">Cadastrar Novo Servidor</h3>
+            <p style="font-size: 12px; color: #999999; margin-top: 2px;">Pré-cadastro administrativo de acesso</p>
+          </div>
+          <button onClick="{{ closeNewUser }}" style="width: 30px; height: 30px; border-radius: 6px; border: none; background-color: #F5F5F5; font-size: 15px; color: #666666; cursor: pointer; flex-shrink: 0;" style-hover="background-color: #E8E8E8;">✕</button>
+        </div>
+
+        <div style="padding: 22px 24px; display: flex; flex-direction: column; gap: 16px;">
+          <div>
+            <label style="font-size: 11.5px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">Nome Completo</label>
+            <input type="text" value="{{ form.name }}" onInput="{{ handleNameInput }}" placeholder="Ex: Fernanda Souza Lima" style="width: 100%; padding: 10px 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px;" style-focus="border-color: #1C543A; outline: none;"/>
+          </div>
+          <div>
+            <label style="font-size: 11.5px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">E-mail Institucional</label>
+            <input type="email" value="{{ form.email }}" onInput="{{ handleEmailInput }}" placeholder="nome@camara.local" style="width: 100%; padding: 10px 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px;" style-focus="border-color: #1C543A; outline: none;"/>
+          </div>
+          <div>
+            <label style="font-size: 11.5px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">Setor / Lotação</label>
+            <input type="text" list="dl-cc-usermanage1" autocomplete="off" placeholder="Digite ou selecione o centro de custo" value="{{ form.department }}" onChange="{{ handleDeptInput }}" style="width: 100%; padding: 10px 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; background-color: #FFFFFF;"/><datalist id="dl-cc-usermanage1"><sc-for list="{{ sectors }}" as="sec" hint-placeholder-count="3"><option value="{{ sec }}"></option></sc-for></datalist>
+          </div>
+          <div>
+            <label style="font-size: 11.5px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">Cargo (Hierarquia no setor)</label>
+            <select value="{{ form.cargo }}" onChange="{{ handleCargoInput }}" style="width: 100%; padding: 10px 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; background-color: #FFFFFF;">
+              <option value="Diretoria">Diretoria (topo da hierarquia)</option>
+              <option value="Chefia">Chefia</option>
+              <option value="Funcionário">Funcionário</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size: 11.5px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">Perfil de Acesso</label>
+            <select value="{{ form.role }}" onChange="{{ handleRoleInput }}" style="width: 100%; padding: 10px 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; background-color: #FFFFFF;">
+                            <option value="Administrativo">Administrativo (vê tudo)</option>
+              <option value="Compras">Compras (Compras &amp; Licitações, Moções)</option>
+              <option value="Almoxarifado">Almoxarifado (Almoxarifado, Moções)</option>
+              <option value="Patrimônio">Patrimônio</option>
+              <option value="Gerenciamento">Gerenciamento (Protocolo)</option>
+              <option value="Visualizador">Visualizador (Analytics e Perfil)</option>
+            </select>
+            <p style="font-size: 11px; color: #999999; margin-top: 6px;">Administradores recebem acesso a todos os módulos por padrão; os privilégios podem ser ajustados na matriz após o cadastro.</p>
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: center; justify-content: flex-end; gap: 10px; padding: 18px 24px; border-top: 1px solid #F0F0F0;">
+          <button onClick="{{ closeNewUser }}" style="padding: 10px 16px; background-color: #FFFFFF; color: #666666; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;" style-hover="background-color: #F7F7F5;">Cancelar</button>
+          <button onClick="{{ submitNewUser }}" disabled="{{ submitDisabled }}" style="padding: 10px 18px; background-color: {{ submitBg }}; color: #FFFFFF; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: {{ submitCursor }};">Cadastrar Servidor</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- Gerenciar Setores Modal -->
+  <sc-if value="{{ sectorsOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeSectors }}" style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; padding: 24px; z-index: 90;">
+      <div onClick="{{ stopPropagation }}" style="background-color: #FFFFFF; border-radius: 14px; width: 100%; max-width: 440px; max-height: 88vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.25); animation: fadeInUp 0.3s ease-out;">
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 20px 24px; border-bottom: 1px solid #F0F0F0;">
+          <div>
+            <h3 style="font-size: 16px; font-weight: 700; color: #1D1D1B;">Gerenciar Setores</h3>
+            <p style="font-size: 12px; color: #999999; margin-top: 2px;">Subsetores da Diretoria Administrativa</p>
+          </div>
+          <button onClick="{{ closeSectors }}" style="width: 30px; height: 30px; border-radius: 6px; border: none; background-color: #F5F5F5; font-size: 15px; color: #666666; cursor: pointer; flex-shrink: 0;" style-hover="background-color: #E8E8E8;">✕</button>
+        </div>
+        <div style="padding: 22px 24px; display: flex; flex-direction: column; gap: 10px;">
+          <sc-for list="{{ sectors }}" as="sec" hint-placeholder-count="3">
+            <div style="display: flex; align-items: center; gap: 10px; padding: 10px 14px; border: 1px solid #E8E8E8; border-radius: 8px; font-size: 13px; font-weight: 600; color: #1D1D1B;">🏢 {{ sec }}</div>
+          </sc-for>
+          <div style="display: flex; gap: 8px; margin-top: 8px;">
+            <input type="text" value="{{ newSectorName }}" onInput="{{ handleNewSectorInput }}" placeholder="Nome do novo setor" style="flex: 1; padding: 10px 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px;" style-focus="border-color: #1C543A; outline: none;"/>
+            <button onClick="{{ addSector }}" disabled="{{ addSectorDisabled }}" style="padding: 10px 16px; background-color: {{ addSectorBg }}; color: #FFFFFF; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: {{ addSectorCursor }}; white-space: nowrap;">Adicionar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- Toast -->
+  <sc-if value="{{ saveSuccess }}" hint-placeholder-val="{{ false }}">
+    <div style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background-color: #1C543A; color: #FFFFFF; padding: 12px 22px; border-radius: 999px; font-size: 13px; font-weight: 600; box-shadow: 0 6px 20px rgba(28,84,58,0.35); z-index: 100; animation: toastIn 0.25s ease-out; display: flex; align-items: center; gap: 8px;">✓ Salvo com sucesso</div>
+  </sc-if>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: &quot;100%&quot;, &quot;height&quot;: &quot;860px&quot;}}">
+class Component extends DCLogic {
+  MODULES = [
+    { key: 'compras', label: 'Compras' },
+    { key: 'protocolo', label: 'Protocolo' },
+    { key: 'rh', label: 'Gestão de Pessoal' },
+    { key: 'almoxarifado', label: 'Almoxarifado' },
+    { key: 'mocoes', label: 'Moções & Galeria' }
+  ];
+
+  state = {
+    exercicio: (window.DAExercicio ? window.DAExercicio.get() : 2026),
+    isMobile: typeof window !== 'undefined' ? window.innerWidth < 900 : false,
+    mobileMenuOpen: false,
+    saveSuccess: false,
+    newUserOpen: false,
+    sectorsOpen: false,
+    newSectorName: '',
+    sectors: (window.DASectors ? window.DASectors.get() : ['Diretoria Administrativa', 'Serviço de Licitações e Contratos', 'Serviço de Almoxarifado e Patrimônio']),
+    searchTerm: '',
+    roleFilter: 'todos',
+    form: { name: '', email: '', department: 'Diretoria Administrativa', cargo: 'Funcionário', role: 'Visualizador' },
+    users: [
+      { id: 1, name: 'Dr. Roberto Alencar', department: 'Diretoria Administrativa', cargo: 'Diretoria', role: 'Administrativo', initials: 'DR',
+        access: { compras: true, protocolo: true, rh: true, almoxarifado: true, mocoes: true } },
+      { id: 2, name: 'Ana Beatriz Silva', department: 'Serviço de Almoxarifado e Patrimônio', cargo: 'Chefia', role: 'Usuário', initials: 'AB',
+        access: { compras: false, protocolo: true, rh: false, almoxarifado: true, mocoes: false } },
+      { id: 3, name: 'Carlos Eduardo Costa', department: 'Serviço de Licitações e Contratos', cargo: 'Funcionário', role: 'Usuário', initials: 'CE',
+        access: { compras: false, protocolo: false, rh: true, almoxarifado: false, mocoes: true } }
+    ],
+    auditLog: [
+      { admin: 'Dr. Roberto Alencar', timestamp: '14/07/2026 14:32', action: 'Acesso Concedido', targetUser: 'Carlos Eduardo Costa', actionBg: '#DCFCE7', actionColor: '#166534', detail: 'Módulo de RH' },
+      { admin: 'Dr. Roberto Alencar', timestamp: '14/07/2026 13:15', action: 'Usuário Criado', targetUser: 'Ana Beatriz Silva', actionBg: '#E0E7FF', actionColor: '#3730A3', detail: 'Perfil: Usuário' },
+      { admin: 'Dr. Roberto Alencar', timestamp: '13/07/2026 10:22', action: 'Acesso Revogado', targetUser: 'Maria Oliveira', actionBg: '#FEE2E2', actionColor: '#991B1B', detail: 'Módulo de Compras' },
+      { admin: 'Dr. Roberto Alencar', timestamp: '12/07/2026 16:45', action: 'Perfil Alterado', targetUser: 'João Pereira', actionBg: '#FEF3C7', actionColor: '#92400E', detail: 'Administrativo → Usuário' },
+      { admin: 'Dr. Roberto Alencar', timestamp: '12/07/2026 09:10', action: 'Acesso Concedido', targetUser: 'Patricia Costa', actionBg: '#DCFCE7', actionColor: '#166534', detail: 'Módulo de Protocolo' }
+    ]
+  };
+
+  componentDidMount() {
+    this._onEx = e => this.setState({ exercicio: e.detail.ano });
+    window.addEventListener('exerciciochange', this._onEx);
+    const waitEx = () => { if (window.DAExercicio) this.setState({ exercicio: window.DAExercicio.get() }); else setTimeout(waitEx, 150); };
+    waitEx();
+    const loadSectors = () => {
+      if (window.DASectors) this.setState({ sectors: window.DASectors.get() });
+      else setTimeout(loadSectors, 200);
+    };
+    loadSectors();
+    this._onSectors = (e) => this.setState({ sectors: e.detail.sectors });
+    window.addEventListener('sectorschange', this._onSectors);
+    this.handleResize = () => { this.setState({ isMobile: window.innerWidth < 900 }); };
+    window.addEventListener('resize', this.handleResize);
+  }
+  componentWillUnmount() {
+    window.removeEventListener('resize', this.handleResize);
+  }
+
+  openMobileMenu = () => { this.setState({ mobileMenuOpen: true }); };
+  closeMobileMenu = () => { this.setState({ mobileMenuOpen: false }); };
+
+  handleSearchInput = (e) => { const v = e.target.value; this.setState({ searchTerm: v }); };
+  setRoleFilter = (f) => { this.setState({ roleFilter: f }); };
+
+  openNewUser = () => { this.setState({ newUserOpen: true, form: { name: '', email: '', department: this.state.sectors[0], cargo: 'Funcionário', role: 'Visualizador' } }); };
+  closeNewUser = () => { this.setState({ newUserOpen: false }); };
+  stopPropagation = (e) => { e.stopPropagation(); };
+  handleNameInput = (e) => { const v = e.target.value; this.setState(s => ({ form: { ...s.form, name: v } })); };
+  handleEmailInput = (e) => { const v = e.target.value; this.setState(s => ({ form: { ...s.form, email: v } })); };
+  handleDeptInput = (e) => { const v = e.target.value; this.setState(s => ({ form: { ...s.form, department: v } })); };
+  handleCargoInput = (e) => { const v = e.target.value; this.setState(s => ({ form: { ...s.form, cargo: v } })); };
+  handleRoleInput = (e) => { const v = e.target.value; this.setState(s => ({ form: { ...s.form, role: v } })); };
+
+  openSectors = () => { this.setState({ sectorsOpen: true, newSectorName: '' }); };
+  closeSectors = () => { this.setState({ sectorsOpen: false }); };
+  handleNewSectorInput = (e) => { this.setState({ newSectorName: e.target.value }); };
+  addSector = () => {
+    const name = this.state.newSectorName.trim();
+    if (!name || this.state.sectors.includes(name)) return;
+    const updated = window.DASectors ? window.DASectors.add(name) : [...this.state.sectors, name];
+    this.setState({ sectors: updated, newSectorName: '' });
+  };
+
+  submitNewUser = () => {
+    const f = this.state.form;
+    if (!f.name.trim() || !f.email.trim() || !f.department.trim()) return;
+    const parts = f.name.trim().split(/\s+/);
+    const initials = ((parts[0][0] || '') + (parts.length > 1 ? parts[parts.length - 1][0] : '')).toUpperCase();
+    const isAdmin = f.role === 'Administrativo';
+    const newUser = {
+      id: Date.now(),
+      name: f.name.trim(),
+      department: f.department,
+      cargo: f.cargo,
+      role: f.role,
+      initials: initials,
+      access: {
+        compras: isAdmin, protocolo: isAdmin, rh: isAdmin,
+        almoxarifado: isAdmin, mocoes: isAdmin
+      }
+    };
+    const now = new Date();
+    const timestamp = now.toLocaleDateString('pt-BR') + ' ' + now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    const auditEntry = {
+      admin: 'Dr. Roberto Alencar',
+      timestamp: timestamp,
+      action: 'Usuário Criado',
+      targetUser: f.name.trim(),
+      actionBg: '#E0E7FF',
+      actionColor: '#3730A3',
+      detail: 'Perfil: ' + f.role
+    };
+    this.setState(s => ({
+      users: [...s.users, newUser],
+      auditLog: [auditEntry, ...s.auditLog],
+      newUserOpen: false,
+      saveSuccess: true
+    }));
+    clearTimeout(this._toastTimer);
+    this._toastTimer = setTimeout(() => this.setState({ saveSuccess: false }), 2000);
+  };
+
+  toggleAccess = (userId, moduleKey) => {
+    // RF07: instant async persist (mock) — no manual Save
+    const user = this.state.users.find(u => u.id === userId);
+    const wasOn = user.access[moduleKey];
+    const now = new Date();
+    const timestamp = now.toLocaleDateString('pt-BR') + ' ' + now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    const moduleLabel = this.MODULES.find(m => m.key === moduleKey)?.label || moduleKey;
+    const auditEntry = {
+      admin: 'Dr. Roberto Alencar',
+      timestamp: timestamp,
+      action: wasOn ? 'Acesso Revogado' : 'Acesso Concedido',
+      targetUser: user.name,
+      actionBg: wasOn ? '#FEE2E2' : '#DCFCE7',
+      actionColor: wasOn ? '#991B1B' : '#166534',
+      detail: 'Módulo de ' + moduleLabel
+    };
+    this.setState(s => ({
+      users: s.users.map(u =>
+        u.id === userId ? { ...u, access: { ...u.access, [moduleKey]: !u.access[moduleKey] } } : u
+      ),
+      auditLog: [auditEntry, ...s.auditLog],
+      saveSuccess: true
+    }));
+    clearTimeout(this._toastTimer);
+    this._toastTimer = setTimeout(() => this.setState({ saveSuccess: false }), 2000);
+  };
+
+  _shellVals() {
+    if (!this._navBound) {
+      this._navBound = true;
+      window.addEventListener('resize', () => this.forceUpdate());
+      window.addEventListener('themechange', () => this.forceUpdate());
+    }
+    const st = this.state || {};
+    const isMobile = window.innerWidth < 900;
+    const open = !!st.navMenuOpen && isMobile;
+    const norm = s => String(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    const q = norm((st.navSearch || '').trim());
+    const INDEX = [["Dashboard.dc.html","▦","Painel de Controle","Sistemas & Gestão","painel dashboard indicadores alertas prazos fluxo"],["AlmoxarifadoAmostragem.dc.html","📦","Almoxarifado","Sistemas & Gestão","almoxarifado estoque amostragem materiais contagem"],["MocoesHomenagens.dc.html","🎗","Moções & Homenagens","Sistemas & Gestão","mocoes homenagens galeria vereador portaria"],["PatrimonioModule.dc.html","🏛","Patrimônio","Sistemas & Gestão","patrimonio bens tombamento transferencias ativos"],["UserProfile.dc.html","👤","Meus Dados (Perfil)","Sistemas & Gestão","perfil meus dados telefone email aniversario"],["ComprasModule.dc.html","🛒","Compras & Licitações","Sistemas & Gestão","compras licitacoes requisicoes fornecedores pregao"],["ProtocoloModule.dc.html","📋","Protocolo","Complementares","protocolo documentos processos prazos"],["RHModule.dc.html","🧑‍💼","Gestão de Pessoal","Complementares","rh recursos humanos servidores ferias"],["AnalyticsModule.dc.html","📈","Analytics & Relatórios","Complementares","analytics relatorios metricas indicadores"],["AuditLog.dc.html","🛡","Log e Auditoria","Administração","log auditoria seguranca acessos lgpd logins"],["Configuracoes.dc.html","⚙","Configurações do Sistema","Administração","configuracoes parametros parametrizacao ajustes alertas limites acessos perfis"],["Legislacoes.dc.html","⚖","Legislações","Administração","legislacao leis decretos portarias resolucoes recomendacoes normas"]];
+    const results = q ? INDEX.filter(i => norm(i[2] + ' ' + i[4]).includes(q)).slice(0, 6).map(i => ({ href: i[0], icon: i[1], label: i[2], group: i[3], go: () => { window.location.href = i[0]; } })) : [];
+    return {
+      navIsMobile: isMobile,
+      navOverlayVisible: open,
+      navSidebarPosition: isMobile ? 'fixed' : 'sticky',
+      navSidebarTransform: isMobile ? (open ? 'translateX(0)' : 'translateX(-100%)') : 'translateX(0)',
+      navOpen: () => this.setState({ navMenuOpen: true }),
+      navClose: () => this.setState({ navMenuOpen: false }),
+      navGutter: isMobile ? '16px' : '36px',
+      navHeaderPad: isMobile ? '18px 16px 12px' : '28px 36px 16px',
+      navTitleSize: isMobile ? '24px' : '30px',
+      navShowBreadcrumb: !isMobile,
+      navSearch: st.navSearch || '',
+      navSearchInput: (e) => this.setState({ navSearch: e.target.value, navSearchFocused: true }),
+      navSearchFocus: () => this.setState({ navSearchFocused: true }),
+      navSearchBlur: () => setTimeout(() => this.setState({ navSearchFocused: false }), 150),
+      navSearchKey: (e) => {
+        if (e.key === 'Enter' && results.length) window.location.href = results[0].href;
+        if (e.key === 'Escape') this.setState({ navSearch: '', navSearchFocused: false });
+      },
+      navSearchResults: results,
+      navSearchOpen: !!(st.navSearchFocused && q),
+      navSearchEmpty: !!q && results.length === 0,
+      ...(() => { const dk = !!(window.theme && window.theme.isDark && window.theme.isDark()); return { navThemeDark: dk, navThemeIsLight: !dk, navThemeLightBg: dk ? 'transparent' : 'rgba(255,255,255,0.9)', navThemeLightFg: dk ? 'rgba(255,255,255,0.6)' : '#1C543A', navThemeDarkBg: dk ? 'rgba(255,255,255,0.18)' : 'transparent', navThemeDarkFg: dk ? '#FFFFFF' : 'rgba(255,255,255,0.6)', navThemeLight: () => { if (window.theme) window.theme.set('light'); }, navThemeDarkSet: () => { if (window.theme) window.theme.set('dark'); } }; })()
+    };
+  }
+
+  renderVals() {
+    const isMobile = this.state.isMobile;
+    const isAdmin = (role) => role === 'Administrativo' || role === 'Administrador';
+
+    const term = this.state.searchTerm.trim().toLowerCase();
+    const roleFilter = this.state.roleFilter;
+    const isAdminRole = (role) => role === 'Administrativo' || role === 'Administrador';
+    const filtered = this.state.users.filter(u => {
+      const matchesTerm = !term || u.name.toLowerCase().includes(term) || u.department.toLowerCase().includes(term);
+      const matchesRole = roleFilter === 'todos'
+        || (roleFilter === 'admin' && isAdminRole(u.role))
+        || (roleFilter === 'user' && !isAdminRole(u.role));
+      return matchesTerm && matchesRole;
+    });
+
+    const filterDefs = [
+      { key: 'todos', label: 'Todos' },
+      { key: 'admin', label: 'Administrativo' },
+      { key: 'user', label: 'Usuário' }
+    ];
+    const roleFilters = filterDefs.map(f => ({
+      label: f.label,
+      onSelect: () => this.setRoleFilter(f.key),
+      bg: roleFilter === f.key ? '#FFFFFF' : 'transparent',
+      color: roleFilter === f.key ? '#1C543A' : '#777777'
+    }));
+
+    const total = this.state.users.length;
+    const shown = filtered.length;
+    const resultLabel = (term || roleFilter !== 'todos')
+      ? shown + ' de ' + total + ' servidores'
+      : total + ' servidores cadastrados';
+
+    const CARGO_STYLE = {
+      'Diretoria': { bg: '#FDF0D5', color: '#92400E' },
+      'Chefia': { bg: '#DCEAFE', color: '#1E40AF' },
+      'Funcionário': { bg: '#EEEEEE', color: '#555555' }
+    };
+    const users = filtered.map(u => ({
+      ...u,
+      cargoBg: (CARGO_STYLE[u.cargo] || CARGO_STYLE['Funcionário']).bg,
+      cargoColor: (CARGO_STYLE[u.cargo] || CARGO_STYLE['Funcionário']).color,
+      avatarBg: isAdmin(u.role) ? '#1C543A' : '#EEEEEE',
+      avatarColor: isAdmin(u.role) ? '#FFFFFF' : '#666666',
+      badgeBg: isAdmin(u.role) ? '#1C543A' : '#EEEEEE',
+      badgeColor: isAdmin(u.role) ? '#FFFFFF' : '#555555',
+      perms: this.MODULES.map(m => {
+        const on = !!u.access[m.key];
+        return {
+      exercicio: String(this.state.exercicio), exercicioAnos: (window.DAExercicio ? window.DAExercicio.anos : [2026, 2025, 2024]).map(String),
+      setExercicio: e => { if (window.DAExercicio) window.DAExercicio.set(e.target.value); else this.setState({ exercicio: +e.target.value }); },
+          key: m.key,
+          label: m.label,
+          on: on,
+          trackColor: on ? '#1C543A' : '#D9D9D9',
+          knobTransform: on ? 'translateX(20px)' : 'translateX(0)',
+          onToggle: () => this.toggleAccess(u.id, m.key)
+        };
+      })
+    }));
+
+    return {
+      ...this._shellVals(),
+      isMobile: isMobile,
+      mobileMenuOpen: this.state.mobileMenuOpen,
+      openMobileMenu: this.openMobileMenu,
+      closeMobileMenu: this.closeMobileMenu,
+      sidebarPosition: isMobile ? 'fixed' : 'sticky',
+      sidebarTransform: isMobile ? (this.state.mobileMenuOpen ? 'translateX(0)' : 'translateX(-100%)') : 'translateX(0)',
+      mainPadding: isMobile ? '18px 16px 32px' : '28px 36px 40px',
+      titleFontSize: isMobile ? '22px' : '30px',
+      moduleGridColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+      saveSuccess: this.state.saveSuccess,
+      newUserOpen: this.state.newUserOpen,
+      form: this.state.form,
+      submitDisabled: !(this.state.form.name.trim() && this.state.form.email.trim() && this.state.form.department.trim()),
+      submitBg: (this.state.form.name.trim() && this.state.form.email.trim() && this.state.form.department.trim()) ? '#1C543A' : '#B8C7BF',
+      submitCursor: (this.state.form.name.trim() && this.state.form.email.trim() && this.state.form.department.trim()) ? 'pointer' : 'not-allowed',
+      searchTerm: this.state.searchTerm,
+      handleSearchInput: this.handleSearchInput,
+      roleFilters: roleFilters,
+      resultLabel: resultLabel,
+      isEmpty: shown === 0,
+      auditLog: this.state.auditLog,
+      openNewUser: this.openNewUser,
+      closeNewUser: this.closeNewUser,
+      stopPropagation: this.stopPropagation,
+      handleNameInput: this.handleNameInput,
+      handleEmailInput: this.handleEmailInput,
+      handleDeptInput: this.handleDeptInput,
+      handleCargoInput: this.handleCargoInput,
+      handleRoleInput: this.handleRoleInput,
+      submitNewUser: this.submitNewUser,
+      sectors: this.state.sectors,
+      sectorsOpen: this.state.sectorsOpen,
+      openSectors: this.openSectors,
+      closeSectors: this.closeSectors,
+      newSectorName: this.state.newSectorName,
+      handleNewSectorInput: this.handleNewSectorInput,
+      addSector: this.addSector,
+      addSectorDisabled: !this.state.newSectorName.trim(),
+      addSectorBg: this.state.newSectorName.trim() ? '#1C543A' : '#B8C7BF',
+      addSectorCursor: this.state.newSectorName.trim() ? 'pointer' : 'not-allowed',
+      users: users
+    };
+  }
+}
+
+</script>
+</body>
+</html>

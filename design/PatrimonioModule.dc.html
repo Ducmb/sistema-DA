@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+  <script src="./theme.js"></script>
+  <script src="./sectors.js"></script>
+  <script src="./config.js"></script>
+  <script src="./session.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema DA - Patrimônio</title>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #FFFFFF; color: #1D1D1B; }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  </style>
+</helmet>
+
+<div style="display: flex; min-height: 100vh; background-color: #FFFFFF; position: relative;">
+
+  <sc-if value="{{ navOverlayVisible }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ navClose }}" style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); z-index: 40;"></div>
+  </sc-if>
+
+  <!-- Sidebar -->
+  <aside style="background-color: #1C543A; color: #FFFFFF; width: 250px; flex-shrink: 0; display: flex; flex-direction: column; padding: 22px 16px; gap: 22px; position: {{ navSidebarPosition }}; top: 0; left: 0; height: 100vh; overflow-y: auto; z-index: 50; transform: {{ navSidebarTransform }}; transition: transform 0.3s cubic-bezier(0.34, 1.25, 0.64, 1);">
+      <a href="Dashboard.dc.html" title="Voltar ao Painel de Controle" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: #FFFFFF; padding: 0 4px;">
+        <div style="width: 36px; height: 36px; background-color: #FFFFFF; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; color: #1C543A; flex-shrink: 0;">DA</div>
+        <div>
+          <p style="font-size: 12.5px; font-weight: 700; line-height: 1.3; color: #FFFFFF;">CÂMARA MUNICIPAL</p>
+          <p style="font-size: 9.5px; letter-spacing: 0.4px; color: rgba(255,255,255,0.65); text-transform: uppercase;">Diretoria Administrativa</p>
+        </div>
+      </a>
+      <nav style="display: flex; flex-direction: column; gap: 2px;">
+        <p style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: rgba(255,255,255,0.5); padding: 0 12px; margin-bottom: 6px;">Sistemas &amp; Gestão</p>
+        <a href="Dashboard.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 13px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">▦</span>Painel de Controle</a>
+        <a href="AlmoxarifadoAmostragem.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 13px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">📦</span>Almoxarifado</a>
+        <a href="ComprasModule.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 13px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">🛒</span>Compras &amp; Licitações</a>
+        <a href="MocoesHomenagens.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 13px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">🎗</span>Moções &amp; Homenagens</a>
+        <a href="PatrimonioModule.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 13px; transition: background-color 0.2s; background-color: #FFFFFF; color: #1C543A; font-weight: 700;"><span style="width: 18px; text-align: center; flex-shrink: 0;">🏛</span>Patrimônio</a>
+      </nav>
+      <nav style="display: flex; flex-direction: column; gap: 2px;">
+        <p style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: rgba(255,255,255,0.5); padding: 0 12px; margin-bottom: 6px;">Módulos Complementares</p>
+        <a href="AnalyticsModule.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">📈</span>Analytics &amp; Relatórios</a>
+        <a href="RHModule.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">🧑‍💼</span>Gestão de Pessoal</a>
+        <a href="Legislacoes.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">⚖</span>Legislações</a>
+        <a href="AuditLog.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">🛡</span>Log e Auditoria</a>
+        <a href="Configuracoes.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">⚙</span>Configurações do Sistema</a>
+      <a href="ProtocoloModule.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none; font-size: 12.5px; transition: background-color 0.2s; color: rgba(255,255,255,0.85); font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1);"><span style="width: 18px; text-align: center; flex-shrink: 0;">📋</span>Protocolo</a>
+      </nav>
+      <div style="margin-top: auto; display: flex; flex-direction: column; gap: 4px; padding-top: 8px;">
+        <a href="UserProfile.dc.html" style="display: flex; align-items: center; gap: 10px; background-color: rgba(255,255,255,0.08); border-radius: 10px; padding: 12px; text-decoration: none; color: #FFFFFF;" style-hover="background-color: rgba(255,255,255,0.14);">
+          <div style="width: 34px; height: 34px; border-radius: 50%; background-color: #F0B429; color: #1C543A; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; flex-shrink: 0;">RA</div>
+          <div style="min-width: 0;">
+            <p style="font-size: 12.5px; font-weight: 700; color: #FFFFFF;">Dr. Roberto Alencar</p>
+            <p style="font-size: 10.5px; color: rgba(255,255,255,0.6);">DA-2026-948 · Diretoria</p>
+          </div>
+        </a>
+        <div role="group" aria-label="Aparência" style="display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 40px; padding: 0 12px;">
+          <span style="font-size: 11px; font-weight: 600; letter-spacing: 0.3px; color: rgba(255,255,255,0.6);">Aparência</span>
+          <div style="display: flex; padding: 2px; border-radius: 999px; background-color: rgba(0,0,0,0.22);">
+            <button onClick="{{ navThemeLight }}" aria-pressed="{{ navThemeIsLight }}" aria-label="Modo padrão" title="Modo padrão" style="width: 30px; height: 26px; border: none; border-radius: 999px; background-color: {{ navThemeLightBg }}; color: {{ navThemeLightFg }}; font-size: 13px; line-height: 1; cursor: pointer; transition: background-color 0.2s;">☀</button>
+            <button onClick="{{ navThemeDarkSet }}" aria-pressed="{{ navThemeDark }}" aria-label="Modo escuro" title="Modo escuro" style="width: 30px; height: 26px; border: none; border-radius: 999px; background-color: {{ navThemeDarkBg }}; color: {{ navThemeDarkFg }}; font-size: 13px; line-height: 1; cursor: pointer; transition: background-color 0.2s;">☾</button>
+          </div>
+        </div>
+        <a href="Login.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 8px; color: rgba(255,255,255,0.7); text-decoration: none; font-size: 12.5px; font-weight: 600;" style-hover="background-color: rgba(255,255,255,0.1); color: #FFFFFF;"><span style="width: 18px; text-align: center; flex-shrink: 0;">⎋</span>Sair do sistema</a>
+      </div>
+    </aside>
+
+  <!-- Main -->
+  <div style="flex: 1; min-width: 0; display: flex; flex-direction: column;">
+    <div style="position: sticky; top: 0; z-index: 30; background-color: rgba(255,255,255,0.96); backdrop-filter: blur(6px); border-bottom: 1px solid #E8E8E8; min-height: 64px; padding: 10px {{ navGutter }}; display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+      <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
+        <sc-if value="{{ navIsMobile }}" hint-placeholder-val="{{ false }}">
+          <button onClick="{{ navOpen }}" aria-label="Abrir menu" style="width: 44px; height: 44px; border-radius: 8px; border: 1px solid #E0E0E0; background-color: #FFFFFF; font-size: 18px; color: #1D1D1B; cursor: pointer; flex-shrink: 0;">☰</button>
+          <a href="Dashboard.dc.html" title="Painel de Controle" style="width: 36px; height: 36px; background-color: #1C543A; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 12px; color: #FFFFFF; text-decoration: none; flex-shrink: 0;">DA</a>
+        </sc-if>
+        <sc-if value="{{ navShowBreadcrumb }}" hint-placeholder-val="{{ true }}">
+          <div style="display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: #666666; white-space: nowrap;">
+            <a href="Dashboard.dc.html" style="color: #666666; text-decoration: none;" style-hover="color: #1C543A;">Painel de Controle</a>
+            <span style="color: #CCCCCC;">›</span>
+            <span style="color: #1D1D1B; font-weight: 600;">Patrimônio</span>
+          </div>
+        </sc-if>
+      </div>
+      <div style="display: flex; align-items: center; gap: 10px; flex: 1; justify-content: flex-end; min-width: 0;">
+        <div style="position: relative; flex: 1; max-width: 340px; min-width: 0;">
+          <input type="search" placeholder="Buscar módulos e telas…" aria-label="Busca global" value="{{ navSearch }}" onInput="{{ navSearchInput }}" onFocus="{{ navSearchFocus }}" onBlur="{{ navSearchBlur }}" onKeyDown="{{ navSearchKey }}" style="width: 100%; height: 44px; padding: 0 12px 0 34px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; color: #1D1D1B; background-color: #F9F9F9;" style-focus="border-color: #1C543A; background-color: #FFFFFF; outline: none;"/>
+          <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 14px; color: #999999; pointer-events: none;">⌕</span>
+          <sc-if value="{{ navSearchOpen }}" hint-placeholder-val="{{ false }}">
+            <div style="position: absolute; top: 50px; right: 0; left: 0; min-width: 240px; background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 8px; box-shadow: 0 12px 32px rgba(0,0,0,0.12); padding: 6px; z-index: 60;">
+              <sc-for list="{{ navSearchResults }}" as="r" hint-placeholder-count="3">
+                <a href="{{ r.href }}" onMouseDown="{{ r.go }}" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 10px; border-radius: 6px; text-decoration: none; color: #1D1D1B; font-size: 13px;" style-hover="background-color: #F2F7F4;">
+                  <span style="width: 20px; text-align: center; flex-shrink: 0;">{{ r.icon }}</span>
+                  <span style="flex: 1; font-weight: 600;">{{ r.label }}</span>
+                  <span style="font-size: 11px; color: #999999;">{{ r.group }}</span>
+                </a>
+              </sc-for>
+              <sc-if value="{{ navSearchEmpty }}" hint-placeholder-val="{{ false }}">
+                <p style="padding: 12px 10px; font-size: 12.5px; color: #999999;">Nenhum resultado para “{{ navSearch }}”</p>
+              </sc-if>
+            </div>
+          </sc-if>
+        </div>
+        <a href="NotificationsModule.dc.html" title="Notificações" style="position: relative; width: 44px; height: 44px; border-radius: 8px; border: 1px solid #E0E0E0; background-color: #FFFFFF; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 16px; flex-shrink: 0;" style-hover="border-color: #1C543A;">🔔<span style="position: absolute; top: 9px; right: 10px; width: 7px; height: 7px; border-radius: 50%; background-color: #DC2626; border: 1.5px solid #FFFFFF;"></span></a>
+      </div>
+    </div>
+    <main style="flex: 1; padding: {{ mainPadding }}; display: flex; flex-direction: column; gap: 20px; min-width: 0;">
+
+    
+
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; flex-wrap: wrap;">
+      <div>
+        <p style="font-size: 11px; font-weight: 700; letter-spacing: 0.6px; color: #1C543A; text-transform: uppercase;">Sistema de Gestão Integrada &nbsp;•&nbsp; Patrimônio</p>
+        <h1 style="font-size: {{ titleFontSize }}; font-weight: 800; color: #1D1D1B; margin-top: 6px;">Patrimônio e Ativos — Transferências</h1>
+      </div>
+      <button onClick="{{ openNewTr }}" style="height: 44px; padding: 0 18px; background-color: #1C543A; color: #FFFFFF; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer;" style-hover="background-color: #153A2E;">+ Nova transferência</button>
+    </div>
+
+    <!-- Pending action for logged-in user -->
+    <sc-if value="{{ myPendingTransfer }}" hint-placeholder-val="{{ false }}">
+      <div style="background-color: #FFFBEB; border: 1px solid #F59E0B; border-radius: 12px; padding: 18px 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; animation: fadeInUp 0.5s ease-out both;">
+        <div>
+          <p style="font-size: 11px; font-weight: 700; color: #92400E; text-transform: uppercase; letter-spacing: 0.4px;">Transferência Pendente para Você</p>
+          <p style="font-size: 14px; font-weight: 700; color: #1D1D1B; margin-top: 4px;">{{ myPendingTransfer.description }} — {{ myPendingTransfer.code }}</p>
+          <p style="font-size: 12px; color: #92400E; margin-top: 2px;">De: {{ myPendingTransfer.fromUser }}</p>
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <button onClick="{{ handleSign }}" style="display: flex; align-items: center; gap: 6px; padding: 10px 16px; background-color: #1C543A; color: #FFFFFF; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer;" style-hover="background-color: #164530;">✒ Assinar Digitalmente</button>
+          <button onClick="{{ handleReject }}" style="display: flex; align-items: center; gap: 6px; padding: 10px 16px; background-color: #FFFFFF; color: #DC2626; border: 1px solid #DC2626; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer;" style-hover="background-color: #FEF2F2;">✕ Contestar/Recusar</button>
+        </div>
+      </div>
+    </sc-if>
+
+    <div role="tablist" aria-label="Seções do patrimônio" style="display: flex; gap: 6px; border-bottom: 2px solid #E8E8E8; overflow-x: auto;">
+      <sc-for list="{{ patTabs }}" as="pt" hint-placeholder-count="2">
+        <button role="tab" aria-selected="{{ pt.active }}" onClick="{{ pt.go }}" style="padding: 12px 14px; border: none; background: none; font-size: 13px; font-weight: 600; white-space: nowrap; cursor: pointer; color: {{ pt.color }}; border-bottom: 2px solid {{ pt.border }}; margin-bottom: -2px; display: flex; gap: 6px; align-items: center;">{{ pt.label }}<sc-if value="{{ pt.hasCount }}" hint-placeholder-val="{{ false }}"><span style="font-size: 10px; font-weight: 700; padding: 1px 7px; border-radius: 999px; background-color: #FEF3C7; color: #92400E;">{{ pt.count }}</span></sc-if></button>
+      </sc-for>
+    </div>
+
+    <sc-if value="{{ isTransfView }}" hint-placeholder-val="{{ true }}">
+<!-- Table -->
+    <div style="background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 12px; overflow-x: auto; animation: fadeInUp 0.5s ease-out 0.1s both;">
+      <div style="display: grid; grid-template-columns: 110px minmax(0,1.6fr) minmax(0,1fr) minmax(0,1fr) 90px 230px; gap: 14px; padding: 12px 18px; background-color: #F9F9F9; font-size: 11px; font-weight: 700; color: #999999; text-transform: uppercase; letter-spacing: 0.3px; min-width: 860px;">
+        <span>Tombamento</span><span>Bem</span><span>De</span><span>Para</span><span>Data</span><span>Etapa</span>
+      </div>
+      <sc-for list="{{ transfers }}" as="t" hint-placeholder-count="5">
+        <div onClick="{{ handleOpenModal }}" data-transfer-id="{{ t.id }}" style="display: grid; grid-template-columns: 110px minmax(0,1.6fr) minmax(0,1fr) minmax(0,1fr) 90px 230px; gap: 14px; padding: 14px 18px; border-top: 1px solid #F0F0F0; align-items: center; cursor: pointer; min-width: 860px;" style-hover="background-color: #FAFAF8;">
+          <button onClick="{{ t.edit }}" title="Ver e editar transferência" style="background: none; border: none; padding: 0; text-align: left; font-size: 12px; font-weight: 700; color: #1C543A; cursor: pointer; text-decoration: underline; text-underline-offset: 3px;">{{ t.code }}</button>
+          <span style="font-size: 12.5px; color: #1D1D1B;">{{ t.description }}</span>
+          <span style="font-size: 12.5px; color: #666666;">{{ t.fromUser }}<span style="display: block; font-size: 11px; color: #5B21B6;">{{ t.fromCcLabel }}</span></span>
+          <span style="font-size: 12.5px; color: #666666;">{{ t.toUser }}<span style="display: block; font-size: 11px; color: #5B21B6;">{{ t.toCcLabel }}</span></span>
+          <span style="font-size: 12px; color: #999999;">{{ t.date }}</span>
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+              <span style="font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 5px; background-color: {{ t.statusBg }}; color: {{ t.statusColor }}; white-space: nowrap; width: fit-content;">{{ t.status }}</span>
+            </div>
+            <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+              <sc-if value="{{ t.canBack }}" hint-placeholder-val="{{ false }}"><button onClick="{{ t.back }}" title="Voltar para {{ t.prevLabel }}" style="padding: 6px 10px; background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 4px; font-size: 11px; font-weight: 600; color: #666666; cursor: pointer; white-space: nowrap;" style-hover="background-color: #F5F5F5; color: #1D1D1B;">← Voltar</button></sc-if>
+              <sc-if value="{{ t.canNext }}" hint-placeholder-val="{{ false }}"><button onClick="{{ t.next }}" style="padding: 6px 10px; background-color: #F5F5F5; border: 1px solid #E8E8E8; border-radius: 4px; font-size: 11px; font-weight: 600; color: #1C543A; cursor: pointer; white-space: nowrap;" style-hover="background-color: #EAF3EE;">{{ t.nextLabel }} →</button></sc-if>
+            </div>
+            <div style="display: flex; gap: 3px;" aria-hidden="true">
+              <sc-for list="{{ t.steps }}" as="sp" hint-placeholder-count="3"><span style="flex: 1; height: 4px; border-radius: 2px; background-color: {{ sp.color }};"></span></sc-for>
+            </div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  
+    </sc-if>
+
+    <sc-if value="{{ isTermosView }}" hint-placeholder-val="{{ false }}">
+      <div style="background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 14px;">
+        <div style="display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; align-items: flex-end; padding-bottom: 10px; border-bottom: 1px solid #1C543A;">
+          <div>
+            <h3 style="font-size: 15px; font-weight: 700; color: #1D1D1B;">Termos de responsabilidade a emitir</h3>
+            <p style="font-size: 12px; color: #666666; margin-top: 2px;">Centros de custo de patrimônio que tiveram entrada ou saída de bens no mês. Cada movimentação exige um novo termo.</p>
+          </div>
+          <div style="display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap;">
+            <div><label for="tm-mes" style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 6px;">Mês</label><input id="tm-mes" type="month" value="{{ termMonth }}" onInput="{{ setTermMonth }}" style="height: 44px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; color: #1D1D1B; background-color: #FFFFFF;"/></div>
+            <div><label for="tm-st" style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 6px;">Situação</label><select id="tm-st" value="{{ termFilter }}" onChange="{{ setTermFilter }}" style="height: 44px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; color: #1D1D1B; background-color: #FFFFFF;"><option value="pendentes">Termo pendente</option><option value="emitidos">Termo emitido</option><option value="todos">Todos</option></select></div>
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px;">
+          <sc-for list="{{ termKpis }}" as="k" hint-placeholder-count="3"><div style="border: 1px solid #E8E8E8; border-radius: 8px; padding: 12px;"><p style="font-size: 11px; font-weight: 700; color: #666666; text-transform: uppercase; letter-spacing: 0.3px;">{{ k.label }}</p><p style="font-size: 22px; font-weight: 800; color: {{ k.color }}; margin-top: 4px;">{{ k.value }}</p></div></sc-for>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <sc-for list="{{ termRows }}" as="tr" hint-placeholder-count="4">
+            <div style="border: 1px solid {{ tr.border }}; border-radius: 8px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px;">
+              <div style="display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; align-items: center;">
+                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                  <span style="font-size: 12px; font-weight: 700; color: #5B21B6; font-family: ui-monospace, monospace;">{{ tr.codigo }}</span>
+                  <span style="font-size: 14px; font-weight: 700; color: #1D1D1B;">{{ tr.nome }}</span>
+                  <span style="font-size: 11px; color: #666666;">{{ tr.resumo }}</span>
+                </div>
+                <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                  <span style="font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 5px; background-color: {{ tr.badgeBg }}; color: {{ tr.badgeColor }};">{{ tr.badge }}</span>
+                  <button onClick="{{ tr.toggle }}" style="padding: 6px 10px; background-color: {{ tr.btnBg }}; border: 1px solid #E8E8E8; border-radius: 4px; font-size: 11px; font-weight: 600; color: {{ tr.btnColor }}; cursor: pointer; white-space: nowrap;" style-hover="background-color: #EAF3EE;">{{ tr.btnLabel }}</button>
+                </div>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 4px;">
+                <sc-for list="{{ tr.movs }}" as="mv" hint-placeholder-count="2">
+                  <p style="font-size: 12px; color: #444444;"><span style="font-weight: 700; color: {{ mv.color }};">{{ mv.dir }}</span> · {{ mv.code }} — {{ mv.description }} · {{ mv.other }} · {{ mv.date }} · {{ mv.status }}</p>
+                </sc-for>
+              </div>
+            </div>
+          </sc-for>
+          <sc-if value="{{ termEmpty }}" hint-placeholder-val="{{ false }}"><p style="padding: 28px; text-align: center; font-size: 13px; color: #666666; border: 1px dashed #E0E0E0; border-radius: 8px;">{{ termEmptyMsg }}</p></sc-if>
+        </div>
+        <sc-if value="{{ hasOrphans }}" hint-placeholder-val="{{ false }}">
+          <div style="border: 1px solid #F3D9A4; background-color: #FFFBF3; border-radius: 8px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px;">
+            <p style="font-size: 13px; font-weight: 700; color: #92400E;">Movimentações sem centro de custo de patrimônio ({{ orphanCount }})</p>
+            <p style="font-size: 12px; color: #666666;">Estas transferências não entram no cálculo dos termos até que origem e destino tenham um centro de custo do tipo Patrimônio.</p>
+            <sc-for list="{{ orphanRows }}" as="or" hint-placeholder-count="1">
+              <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; padding-top: 8px; border-top: 1px solid #F3E6C7;">
+                <p style="font-size: 12px; color: #444444; min-width: 0;"><strong style="color: #1D1D1B;">{{ or.code }}</strong> — {{ or.description }} · {{ or.route }} · {{ or.date }} · {{ or.status }}</p>
+                <button onClick="{{ or.edit }}" style="padding: 6px 10px; background-color: #F5F5F5; border: 1px solid #E8E8E8; border-radius: 4px; font-size: 11px; font-weight: 600; color: #1C543A; cursor: pointer; white-space: nowrap;" style-hover="background-color: #EAF3EE;">Definir centros de custo →</button>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+  </main>
+  </div>
+
+  <!-- Modal: Termo de Responsabilidade -->
+  <sc-if value="{{ newTrOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeNewTr }}" style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 95;">
+      <div onClick="{{ stopPropagation }}" role="dialog" aria-label="{{ trTitle }}" style="background-color: #FFFFFF; border-radius: 12px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; padding: 22px; display: flex; flex-direction: column; gap: 14px;">
+        <div>
+          <h3 style="font-size: 16px; font-weight: 700; color: #1D1D1B;">{{ trTitle }}</h3>
+          <p style="font-size: 12px; color: #666666; margin-top: 2px;">A transferência fica Pendente até o novo responsável assinar o termo.</p>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+          <div><label for="tr-code" style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 6px;">Código de tombamento</label><input id="tr-code" type="text" value="{{ trForm.code }}" onInput="{{ setTrCode }}" placeholder="DA-PAT-00000" style="width: 100%; height: 40px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px;" style-focus="border-color: #1C543A; outline: none;"/></div>
+          <div><label for="tr-date" style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 6px;">Data da transferência</label><input id="tr-date" type="date" value="{{ trForm.date }}" onInput="{{ setTrDate }}" style="width: 100%; height: 40px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px;" style-focus="border-color: #1C543A; outline: none;"/></div>
+        </div>
+        <div><label for="tr-desc" style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 6px;">Descrição do bem</label><input id="tr-desc" type="text" value="{{ trForm.description }}" onInput="{{ setTrDesc }}" placeholder="Ex.: Notebook Dell Latitude 5420" style="width: 100%; height: 40px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px;" style-focus="border-color: #1C543A; outline: none;"/></div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+          <div><label for="tr-from" style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 6px;">De (responsável atual)</label><input id="tr-from" type="text" value="{{ trForm.fromUser }}" onInput="{{ setTrFrom }}" placeholder="Servidor ou setor" style="width: 100%; height: 40px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px;" style-focus="border-color: #1C543A; outline: none;"/></div>
+          <div><label for="tr-to" style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 6px;">Para (novo responsável)</label><input id="tr-to" type="text" value="{{ trForm.toUser }}" onInput="{{ setTrTo }}" placeholder="Servidor ou setor" style="width: 100%; height: 40px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px;" style-focus="border-color: #1C543A; outline: none;"/></div>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+          <div><label for="tr-fcc" style="font-size: 12px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">Centro de custo de origem</label><input id="tr-fcc" type="text" list="dl-patcc" autocomplete="off" value="{{ trForm.fromCc }}" onInput="{{ setTrFromCc }}" placeholder="Digite ou selecione" style="width: 100%; height: 44px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; color: #1D1D1B; background-color: #FFFFFF;" style-focus="border-color: #1C543A; outline: none;"/></div>
+          <div><label for="tr-tcc" style="font-size: 12px; font-weight: 600; color: #1D1D1B; display: block; margin-bottom: 6px;">Centro de custo de destino</label><input id="tr-tcc" type="text" list="dl-patcc" autocomplete="off" value="{{ trForm.toCc }}" onInput="{{ setTrToCc }}" placeholder="Digite ou selecione" style="width: 100%; height: 44px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; color: #1D1D1B; background-color: #FFFFFF;" style-focus="border-color: #1C543A; outline: none;"/></div>
+          <datalist id="dl-patcc"><sc-for list="{{ patCcs }}" as="pc" hint-placeholder-count="5"><option value="{{ pc }}"></option></sc-for></datalist>
+        </div>
+        <p style="font-size: 11px; color: #666666; margin-top: -4px;">Somente centros de custo do tipo Patrimônio (Configurações › Centros de Custo).</p>
+        <sc-if value="{{ trError }}" hint-placeholder-val="{{ false }}"><p role="alert" style="font-size: 12.5px; color: #B91C1C; background-color: #FDF3F2; padding: 8px 12px; border-radius: 6px;">{{ trError }}</p></sc-if>
+        <div style="display: flex; justify-content: flex-end; gap: 10px;">
+          <button onClick="{{ closeNewTr }}" style="height: 40px; padding: 0 16px; border: 1px solid #E0E0E0; border-radius: 8px; background-color: #FFFFFF; font-size: 13px; cursor: pointer;" style-hover="background-color: #F5F5F5;">Cancelar</button>
+          <button onClick="{{ submitNewTr }}" style="height: 40px; padding: 0 16px; border: none; border-radius: 8px; background-color: #1C543A; color: #FFFFFF; font-size: 13px; font-weight: 700; cursor: pointer;" style-hover="background-color: #153A2E;">{{ trSaveLabel }}</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ toastMsg }}" hint-placeholder-val="{{ false }}">
+    <div role="status" style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background-color: #1C543A; color: #FFFFFF; padding: 12px 22px; border-radius: 999px; font-size: 13px; font-weight: 600; z-index: 100;">✓ {{ toastMsg }}</div>
+  </sc-if>
+
+  <sc-if value="{{ modalOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ handleCloseModal }}" style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; padding: 32px; z-index: 100; animation: fadeIn 0.2s ease-out;">
+      <div onClick="{{ stopPropagation }}" style="background-color: #FFFFFF; border-radius: 8px; max-width: 640px; width: 100%; max-height: 85vh; overflow-y: auto; padding: 48px 56px; font-family: 'Source Serif 4', Georgia, serif; box-shadow: 0 20px 60px rgba(0,0,0,0.25);">
+        <div style="text-align: center; border-bottom: 2px solid #1C543A; padding-bottom: 16px; margin-bottom: 24px;">
+          <p style="font-size: 13px; font-weight: 700; letter-spacing: 0.5px; color: #1C543A;">CÂMARA MUNICIPAL — DIRETORIA ADMINISTRATIVA</p>
+          <h2 style="font-size: 19px; font-weight: 700; margin-top: 8px;">Termo de Transferência de Responsabilidade Patrimonial</h2>
+        </div>
+        <p style="font-size: 14.5px; line-height: 1.8; text-align: justify; color: #1D1D1B;">
+          Pelo presente termo, fica formalizada a transferência de guarda e responsabilidade civil do bem patrimonial abaixo descrito, nos termos do rito fiscal-contábil da Diretoria Administrativa, transferindo-se a posse funcional de <strong>{{ selectedTransfer.fromUser }}</strong> para <strong>{{ selectedTransfer.toUser }}</strong>.
+        </p>
+        <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 8px; font-size: 14px;">
+          <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #E8E8E8; padding-bottom: 6px;"><span>Código de Tombamento:</span><strong>{{ selectedTransfer.code }}</strong></div>
+          <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #E8E8E8; padding-bottom: 6px;"><span>Descrição do Bem:</span><strong>{{ selectedTransfer.description }}</strong></div>
+          <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #E8E8E8; padding-bottom: 6px;"><span>Data da Transferência:</span><strong>{{ selectedTransfer.date }}</strong></div>
+          <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #E8E8E8; padding-bottom: 6px;"><span>Status:</span><strong>{{ selectedTransfer.status }}</strong></div>
+        </div>
+        <p style="font-size: 14.5px; line-height: 1.8; text-align: justify; color: #1D1D1B; margin-top: 20px;">
+          A responsabilidade legal pelo bem somente se formaliza junto à base geral de ativos do município após assinatura eletrônica autenticada do responsável de destino.
+        </p>
+        <button onClick="{{ handleCloseModal }}" style="margin-top: 28px; padding: 10px 18px; background-color: #1C543A; color: #FFFFFF; border: none; border-radius: 6px; font-family: -apple-system, sans-serif; font-size: 13px; font-weight: 700; cursor: pointer;">Fechar</button>
+      </div>
+    </div>
+  </sc-if>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: &quot;100%&quot;, &quot;height&quot;: &quot;900px&quot;}}">
+class Component extends DCLogic {
+  state = {
+    isMobile: typeof window !== 'undefined' ? window.innerWidth < 900 : false,
+    mobileMenuOpen: false,
+    modalOpen: false,
+    selectedTransferId: null,
+    patView: new URLSearchParams(location.search).get('view') === 'termos' ? 'termos' : 'transf',
+    termMonth: (() => { let l = []; try { l = JSON.parse(localStorage.getItem('DA_patrimonio_transf_v1')) || []; } catch (e) {} const ms = l.map(x => { const p = String(x.date || '').split('/'); return p.length === 3 ? p[2] + '-' + p[1] : ''; }).filter(Boolean).sort(); return ms.length ? ms[ms.length - 1] : '2026-07'; })(), termFilter: 'pendentes', ccTick: 0,
+    termos: (() => { try { return JSON.parse(localStorage.getItem('DA_patrimonio_termos_v1')) || {}; } catch (e) { return {}; } })(),
+    transfers: (() => { try { const s = JSON.parse(localStorage.getItem('DA_patrimonio_transf_v1')); if (Array.isArray(s)) return s; } catch (e) {} return [
+      { id: 1, code: 'DA-PAT-00452', description: 'Notebook Dell Latitude 5420', fromUser: 'Almoxarifado Central', toUser: 'Ana Costa', date: '10/07/2026', status: 'Pendente', statusBg: '#FEF3C7', statusColor: '#92400E' },
+      { id: 2, code: 'DA-PAT-00318', description: 'Mesa de Reunião 8 Lugares', fromUser: 'Carlos Mendes', toUser: 'Sala de Sessões', date: '02/07/2026', status: 'Realizado', statusBg: '#EAF3EE', statusColor: '#1C543A' },
+      { id: 3, code: 'DA-PAT-00501', description: 'Projetor Epson PowerLite', fromUser: 'Protocolo', toUser: 'Fernando Souza', date: '28/06/2026', status: 'Realizado', statusBg: '#EAF3EE', statusColor: '#1C543A' },
+      { id: 4, code: 'DA-PAT-00287', description: 'Armário de Aço 4 Portas', fromUser: 'RH', toUser: 'Almoxarifado Central', date: '20/06/2026', status: 'Recusado', statusBg: '#FEE2E2', statusColor: '#991B1B' }
+    ]; })(),
+    currentUser: 'Ana Costa',
+    newTrOpen: false,
+    trForm: { code: '', description: '', fromUser: '', toUser: '', fromCc: '', toCc: '', date: '' },
+    trError: '',
+    toastMsg: ''
+  };
+
+  STAGES = ['Pendente', 'Verificar transferência', 'Realizado'];
+  STAGE_STYLE = { 'Pendente': ['#FEF3C7', '#92400E'], 'Verificar transferência': ['#EEF4FD', '#1E40AF'], 'Realizado': ['#EAF3EE', '#1C543A'], 'Recusado': ['#FDF3F2', '#B91C1C'] };
+  _setTransfers(l) { try { localStorage.setItem('DA_patrimonio_transf_v1', JSON.stringify(l)); } catch (e) {} this.setState({ transfers: l }); }
+  moveStage(id, dir, ev) {
+    if (ev) ev.stopPropagation();
+    const t = this.state.transfers.find(x => x.id === id); if (!t) return;
+    const i = Math.max(0, this.STAGES.indexOf(t.status === 'Concluído' ? 'Realizado' : t.status)), n = Math.min(this.STAGES.length - 1, Math.max(0, i + dir));
+    if (n === i) return;
+    const st = this.STAGES[n];
+    this._setTransfers(this.state.transfers.map(x => x.id === id ? { ...x, status: st } : x));
+    if (window.DAAudit) window.DAAudit.log('Transferência: etapa alterada', 'patrimonio', t.code + ' · ' + t.status + ' → ' + st);
+    clearTimeout(this._toastT); this.setState({ toastMsg: t.code + ': ' + st }); this._toastT = setTimeout(() => this.setState({ toastMsg: '' }), 2500);
+  }
+  openEditTr = (id, ev) => { if (ev) ev.stopPropagation(); const t = this.state.transfers.find(x => x.id === id); if (!t) return; this.setState({ newTrOpen: true, trError: '', trForm: { id: t.id, code: t.code, description: t.description, fromUser: t.fromUser, toUser: t.toUser, fromCc: this._ccOf(t, 'from'), toCc: this._ccOf(t, 'to'), date: t.date.split('/').reverse().join('-') } }); };
+  _patCcs() { return window.DACostCenters ? window.DACostCenters.patrimonio() : []; }
+  _ccOf(t, side) { const v = side === 'from' ? t.fromCc : t.toCc; if (v) return v; const u = side === 'from' ? t.fromUser : t.toUser; return this._patCcs().indexOf(u) >= 0 ? u : ''; }
+  _toggleTermo(key, nome) { const tm = { ...this.state.termos }; const on = !tm[key]; if (on) tm[key] = new Date().toISOString().slice(0, 10); else delete tm[key];
+    try { localStorage.setItem('DA_patrimonio_termos_v1', JSON.stringify(tm)); } catch (e) {} this.setState({ termos: tm });
+    if (window.DAAudit) window.DAAudit.log(on ? 'Termo de responsabilidade emitido' : 'Emissão de termo desfeita', 'patrimonio', nome + ' · ' + this.state.termMonth); }
+  _termVals() {
+    const ym = this.state.termMonth, ccs = window.DACostCenters ? window.DACostCenters.active('patrimonio') : [];
+    const inMonth = this.state.transfers.filter(t => { const p = String(t.date || '').split('/'); return p.length === 3 && (p[2] + '-' + p[1]) === ym && t.status !== 'Recusado'; });
+    const rows = ccs.map(cc => { const movs = [];
+      inMonth.forEach(t => { if (this._ccOf(t, 'from') === cc.nome) movs.push({ dir: 'Saída', color: '#B45309', code: t.code, description: t.description, other: 'para ' + (this._ccOf(t, 'to') || t.toUser), date: t.date, status: t.status }); if (this._ccOf(t, 'to') === cc.nome) movs.push({ dir: 'Entrada', color: '#1C543A', code: t.code, description: t.description, other: 'de ' + (this._ccOf(t, 'from') || t.fromUser), date: t.date, status: t.status }); });
+      const key = cc.codigo + '|' + ym, emitido = this.state.termos[key];
+      return { ...cc, movs, emitido, key }; }).filter(r => r.movs.length);
+    const orphans = inMonth.filter(t => !this._ccOf(t, 'from') || !this._ccOf(t, 'to'));
+    const pend = rows.filter(r => !r.emitido).length;
+    const shown = rows.filter(r => this.state.termFilter === 'todos' || (this.state.termFilter === 'pendentes' ? !r.emitido : !!r.emitido));
+    const [yy, mm] = ym.split('-'); const MES = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'][+mm - 1] + ' de ' + yy;
+    return { pend, termMonth: ym, termFilter: this.state.termFilter, setTermMonth: e => this.setState({ termMonth: e.target.value || ym }), setTermFilter: e => this.setState({ termFilter: e.target.value }),
+      termKpis: [{ label: 'Centros com movimentação', value: String(rows.length), color: '#1D1D1B' }, { label: 'Termos pendentes', value: String(pend), color: pend ? '#B45309' : '#1C543A' }, { label: 'Movimentações no mês', value: String(inMonth.length), color: '#1D1D1B' }],
+      termEmpty: shown.length === 0, termEmptyMsg: rows.length ? 'Nenhum centro de custo nesta situação em ' + MES + '.' : (inMonth.length ? 'Nenhuma das ' + inMonth.length + ' movimentação(ões) de ' + MES + ' tem centro de custo de patrimônio. Defina os centros abaixo.' : 'Nenhuma movimentação de bens em ' + MES + '.'),
+      hasOrphans: orphans.length > 0, orphanCount: orphans.length,
+      orphanRows: orphans.map(o => ({ code: o.code, description: o.description, route: (this._ccOf(o, 'from') || o.fromUser + ' (sem CC)') + ' → ' + (this._ccOf(o, 'to') || o.toUser + ' (sem CC)'), date: o.date, status: o.status, edit: (e) => this.openEditTr(o.id, e) })),
+      termRows: shown.map(r => { const e = r.movs.filter(x => x.dir === 'Entrada').length, s = r.movs.length - e;
+        return { codigo: r.codigo, nome: r.nome, movs: r.movs, resumo: e + ' entrada(s) · ' + s + ' saída(s)', border: r.emitido ? '#E8E8E8' : '#F3D9A4',
+          badge: r.emitido ? 'Termo emitido em ' + r.emitido.split('-').reverse().join('/') : 'Emitir novo termo', badgeBg: r.emitido ? '#EAF3EE' : '#FEF3C7', badgeColor: r.emitido ? '#1C543A' : '#92400E',
+          btnLabel: r.emitido ? '← Desfazer' : 'Marcar termo emitido →', btnBg: r.emitido ? '#FFFFFF' : '#F5F5F5', btnColor: r.emitido ? '#666666' : '#1C543A', toggle: () => this._toggleTermo(r.key, r.nome) }; }) };
+  }
+  setTrField = (k) => (e) => { const v = e.target.value; this.setState(s => ({ trForm: { ...s.trForm, [k]: v }, trError: '' })); };
+  setTrCode = this.setTrField('code');
+  setTrDesc = this.setTrField('description');
+  setTrFrom = this.setTrField('fromUser');
+  setTrTo = this.setTrField('toUser');
+  setTrDate = this.setTrField('date');
+  openNewTr = () => { this.setState({ newTrOpen: true, trError: '', trForm: { code: '', description: '', fromUser: '', toUser: '', fromCc: '', toCc: '', date: new Date().toISOString().slice(0, 10) } }); };
+  closeNewTr = () => { this.setState({ newTrOpen: false }); };
+  submitNewTr = () => {
+    const f = this.state.trForm;
+    const v = k => (f[k] || '').trim();
+    const pcs = this._patCcs(); if ((v('fromCc') && pcs.indexOf(v('fromCc')) < 0) || (v('toCc') && pcs.indexOf(v('toCc')) < 0)) { this.setState({ trError: 'Use um centro de custo do tipo Patrimônio cadastrado.' }); return; }
+    if (!v('code') || !v('description') || !v('fromUser') || !v('toUser') || !f.date) return this.setState({ trError: 'Preencha todos os campos.' });
+    if (v('fromUser').toLowerCase() === v('toUser').toLowerCase()) return this.setState({ trError: 'O novo responsável deve ser diferente do atual.' });
+    if (f.id) {
+      const before = this.state.transfers.find(t => t.id === f.id);
+      this._setTransfers(this.state.transfers.map(t => t.id === f.id ? { ...t, code: v('code').toUpperCase(), description: v('description'), fromUser: v('fromUser'), toUser: v('toUser'), fromCc: v('fromCc'), toCc: v('toCc'), date: f.date.split('-').reverse().join('/') } : t));
+      if (window.DAAudit) window.DAAudit.log('Transferência editada', 'patrimonio', (before ? before.code : '') + ' · ' + v('description'));
+      clearTimeout(this._toastT); this.setState({ newTrOpen: false, toastMsg: 'Transferência ' + v('code').toUpperCase() + ' atualizada' }); this._toastT = setTimeout(() => this.setState({ toastMsg: '' }), 2500);
+      return;
+    }
+    if ((window.DAConfig ? window.DAConfig.get('patrim.bloqueioDuplo') : true) && this.state.transfers.some(t => t.code.toUpperCase() === v('code').toUpperCase() && t.status !== 'Realizado' && t.status !== 'Recusado')) return this.setState({ trError: 'Já existe transferência pendente para este bem.' });
+    const tr = { id: Date.now(), code: v('code').toUpperCase(), description: v('description'), fromUser: v('fromUser'), fromCc: v('fromCc'), toCc: v('toCc'), toUser: v('toUser'), date: f.date.split('-').reverse().join('/'), status: 'Pendente', statusBg: '#FEF3C7', statusColor: '#92400E' };
+    clearTimeout(this._toastT);
+    this._setTransfers([tr, ...this.state.transfers]);
+    this.setState({ newTrOpen: false, toastMsg: 'Transferência ' + tr.code + ' registrada' });
+    this._toastT = setTimeout(() => this.setState({ toastMsg: '' }), 2500);
+  };
+
+  componentDidUpdate(pp, ps) { if (ps && ps.transfers !== this.state.transfers) { try { localStorage.setItem('DA_patrimonio_transf_v1', JSON.stringify(this.state.transfers)); } catch (e) {} } }
+  componentDidMount() {
+    this._onCc = () => this.setState(s => ({ ccTick: s.ccTick + 1 })); window.addEventListener('costcenterschange', this._onCc);
+    const wcc = () => { if (window.DACostCenters) this._onCc(); else setTimeout(wcc, 150); }; wcc();
+    this.handleResize = () => { this.setState({ isMobile: window.innerWidth < 900 }); };
+    window.addEventListener('resize', this.handleResize);
+  }
+  componentWillUnmount() {
+    window.removeEventListener('resize', this.handleResize);
+  }
+  openMobileMenu = () => { this.setState({ mobileMenuOpen: true }); };
+  closeMobileMenu = () => { this.setState({ mobileMenuOpen: false }); };
+  handleOpenModal = (e) => {
+    const id = parseInt(e.currentTarget.getAttribute('data-transfer-id'), 10);
+    this.setState({ modalOpen: true, selectedTransferId: id });
+  };
+  handleCloseModal = () => { this.setState({ modalOpen: false }); };
+  stopPropagation = (e) => { e.stopPropagation(); };
+
+  handleSign = () => {
+    this.setState(s => ({
+      transfers: s.transfers.map(t =>
+        t.toUser === s.currentUser && t.status === 'Pendente'
+          ? { ...t, status: 'Verificar transferência' }
+          : t
+      )
+    }));
+  };
+  handleReject = () => {
+    this.setState(s => ({
+      transfers: s.transfers.map(t =>
+        t.toUser === s.currentUser && t.status === 'Pendente'
+          ? { ...t, status: 'Recusado', statusBg: '#FEE2E2', statusColor: '#991B1B' }
+          : t
+      )
+    }));
+  };
+
+  _shellVals() {
+    if (!this._navBound) {
+      this._navBound = true;
+      window.addEventListener('resize', () => this.forceUpdate());
+      window.addEventListener('themechange', () => this.forceUpdate());
+    }
+    const st = this.state || {};
+    const isMobile = window.innerWidth < 900;
+    const open = !!st.navMenuOpen && isMobile;
+    const norm = s => String(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    const q = norm((st.navSearch || '').trim());
+    const INDEX = [["Dashboard.dc.html","▦","Painel de Controle","Sistemas & Gestão","painel dashboard indicadores alertas prazos fluxo"],["AlmoxarifadoAmostragem.dc.html","📦","Almoxarifado","Sistemas & Gestão","almoxarifado estoque amostragem materiais contagem"],["MocoesHomenagens.dc.html","🎗","Moções & Homenagens","Sistemas & Gestão","mocoes homenagens galeria vereador portaria"],["PatrimonioModule.dc.html","🏛","Patrimônio","Sistemas & Gestão","patrimonio bens tombamento transferencias ativos"],["UserProfile.dc.html","👤","Meus Dados (Perfil)","Sistemas & Gestão","perfil meus dados telefone email aniversario"],["ComprasModule.dc.html","🛒","Compras & Licitações","Sistemas & Gestão","compras licitacoes requisicoes fornecedores pregao"],["ProtocoloModule.dc.html","📋","Protocolo","Complementares","protocolo documentos processos prazos"],["RHModule.dc.html","🧑‍💼","Gestão de Pessoal","Complementares","rh recursos humanos servidores ferias"],["AnalyticsModule.dc.html","📈","Analytics & Relatórios","Complementares","analytics relatorios metricas indicadores"],["AuditLog.dc.html","🛡","Log e Auditoria","Administração","log auditoria seguranca acessos lgpd logins"],["Configuracoes.dc.html","⚙","Configurações do Sistema","Administração","configuracoes parametros parametrizacao ajustes alertas limites acessos perfis"],["Legislacoes.dc.html","⚖","Legislações","Administração","legislacao leis decretos portarias resolucoes recomendacoes normas"]];
+    const results = q ? INDEX.filter(i => norm(i[2] + ' ' + i[4]).includes(q)).slice(0, 6).map(i => ({ href: i[0], icon: i[1], label: i[2], group: i[3], go: () => { window.location.href = i[0]; } })) : [];
+    return {
+      navIsMobile: isMobile,
+      navOverlayVisible: open,
+      navSidebarPosition: isMobile ? 'fixed' : 'sticky',
+      navSidebarTransform: isMobile ? (open ? 'translateX(0)' : 'translateX(-100%)') : 'translateX(0)',
+      navOpen: () => this.setState({ navMenuOpen: true }),
+      navClose: () => this.setState({ navMenuOpen: false }),
+      navGutter: isMobile ? '16px' : '36px',
+      navHeaderPad: isMobile ? '18px 16px 12px' : '28px 36px 16px',
+      navTitleSize: isMobile ? '24px' : '30px',
+      navShowBreadcrumb: !isMobile,
+      navSearch: st.navSearch || '',
+      navSearchInput: (e) => this.setState({ navSearch: e.target.value, navSearchFocused: true }),
+      navSearchFocus: () => this.setState({ navSearchFocused: true }),
+      navSearchBlur: () => setTimeout(() => this.setState({ navSearchFocused: false }), 150),
+      navSearchKey: (e) => {
+        if (e.key === 'Enter' && results.length) window.location.href = results[0].href;
+        if (e.key === 'Escape') this.setState({ navSearch: '', navSearchFocused: false });
+      },
+      navSearchResults: results,
+      navSearchOpen: !!(st.navSearchFocused && q),
+      navSearchEmpty: !!q && results.length === 0,
+      ...(() => { const dk = !!(window.theme && window.theme.isDark && window.theme.isDark()); return { navThemeDark: dk, navThemeIsLight: !dk, navThemeLightBg: dk ? 'transparent' : 'rgba(255,255,255,0.9)', navThemeLightFg: dk ? 'rgba(255,255,255,0.6)' : '#1C543A', navThemeDarkBg: dk ? 'rgba(255,255,255,0.18)' : 'transparent', navThemeDarkFg: dk ? '#FFFFFF' : 'rgba(255,255,255,0.6)', navThemeLight: () => { if (window.theme) window.theme.set('light'); }, navThemeDarkSet: () => { if (window.theme) window.theme.set('dark'); } }; })()
+    };
+  }
+
+  _auditWrap = (() => {
+    if (this.handleSign) { const o = this.handleSign; this.handleSign = (...x) => { const r = o(...x); if (window.DAAudit) window.DAAudit.log('Termo de responsabilidade assinado', 'patrimonio', (this.state.selectedItem && (this.state.selectedItem.title || this.state.selectedItem.id)) || ''); return r; }; }
+    if (this.handleReject) { const o = this.handleReject; this.handleReject = (...x) => { const r = o(...x); if (window.DAAudit) window.DAAudit.log('Termo de responsabilidade recusado', 'patrimonio', (this.state.selectedItem && (this.state.selectedItem.title || this.state.selectedItem.id)) || ''); return r; }; }
+  })();
+
+  renderVals() {
+    const selectedTransfer = this.state.transfers.find(t => t.id === this.state.selectedTransferId) || {};
+    const myPendingTransfer = this.state.transfers.find(t => t.toUser === this.state.currentUser && t.status === 'Pendente') || null;
+    const isMobile = this.state.isMobile;
+    return {
+      ...this._shellVals(),
+      isMobile: isMobile,
+      mobileMenuOpen: this.state.mobileMenuOpen,
+      openMobileMenu: this.openMobileMenu,
+      closeMobileMenu: this.closeMobileMenu,
+      sidebarPosition: isMobile ? 'fixed' : 'sticky',
+      sidebarTransform: isMobile ? (this.state.mobileMenuOpen ? 'translateX(0)' : 'translateX(-100%)') : 'translateX(0)',
+      mainPadding: isMobile ? '18px 16px 32px' : '28px 36px 40px',
+      titleFontSize: isMobile ? '22px' : '28px',
+      ...(() => { const tv = this._termVals(); const v = this.state.patView; return { ...tv, isTransfView: v === 'transf', isTermosView: v === 'termos', patCcs: this._patCcs(),
+        setTrFromCc: this.setTrField('fromCc'), setTrToCc: this.setTrField('toCc'),
+        patTabs: [['transf', 'Transferências', 0], ['termos', 'Termos de responsabilidade', tv.pend]].map(([k, l, n]) => ({ label: l, active: v === k, color: v === k ? '#1C543A' : '#666666', border: v === k ? '#1C543A' : 'transparent', hasCount: n > 0, count: n, go: () => this.setState({ patView: k }) })) }; })(),
+      transfers: this.state.transfers.map(t => { const s = t.status === 'Concluído' ? 'Realizado' : t.status; const i = this.STAGES.indexOf(s), st = this.STAGE_STYLE[s] || this.STAGE_STYLE['Pendente'], last = i >= this.STAGES.length - 1 || i < 0;
+        return { ...t, fromCcLabel: this._ccOf(t, 'from'), toCcLabel: this._ccOf(t, 'to'), status: s, statusBg: st[0], statusColor: st[1], noBack: i <= 0, noNext: last, canBack: i > 0, canNext: !last, prevLabel: i > 0 ? this.STAGES[i - 1] : '', nextLabel: last ? '' : this.STAGES[i + 1], backColor: i <= 0 ? '#CCCCCC' : '#1D1D1B',
+          nextBg: last ? '#FFFFFF' : '#1C543A', nextColor: last ? '#CCCCCC' : '#FFFFFF', nextBorder: last ? '#E0E0E0' : '#1C543A', nextTitle: last ? 'Etapa final' : 'Avançar para ' + this.STAGES[i + 1],
+          steps: this.STAGES.map((x, k) => ({ color: i >= 0 && k <= i ? '#1C543A' : '#E8E8E8' })),
+          back: (e) => this.moveStage(t.id, -1, e), next: (e) => this.moveStage(t.id, 1, e), edit: (e) => this.openEditTr(t.id, e) }; }),
+      trTitle: this.state.trForm && this.state.trForm.id ? 'Editar transferência' : 'Nova transferência de patrimônio',
+      trSaveLabel: this.state.trForm && this.state.trForm.id ? 'Salvar alterações' : 'Registrar transferência',
+      modalOpen: this.state.modalOpen,
+      selectedTransfer: selectedTransfer,
+      myPendingTransfer: myPendingTransfer,
+      newTrOpen: this.state.newTrOpen, openNewTr: this.openNewTr, closeNewTr: this.closeNewTr, submitNewTr: this.submitNewTr,
+      trForm: this.state.trForm, trError: this.state.trError, toastMsg: this.state.toastMsg,
+      setTrCode: this.setTrCode, setTrDesc: this.setTrDesc, setTrFrom: this.setTrFrom, setTrTo: this.setTrTo, setTrDate: this.setTrDate,
+      handleOpenModal: this.handleOpenModal,
+      handleCloseModal: this.handleCloseModal,
+      stopPropagation: this.stopPropagation,
+      handleSign: this.handleSign,
+      handleReject: this.handleReject
+    };
+  }
+}
+
+</script>
+</body>
+</html>

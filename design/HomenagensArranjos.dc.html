@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <script src="./theme.js"></script>
+  <script src="./liccont.js"></script>
+  <script src="./vereadores.js"></script>
+</helmet>
+<div style="display: flex; flex-direction: column; gap: 16px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #1D1D1B;">
+  <div style="display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; align-items: center;">
+    <div>
+      <h2 style="font-size: 18px; font-weight: 700;">Arranjos e Placas</h2>
+      <p style="font-size: 12.5px; color: #666666; margin-top: 2px;">Logística de entrega das homenagens. As datas agendadas aparecem no Calendário Integrado do Protocolo.</p>
+    </div>
+    <button onClick="{{ openNew }}" style="height: 40px; padding: 0 16px; background-color: #1C543A; color: #FFFFFF; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer;" style-hover="background-color: #153A2E;">+ Nova entrega</button>
+  </div>
+  <div style="background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 8px; padding: 14px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+    <input type="search" value="{{ q }}" onInput="{{ setQ }}" list="dl-ver-arr" placeholder="Buscar homenageado, vereador ou decreto" aria-label="Buscar entrega" style="flex: 1; min-width: 200px; height: 40px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px;" style-focus="border-color: #1C543A; outline: none;"/><datalist id="dl-ver-arr"><sc-for list="{{ vereadores }}" as="vv" hint-placeholder-count="6"><option value="{{ vv }}"></option></sc-for></datalist>
+    <select value="{{ filter }}" onChange="{{ setFilter }}" aria-label="Filtrar entregas" style="height: 40px; padding: 0 10px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; background-color: #FFFFFF;">
+      <option value="todos">Todas</option>
+      <option value="proximas">Próximas entregas</option>
+      <option value="agendar">A agendar</option>
+      <option value="pendentes">Com item pendente</option>
+    </select>
+    <span style="font-size: 12px; color: #666666;">{{ shown }} entrega(s)</span>
+  </div>
+  <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px;">
+    <sc-for list="{{ rows }}" as="h" hint-placeholder-count="6">
+      <div style="background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 10px;">
+        <div style="display: flex; justify-content: space-between; gap: 10px; align-items: flex-start;">
+          <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 54px; height: 54px; border-radius: 8px; background-color: {{ h.dateBg }}; color: {{ h.dateColor }};">
+            <span style="font-size: 18px; font-weight: 800; line-height: 1;">{{ h.day }}</span><span style="font-size: 10.5px; font-weight: 700; text-transform: uppercase;">{{ h.mon }}</span>
+          </div>
+          <div style="flex: 1; min-width: 0;">
+            <p style="font-size: 14px; font-weight: 700; color: #1D1D1B;">{{ h.homenageado }}</p>
+            <p style="font-size: 12px; color: #444444; margin-top: 2px;">{{ h.honraria }} · Ver. {{ h.vereador }}</p>
+            <p style="font-size: 11.5px; color: #666666; margin-top: 2px;">{{ h.when }}</p>
+          </div>
+          <button onClick="{{ h.edit }}" aria-label="Editar entrega" style="height: 34px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 6px; background-color: #FFFFFF; font-size: 12px; font-weight: 600; color: #1C543A; cursor: pointer;" style-hover="background-color: #F4F9F6;">Editar</button>
+        </div>
+        <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+          <sc-for list="{{ h.items }}" as="it" hint-placeholder-count="2"><span style="font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 999px; background-color: {{ it.bg }}; color: {{ it.color }};">{{ it.label }}</span></sc-for>
+        </div>
+        <p style="font-size: 11.5px; color: #666666;">Processo {{ h.processoFmt }} · Decreto {{ h.decreto }}</p>
+        <sc-if value="{{ h.hasObs }}" hint-placeholder-val="{{ false }}"><p style="font-size: 11.5px; color: #92400E;">{{ h.obs }}</p></sc-if>
+      </div>
+    </sc-for>
+  </div>
+
+  <sc-if value="{{ formOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ close }}" style="position: fixed; inset: 0; background-color: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 95;">
+      <div onClick="{{ stop }}" style="background-color: #FFFFFF; border-radius: 12px; width: 100%; max-width: 520px; max-height: 90vh; overflow-y: auto; padding: 22px; display: flex; flex-direction: column; gap: 12px;">
+        <h3 style="font-size: 16px; font-weight: 700;">{{ formTitle }}</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+          <sc-for list="{{ fields }}" as="f" hint-placeholder-count="8">
+            <div><label style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 6px;">{{ f.label }}</label>
+              <sc-if value="{{ f.isInput }}" hint-placeholder-val="{{ true }}"><input type="{{ f.type }}" value="{{ f.value }}" onInput="{{ f.set }}" style="width: 100%; height: 40px; padding: 0 12px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px;" style-focus="border-color: #1C543A; outline: none;"/></sc-if>
+              <sc-if value="{{ f.isVereador }}" hint-placeholder-val="{{ false }}"><select value="{{ f.value }}" onChange="{{ f.set }}" style="width: 100%; height: 40px; padding: 0 10px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; background-color: #FFFFFF; color: #1D1D1B;"><option value="">Selecione o vereador autor…</option><sc-for list="{{ f.options }}" as="vo" hint-placeholder-count="6"><option value="{{ vo }}">{{ vo }}</option></sc-for></select></sc-if>
+            </div>
+          </sc-for>
+        </div>
+        <div><label style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 6px;">Situação</label>
+          <select value="{{ form.status }}" onChange="{{ setStatus }}" style="width: 100%; height: 40px; padding: 0 10px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 13px; background-color: #FFFFFF;">
+            <sc-for list="{{ statusOptions }}" as="so" hint-placeholder-count="5"><option value="{{ so }}">{{ so }}</option></sc-for>
+          </select>
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 10px;">
+          <button onClick="{{ close }}" style="height: 40px; padding: 0 16px; border: 1px solid #E0E0E0; border-radius: 8px; background-color: #FFFFFF; font-size: 13px; cursor: pointer;">Cancelar</button>
+          <button onClick="{{ submit }}" style="height: 40px; padding: 0 16px; border: none; border-radius: 8px; background-color: #1C543A; color: #FFFFFF; font-size: 13px; font-weight: 700; cursor: pointer;">Salvar</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: &quot;1000px&quot;, &quot;height&quot;: &quot;800px&quot;}}">
+class Component extends DCLogic {
+  state = { ready: !!window.DALic, q: '', filter: 'todos', form: null };
+  STATUS = ['PLACA ENCOMENDADA', 'ARRANJO ENCOMENDADO', 'PLACA ENTREGUE E ARRANJO ENCOMENDADO', 'PLACA ENTREGUE - EVENTO FORA', 'ENTREGUE'];
+  FIELDS = [['homenageado', 'Homenageado', 'text'], ['honraria', 'Honraria', 'text'], ['vereador', 'Vereador autor', 'vereador'], ['material', 'Material (placa, arranjo, medalha)', 'text'], ['processo', 'Processo do pedido', 'text'], ['decreto', 'Decreto', 'text'], ['data', 'Data da entrega', 'date'], ['horario', 'Horário', 'text'], ['obs', 'Observações', 'text']];
+  componentDidMount() {
+    this._onVer = () => this.forceUpdate(); window.addEventListener('vereadoreschange', this._onVer);
+    const wv = () => { if (window.DAVereadores && window.DALic) { window.DAVereadores.merge(window.DALic.get().homenagens.map(h => h.vereador)); this.forceUpdate(); } else setTimeout(wv, 150); }; wv();
+    const wait = () => { if (window.DALic) this.setState({ ready: true }); else setTimeout(wait, 150); };
+    wait(); this._on = () => this.forceUpdate(); window.addEventListener('licchange', this._on);
+  }
+  componentWillUnmount() { window.removeEventListener('licchange', this._on); }
+  renderVals() {
+    const L = window.DALic, st = this.state;
+    const f = st.form || {};
+    const vers = window.DAVereadores ? window.DAVereadores.all() : [];
+    const common = { vereadores: vers, q: st.q, filter: st.filter, setQ: e => this.setState({ q: e.target.value }), setFilter: e => this.setState({ filter: e.target.value }),
+      stop: e => e.stopPropagation(), close: () => this.setState({ form: null }), formOpen: !!st.form, form: f, formTitle: f.id ? 'Editar entrega' : 'Nova entrega',
+      statusOptions: this.STATUS, setStatus: e => { const v = e.target.value; this.setState(s => ({ form: { ...s.form, status: v } })); },
+      fields: this.FIELDS.map(([k, label, type]) => ({ label, type: type === 'vereador' ? 'text' : type, isInput: type !== 'vereador', isVereador: type === 'vereador', options: vers.indexOf(f[k] || '') < 0 && f[k] ? [f[k]].concat(vers) : vers, value: f[k] || '', set: e => { const v = e.target.value; this.setState(s => ({ form: { ...s.form, [k]: v } })); } })),
+      openNew: () => this.setState({ form: { material: 'Placa', status: 'PLACA ENCOMENDADA', horario: '19h' } }),
+      submit: () => { if (!L || !(f.homenageado || '').trim()) return; if (!(f.vereador || '').trim()) return; L.saveHomenagem({ ...f, dataTexto: f.data ? '' : 'AGENDAR' }); this.setState({ form: null }); } };
+    if (!L) return { ...common, rows: [], shown: 0 };
+    const M = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+    const hoje = new Date().toISOString().slice(0, 10);
+    const q = st.q.trim().toLowerCase();
+    const all = L.get().homenagens.slice().sort((a, b) => (a.data || '9999').localeCompare(b.data || '9999'));
+    const pending = h => /ENCOMENDAD/i.test(h.status);
+    const list = all.filter(h => (!q || (h.homenageado + ' ' + h.vereador + ' ' + h.decreto).toLowerCase().includes(q)) && (st.filter === 'todos' || (st.filter === 'proximas' && h.data && h.data >= hoje) || (st.filter === 'agendar' && !h.data) || (st.filter === 'pendentes' && pending(h))));
+    const item = (label, done) => ({ label, bg: done ? '#EAF3EE' : '#FDF8EC', color: done ? '#1C543A' : '#92400E' });
+    return { ...common, shown: list.length,
+      rows: list.map(h => { const s = h.status || ''; const items = [];
+        if (/placa/i.test(h.material)) items.push(item('Placa ' + (/PLACA ENTREGUE|^ENTREGUE/i.test(s) ? 'entregue' : 'encomendada'), /PLACA ENTREGUE|^ENTREGUE/i.test(s)));
+        if (/arranjo/i.test(h.material)) items.push(item('Arranjo ' + (/^ENTREGUE/i.test(s) ? 'entregue' : 'encomendado'), /^ENTREGUE/i.test(s)));
+        if (/medalha/i.test(h.material)) items.push(item('Medalha', /^ENTREGUE/i.test(s)));
+        if (/EVENTO FORA/i.test(s)) items.push({ label: 'Evento fora', bg: '#EEF4FD', color: '#1E40AF' });
+        const past = h.data && h.data < hoje;
+        return { ...h, items, hasObs: !!h.obs, processoFmt: h.processo && h.processo !== '-' ? h.processo : '—',
+          day: h.data ? h.data.slice(8, 10) : '—', mon: h.data ? M[+h.data.slice(5, 7) - 1] : 'agendar',
+          dateBg: !h.data ? '#FDF8EC' : past ? '#F0F0F0' : '#1C543A', dateColor: !h.data ? '#92400E' : past ? '#666666' : '#FFFFFF',
+          when: h.data ? L.fmt(h.data) + (h.horario ? ' às ' + h.horario : '') + (past ? ' · realizada' : '') : 'Data e horário a agendar',
+          edit: () => this.setState({ form: { ...h } }) }; }) };
+  }
+}
+</script>
+</body>
+</html>

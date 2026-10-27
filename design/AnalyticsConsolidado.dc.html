@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <script src="./theme.js"></script>
+  <script src="./liccont.js"></script>
+  <script src="./sectors.js"></script>
+</helmet>
+<div style="display: flex; flex-direction: column; gap: 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #1D1D1B;">
+  <div>
+    <h2 style="font-size: 18px; font-weight: 700;">Visão consolidada</h2>
+    <p style="font-size: 12.5px; color: #666666; margin-top: 2px; max-width: 720px;">Indicadores calculados a partir dos dados lançados nos módulos. Para detalhes e ações, use o link de cada bloco.</p>
+  </div>
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px;">
+    <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="6">
+      <a href="{{ k.href }}" style="display: block; text-decoration: none; background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 8px; padding: 14px;" style-hover="border-color: #1C543A;">
+        <p style="font-size: 11px; font-weight: 700; color: #666666; text-transform: uppercase; letter-spacing: 0.3px;">{{ k.label }}</p>
+        <p style="font-size: 22px; font-weight: 800; color: {{ k.color }}; margin-top: 4px;">{{ k.value }}</p>
+        <p style="font-size: 11.5px; color: #666666; margin-top: 2px;">{{ k.sub }}</p>
+      </a>
+    </sc-for>
+  </div>
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; align-items: start;">
+    <sc-for list="{{ blocks }}" as="b" hint-placeholder-count="4">
+      <div style="background-color: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 8px; padding: 18px; display: flex; flex-direction: column; gap: 12px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; padding-bottom: 10px; border-bottom: 1px solid #1C543A;">
+          <h3 style="font-size: 14.5px; font-weight: 700;">{{ b.title }}</h3>
+          <a href="{{ b.href }}" style="font-size: 12.5px; font-weight: 700; color: #1C543A; text-decoration: none; white-space: nowrap;" style-hover="text-decoration: underline;">{{ b.linkLabel }} →</a>
+        </div>
+        <sc-for list="{{ b.rows }}" as="r" hint-placeholder-count="4">
+          <div style="display: flex; flex-direction: column; gap: 4px;">
+            <div style="display: flex; justify-content: space-between; gap: 8px; font-size: 12.5px;"><span style="font-weight: 600; min-width: 0; overflow-wrap: anywhere;">{{ r.label }}</span><span style="color: {{ r.color }}; font-weight: 700; white-space: nowrap;">{{ r.value }}</span></div>
+            <div style="height: 6px; border-radius: 999px; background-color: #EDEDEB;"><div style="height: 6px; border-radius: 999px; background-color: {{ r.color }}; width: {{ r.bar }};"></div></div>
+          </div>
+        </sc-for>
+        <sc-if value="{{ b.hasNote }}" hint-placeholder-val="{{ false }}"><p style="font-size: 12.5px; color: #444444;">{{ b.note }}</p></sc-if>
+        <sc-if value="{{ b.empty }}" hint-placeholder-val="{{ false }}"><p style="font-size: 12.5px; color: #666666;">Sem dados lançados.</p></sc-if>
+      </div>
+    </sc-for>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: &quot;1100px&quot;, &quot;height&quot;: &quot;900px&quot;}}">
+class Component extends DCLogic {
+  state = { tick: 0 };
+  componentDidMount() {
+    const bump = () => this.setState(s => ({ tick: s.tick + 1 }));
+    const w = () => { if (window.DALic) bump(); else setTimeout(w, 150); }; w();
+    this._on = bump; ['licchange', 'sectorschange', 'auditchange'].forEach(e => window.addEventListener(e, bump));
+  }
+  componentWillUnmount() { ['licchange', 'sectorschange', 'auditchange'].forEach(e => window.removeEventListener(e, this._on)); }
+  renderVals() {
+    const L = window.DALic;
+    if (!L) return { kpis: [], blocks: [] };
+    const db = L.get();
+    const bars = (pairs, color, fmt) => { const mx = Math.max(1, ...pairs.map(p => p[1])); return pairs.map(([label, v, c]) => ({ label, value: fmt ? fmt(v) : String(v), color: c || color, bar: Math.round(v / mx * 100) + '%' })); };
+    const procs = db.processes.map(p => ({ p, i: L.procInfo(p) }));
+    const ativos = procs.filter(x => !x.i.concluido);
+    const atras = procs.filter(x => x.i.atrasado).length;
+    const contr = db.contracts.map(c => ({ c, ci: L.contractInfo(c) }));
+    const venc = contr.filter(x => x.ci.dias >= 0 && x.ci.dias <= 120).length;
+    const dot = (db.dotacoes || []).map(d => ({ d, i: L.dotacaoInfo(d) }));
+    const orc = dot.reduce((a, x) => a + x.d.orcado, 0), emp = dot.reduce((a, x) => a + x.i.empenhado, 0);
+    const hoje = new Date().toISOString().slice(0, 10);
+    const entregas = db.homenagens.filter(h => h.data && h.data >= hoje).length;
+    const sectors = window.DASectors ? window.DASectors.get() : L.SETORES;
+    const bySector = sectors.map(s => [s, ativos.filter(x => x.p.setor === s).length]);
+    const byModo = L.MODOS.map(m => [m, procs.filter(x => x.p.modo === m).length]);
+    const byFase = [['Fase interna', ativos.filter(x => x.i.fase === 'interna').length], ['Fase externa', ativos.filter(x => x.i.fase === 'externa').length], ['Concluídos', procs.length - ativos.length, '#7FA693']];
+    const valorBySector = sectors.map(s => [s, ativos.filter(x => x.p.setor === s).reduce((a, x) => a + (x.p.valor || 0), 0)]);
+    const contrRows = contr.slice().sort((a, b) => a.ci.dias - b.ci.dias).slice(0, 5).map(x => [x.c.contrato + ' · ' + x.c.contratada.split(' ').slice(0, 2).join(' '), Math.max(0, x.ci.dias), x.ci.dias <= 30 ? '#B91C1C' : x.ci.dias <= 60 ? '#B45309' : x.ci.dias <= 120 ? '#1E40AF' : '#1C543A']);
+    const dotRows = dot.slice().sort((a, b) => b.i.pct - a.i.pct).slice(0, 5).map(x => ['Ficha ' + x.d.ficha + '/' + x.d.sub, Math.round(x.i.pct * 100), x.i.pct >= 0.8 ? '#B45309' : '#1C543A']);
+    const mk = (title, href, linkLabel, rows) => ({ title, href, linkLabel, rows, empty: !rows.length || rows.every(r => r.value === '0' || r.value === 'R$ 0,00') });
+    return {
+      kpis: [
+        { label: 'Processos ativos', value: String(ativos.length), sub: atras + ' com etapa atrasada', color: atras ? '#B45309' : '#1C543A', href: 'ComprasModule.dc.html?tab=processos' },
+        { label: 'Valor estimado em curso', value: L.brl(ativos.reduce((a, x) => a + (x.p.valor || 0), 0)), sub: 'Soma dos processos ativos', color: '#1D1D1B', href: 'ComprasModule.dc.html?tab=processos' },
+        { label: 'Contratos vencendo', value: String(venc), sub: 'Nos próximos 120 dias', color: venc ? '#B45309' : '#1C543A', href: 'ComprasModule.dc.html?tab=contratos' },
+        { label: 'Execução da dotação', value: orc ? Math.round(emp / orc * 100) + '%' : '—', sub: L.brl(emp) + ' de ' + L.brl(orc), color: '#1C543A', href: 'ComprasModule.dc.html?tab=analytics' },
+        { label: 'Alertas ativos', value: String(L.alerts().length), sub: 'Contratos, TCN, Refazer e atrasos', color: L.alerts().length ? '#B91C1C' : '#1C543A', href: 'NotificationsModule.dc.html' },
+        { label: 'Entregas de homenagem', value: String(entregas), sub: 'Agendadas a partir de hoje', color: '#1C543A', href: 'MocoesHomenagens.dc.html' }
+      ],
+      blocks: [
+        mk('Processos ativos por setor requisitante', 'ComprasModule.dc.html?tab=processos', 'Controle de Processos', bars(bySector, '#1C543A')),
+        mk('Valor estimado por setor', 'ComprasModule.dc.html?tab=processos', 'Controle de Processos', bars(valorBySector, '#2E6B4E', v => L.brl(v))),
+        mk('Processos por modo de contratação', 'ComprasModule.dc.html?tab=processos', 'Controle de Processos', bars(byModo, '#1C543A')),
+        mk('Situação das fases', 'ComprasModule.dc.html?tab=processos', 'Controle de Processos', bars(byFase, '#1C543A')),
+        mk('Contratos mais próximos do fim (dias)', 'ComprasModule.dc.html?tab=contratos', 'Contratos', bars(contrRows, '#1C543A', v => v + ' dias')),
+        mk('Dotações mais utilizadas (%)', 'ComprasModule.dc.html?tab=analytics', 'Dotação Orçamentária', bars(dotRows, '#1C543A', v => v + '%')),
+        mk('Carga por agente de contratação', 'ComprasModule.dc.html?tab=processos', 'Controle de Processos', bars(L.loads().map(l => [l.agente, l.ativos, l.atrasados ? '#B45309' : '#1C543A']), '#1C543A')),
+        { title: 'Gestão de Pessoal', href: 'RHModule.dc.html?tab=analytics', linkLabel: 'Indicadores de pessoal', rows: [], empty: false, hasNote: true, note: 'Quadro de servidores, afastamentos e férias por setor ficam no próprio módulo de Gestão de Pessoal.' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>
