@@ -1,214 +1,393 @@
-openapi: 3.0.0
+# Gerado por backend/scripts/openapi.js (npm run openapi) — não edite à mão.
+openapi: 3.0.3
 info:
-  title: Sistema de Gestão Integrada - Câmara Municipal
-  description: API RESTful para gestão de Compras, Protocolo, RH, Almoxarifado e Moções/Homenagens
+  title: Sistema DA — Diretoria Administrativa da Câmara Municipal
   version: 1.0.0
-  contact:
-    name: Diretoria Administrativa
-    email: api@camara.sp.gov.br
-  license:
-    name: Proprietary
-    url: https://camara.sp.gov.br/legal
+  description: >-
+    API do Sistema DA (Node.js/Express + PostgreSQL). Gerado por `npm run openapi` a partir das rotas registradas — não edite à mão.
 
+
+    Autenticação: `Authorization: Bearer <token>` obtido em `POST /api/auth/login`. A sessão expira por inatividade (Configurações › Geral).
+    Toda autorização é validada no servidor: rota de módulo sem acesso devolve 403 e é registrada na auditoria. Erros 500 não expõem
+    detalhes internos.
 servers:
-  - url: https://api.camara.sp.gov.br/v1
-    description: Production
-  - url: http://localhost:3000/v1
-    description: Development
-
+  - url: http://localhost:3000
+    description: Desenvolvimento
+security:
+  - bearerAuth: []
+tags:
+  - name: Autenticação
+  - name: Perfil
+  - name: Usuários
+  - name: Auditoria
+  - name: Configurações
+  - name: Cadastros
+  - name: Painel
+  - name: Gestão de Pessoal
+  - name: Compras & Licitações
+  - name: Almoxarifado
+  - name: Patrimônio
+  - name: Protocolo
+  - name: Moções & Homenagens
+  - name: Legislações
+  - name: Notificações
+  - name: Analytics
 paths:
-  /auth/login:
-    post:
-      operationId: loginUser
+  /health:
+    get:
       tags:
-        - Authentication
-      summary: Autenticação de usuário
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - email
-                - password
-              properties:
-                email:
-                  type: string
-                  format: email
-                  example: roberto.alencar@camara.sp.gov.br
-                password:
-                  type: string
-                  format: password
-                  minLength: 8
+        - Sistema
+      summary: Verificação de saúde do serviço
+      description: '{ ok: true }'
       responses:
         '200':
-          description: Login bem-sucedido
+          description: Sucesso
           content:
             application/json:
               schema:
                 type: object
-                properties:
-                  token:
-                    type: string
-                    description: JWT access token (válido por 24h)
-                  user:
-                    $ref: '#/components/schemas/User'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
         '400':
-          $ref: '#/components/responses/BadRequestError'
-
-  /auth/logout:
+          $ref: '#/components/responses/Erro'
+      security: []
+  /api/auth/login:
     post:
-      operationId: logoutUser
       tags:
-        - Authentication
-      summary: Logout e invalidação de token
-      security:
-        - BearerAuth: []
-      responses:
-        '200':
-          description: Logout realizado com sucesso
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-
-  /users:
-    get:
-      operationId: listUsers
-      tags:
-        - Users (RH)
-      summary: Listar todos os usuários do sistema
-      security:
-        - BearerAuth: []
-      parameters:
-        - name: role
-          in: query
-          schema:
-            type: string
-            enum: [admin, user]
-          description: Filtrar por função
-        - name: status
-          in: query
-          schema:
-            type: string
-            enum: [active, invited, archived]
-        - name: sector
-          in: query
-          schema:
-            type: string
-            description: Filtrar por setor
-      responses:
-        '200':
-          description: Lista de usuários
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/User'
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '403':
-          $ref: '#/components/responses/ForbiddenError'
-
-    post:
-      operationId: createUser
-      tags:
-        - Users (RH)
-      summary: Criar novo usuário (requer role=admin)
-      security:
-        - BearerAuth: []
+        - Autenticação
+      summary: Login com usuário (ou matrícula) e senha
+      description: Token JWT e dados do usuário. 401 com tentativas restantes; 423 quando bloqueado.
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+              required:
+                - username
+                - password
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+      security: []
+  /api/auth/me:
+    get:
+      tags:
+        - Autenticação
+      summary: Usuário autenticado, perfis, módulos e preferências
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/auth/logout:
+    post:
+      tags:
+        - Autenticação
+      summary: Encerra a sessão atual (revoga o token)
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/auth/password-rules:
+    get:
+      tags:
+        - Autenticação
+      summary: Regras de senha vigentes (Configurações › Segurança)
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+      security: []
+  /api/auth/forgot-password:
+    post:
+      tags:
+        - Autenticação
+      summary: Solicita redefinição de senha (resposta sempre genérica)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+              required:
+                - email
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+      security: []
+  /api/auth/reset-password:
+    post:
+      tags:
+        - Autenticação
+      summary: Redefine a senha com token de uso único (30 min) ou convite
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+                password:
+                  type: string
+              required:
+                - token
+                - password
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+      security: []
+  /api/auth/password:
+    put:
+      tags:
+        - Autenticação
+      summary: Troca a própria senha (exige a atual; devolve novo token)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                currentPassword:
+                  type: string
+                newPassword:
+                  type: string
+              required:
+                - currentPassword
+                - newPassword
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/auth/preferences:
+    put:
+      tags:
+        - Autenticação
+      summary: Salva preferências do usuário (tema, exercício fiscal)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                theme:
+                  type: string
+                exercicio:
+                  type: integer
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/profile/:
+    get:
+      tags:
+        - Perfil
+      summary: Dados do próprio perfil
+      description: 'Acesso: módulo `perfil` (403 sem permissão).'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+    put:
+      tags:
+        - Perfil
+      summary: Atualiza telefone, e-mail pessoal e aniversário. Nome, matrícula, cargo e e-mail institucional → 403
+      description: 'Acesso: módulo `perfil` (403 sem permissão).'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                phone:
+                  type: string
+                personalEmail:
+                  type: string
+                birthday:
+                  type: string
+                  format: date
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/users/:
+    get:
+      tags:
+        - Usuários
+      summary: Lista usuários com perfis e permissões (leitura registrada — LGPD)
+      description: 'Acesso: perfil Administrativo (403 sem permissão).'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+    post:
+      tags:
+        - Usuários
+      summary: Cria usuário e envia convite por e-mail
+      description: 'Acesso: perfil Administrativo (403 sem permissão).'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                registration:
+                  type: string
+                position:
+                  type: string
+                hierarchy:
+                  type: string
+                department:
+                  type: string
+                roles:
+                  type: array
+                  items: {}
               required:
                 - name
                 - email
-                - role
-                - sector
-              properties:
-                name:
-                  type: string
-                  minLength: 3
-                  example: Ana Beatriz Silva
-                email:
-                  type: string
-                  format: email
-                role:
-                  type: string
-                  enum: [admin, user]
-                sector:
-                  type: string
-                  example: Almoxarifado
-                phone:
-                  type: string
-                  pattern: '^\(\d{2}\)\s\d{4,5}-\d{4}$'
-                permissions:
-                  type: object
-                  properties:
-                    compras:
-                      type: boolean
-                    protocolo:
-                      type: boolean
-                    rh:
-                      type: boolean
-                    almoxarifado:
-                      type: boolean
-                    mocoes:
-                      type: boolean
+                - registration
+                - roles
       responses:
         '201':
-          description: Usuário criado com sucesso
+          description: Sucesso
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                type: object
         '400':
-          $ref: '#/components/responses/BadRequestError'
+          $ref: '#/components/responses/Erro'
         '401':
-          $ref: '#/components/responses/UnauthorizedError'
+          $ref: '#/components/responses/NaoAutenticado'
         '403':
-          $ref: '#/components/responses/ForbiddenError'
-
-  /users/{userId}:
+          $ref: '#/components/responses/SemPermissao'
+  /api/users/history:
     get:
-      operationId: getUser
       tags:
-        - Users (RH)
-      summary: Obter dados de um usuário específico
-      security:
-        - BearerAuth: []
-      parameters:
-        - name: userId
-          in: path
-          required: true
-          schema:
-            type: integer
+        - Usuários
+      summary: Histórico de alterações de acesso
+      description: 'Acesso: perfil Administrativo (403 sem permissão).'
       responses:
         '200':
-          description: Dados do usuário
+          description: Sucesso
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
-        '404':
-          $ref: '#/components/responses/NotFoundError'
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
         '401':
-          $ref: '#/components/responses/UnauthorizedError'
-
-    patch:
-      operationId: updateUser
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/users/{id}:
+    put:
       tags:
-        - Users (RH)
-      summary: Atualizar dados de um usuário
-      security:
-        - BearerAuth: []
+        - Usuários
+      summary: Edita dados cadastrais do usuário
+      description: 'Acesso: perfil Administrativo (403 sem permissão).'
       parameters:
-        - name: userId
+        - name: id
           in: path
           required: true
           schema:
@@ -224,34 +403,3498 @@ paths:
                   type: string
                 email:
                   type: string
-                  format: email
-                phone:
+                registration:
+                  type: string
+                position:
+                  type: string
+                hierarchy:
+                  type: string
+                department:
+                  type: string
+              required:
+                - name
+                - email
+                - registration
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+        '404':
+          $ref: '#/components/responses/Erro'
+  /api/users/{id}/roles:
+    put:
+      tags:
+        - Usuários
+      summary: Define os perfis (vários por usuário); protege o último Administrativo
+      description: 'Acesso: perfil Administrativo (403 sem permissão).'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                roles:
+                  type: array
+                  items: {}
+              required:
+                - roles
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+        '404':
+          $ref: '#/components/responses/Erro'
+  /api/users/{id}/access/{module}:
+    put:
+      tags:
+        - Usuários
+      summary: Exceção de acesso a um módulo (sobrepõe o perfil)
+      description: 'Acesso: perfil Administrativo (403 sem permissão).'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: module
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                allowed:
+                  type: boolean
+              required:
+                - allowed
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+        '404':
+          $ref: '#/components/responses/Erro'
+    delete:
+      tags:
+        - Usuários
+      summary: Remove a exceção de acesso (volta ao perfil)
+      description: 'Acesso: perfil Administrativo (403 sem permissão).'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: module
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+        '404':
+          $ref: '#/components/responses/Erro'
+  /api/users/{id}/invite:
+    post:
+      tags:
+        - Usuários
+      summary: Reenvia o convite de primeiro acesso
+      description: 'Acesso: perfil Administrativo (403 sem permissão).'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+        '404':
+          $ref: '#/components/responses/Erro'
+  /api/audit/:
+    get:
+      tags:
+        - Auditoria
+      summary: Log de auditoria com filtros e indicadores
+      description: 'Acesso: módulo `auditoria` (403 sem permissão).'
+      parameters:
+        - name: q
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: module
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: level
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: period
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/audit/export.csv:
+    get:
+      tags:
+        - Auditoria
+      summary: Exporta o log filtrado (CSV; exportação auditada)
+      description: 'Acesso: módulo `auditoria` (403 sem permissão).'
+      parameters:
+        - name: q
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: module
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: level
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: period
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Arquivo CSV (UTF-8 com BOM, separador ;)
+          content:
+            text/csv:
+              schema:
+                type: string
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/config/:
+    get:
+      tags:
+        - Configurações
+      summary: Parâmetros do sistema por aba (esquema + valores)
+      description: 'Acesso: perfil Administrativo (403 sem permissão).'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/config/values/{key}:
+    put:
+      tags:
+        - Configurações
+      summary: Altera um parâmetro (validado pelo esquema; auditado)
+      description: 'Acesso: perfil Administrativo (403 sem permissão).'
+      parameters:
+        - name: key
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                value:
+                  type: object
+              required:
+                - value
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+        '404':
+          $ref: '#/components/responses/Erro'
+  /api/config/reset/{tab}:
+    post:
+      tags:
+        - Configurações
+      summary: Restaura os padrões de uma aba
+      description: 'Acesso: perfil Administrativo (403 sem permissão).'
+      parameters:
+        - name: tab
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+        '404':
+          $ref: '#/components/responses/Erro'
+  /api/config/access:
+    get:
+      tags:
+        - Configurações
+      summary: Matriz perfil × módulo
+      description: 'Acesso: perfil Administrativo (403 sem permissão).'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+    put:
+      tags:
+        - Configurações
+      summary: Liga/desliga um módulo para um perfil (auditado)
+      description: 'Acesso: perfil Administrativo (403 sem permissão).'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                role:
+                  type: string
+                module:
+                  type: string
+                'on':
+                  type: boolean
+              required:
+                - role
+                - module
+                - 'on'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/config/access/reset:
+    post:
+      tags:
+        - Configurações
+      summary: Restaura a matriz padrão
+      description: 'Acesso: perfil Administrativo (403 sem permissão).'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/cost-centers:
+    get:
+      tags:
+        - Cadastros
+      summary: Centros de custo (padrão ou patrimônio)
+      parameters:
+        - name: tipo
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+    post:
+      tags:
+        - Cadastros
+      summary: Cadastra centro de custo
+      description: 'Acesso: perfil Administrativo (403 sem permissão).'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                codigo:
+                  type: string
+                nome:
+                  type: string
+                tipo:
+                  type: string
+              required:
+                - codigo
+                - nome
+                - tipo
+      responses:
+        '201':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/cost-centers/{id}:
+    put:
+      tags:
+        - Cadastros
+      summary: Edita centro de custo
+      description: 'Acesso: perfil Administrativo (403 sem permissão).'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                codigo:
+                  type: string
+                nome:
+                  type: string
+                tipo:
+                  type: string
+              required:
+                - codigo
+                - nome
+                - tipo
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+        '404':
+          $ref: '#/components/responses/Erro'
+  /api/cost-centers/{id}/active:
+    patch:
+      tags:
+        - Cadastros
+      summary: Ativa/inativa centro de custo
+      description: 'Acesso: perfil Administrativo (403 sem permissão).'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ativo:
+                  type: boolean
+              required:
+                - ativo
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+        '404':
+          $ref: '#/components/responses/Erro'
+  /api/vereadores:
+    get:
+      tags:
+        - Cadastros
+      summary: Vereadores ativos (autores de moções e homenagens)
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+    post:
+      tags:
+        - Cadastros
+      summary: Cadastra vereador
+      description: 'Acesso: módulo `mocoes ou configuracoes` (403 sem permissão).'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nome:
+                  type: string
+              required:
+                - nome
+      responses:
+        '201':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/exercicio:
+    get:
+      tags:
+        - Cadastros
+      summary: Exercícios fiscais disponíveis
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/painel/:
+    get:
+      tags:
+        - Painel
+      summary: Indicadores do exercício e feed de alertas (somente módulos acessíveis)
+      description: 'Acesso: módulo `dashboard` (403 sem permissão).'
+      parameters:
+        - name: ano
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/pessoal/servidores:
+    get:
+      tags:
+        - Gestão de Pessoal
+      summary: Servidores (leitura registrada — LGPD)
+      description: 'Acesso: módulo `rh` (403 sem permissão).'
+      parameters:
+        - name: situacao
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: setor
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+    post:
+      tags:
+        - Gestão de Pessoal
+      summary: Cadastra servidor (sem acesso ao sistema até receber perfil)
+      description: 'Acesso: módulo `rh` (403 sem permissão).'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                registration:
+                  type: string
+                position:
+                  type: string
+                department:
+                  type: string
+                situacao:
+                  type: string
+                email:
+                  type: string
+              required:
+                - name
+                - registration
+      responses:
+        '201':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/pessoal/servidores/{id}:
+    put:
+      tags:
+        - Gestão de Pessoal
+      summary: Edita servidor
+      description: 'Acesso: módulo `rh` (403 sem permissão).'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                registration:
+                  type: string
+                position:
+                  type: string
+                department:
+                  type: string
+                situacao:
+                  type: string
+                email:
+                  type: string
+              required:
+                - name
+                - registration
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+        '404':
+          $ref: '#/components/responses/Erro'
+  /api/pessoal/ausencias:
+    get:
+      tags:
+        - Gestão de Pessoal
+      summary: Férias e licenças
+      description: 'Acesso: módulo `rh` (403 sem permissão).'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+    post:
+      tags:
+        - Gestão de Pessoal
+      summary: Solicita férias/licença (antecedência, limite de 30 dias e sobreposição validados)
+      description: 'Acesso: módulo `rh` (403 sem permissão).'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  type: integer
+                type:
+                  type: string
+                start:
+                  type: string
+                  format: date
+                end:
+                  type: string
+                  format: date
+                notes:
+                  type: string
+              required:
+                - userId
+                - type
+                - start
+                - end
+      responses:
+        '201':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/pessoal/ausencias/{id}/status:
+    patch:
+      tags:
+        - Gestão de Pessoal
+      summary: Aprova ou recusa (não pode decidir a própria)
+      description: 'Acesso: módulo `rh` (403 sem permissão).'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+              required:
+                - status
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+        '404':
+          $ref: '#/components/responses/Erro'
+  /api/pessoal/indicadores:
+    get:
+      tags:
+        - Gestão de Pessoal
+      summary: Indicadores de pessoal
+      description: 'Acesso: módulo `rh` (403 sem permissão).'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/compras/meta:
+    get:
+      tags:
+        - Compras & Licitações
+      summary: Etapas, modos, setores, agentes e permissões do usuário
+      description: 'Acesso: módulo `compras` (403 sem permissão).'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/compras/processos:
+    get:
+      tags:
+        - Compras & Licitações
+      summary: Processos com etapas, SLA e carga por agente
+      description: 'Acesso: módulo `compras` (403 sem permissão).'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+    post:
+      tags:
+        - Compras & Licitações
+      summary: Abre processo (chefia; agente sugerido pela menor carga)
+      description: 'Acesso: módulo `compras` (403 sem permissão).'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                interno:
+                  type: string
+                externo:
+                  type: string
+                objeto:
+                  type: string
+                modo:
+                  type: string
+                setor:
+                  type: string
+                agenteId:
+                  type: integer
+              required:
+                - interno
+                - objeto
+                - modo
+                - setor
+                - agenteId
+      responses:
+        '201':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/compras/processos/{id}:
+    put:
+      tags:
+        - Compras & Licitações
+      summary: Edita processo (chefia ou agente responsável)
+      description: 'Acesso: módulo `compras` (403 sem permissão).'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                interno:
+                  type: string
+                externo:
+                  type: string
+                objeto:
+                  type: string
+                modo:
+                  type: string
+                setor:
+                  type: string
+              required:
+                - interno
+                - objeto
+                - modo
+                - setor
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+        '404':
+          $ref: '#/components/responses/Erro'
+    delete:
+      tags:
+        - Compras & Licitações
+      summary: Remove processo (chefia)
+      description: 'Acesso: módulo `compras` (403 sem permissão).'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+        '404':
+          $ref: '#/components/responses/Erro'
+  /api/compras/processos/{id}/agente:
+    put:
+      tags:
+        - Compras & Licitações
+      summary: Atribui/transfere o agente de contratação (chefia)
+      description: 'Acesso: módulo `compras` (403 sem permissão).'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                agenteId:
+                  type: integer
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+        '404':
+          $ref: '#/components/responses/Erro'
+  /api/compras/processos/{id}/etapas/{idx}:
+    put:
+      tags:
+        - Compras & Licitações
+      summary: Atualiza etapa (ok, pendente, refazer com justificativa, não se aplica)
+      description: 'Acesso: módulo `compras` (403 sem permissão).'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: idx
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                justificativa:
+                  type: string
+              required:
+                - status
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+        '404':
+          $ref: '#/components/responses/Erro'
+  /api/compras/contratos:
+    get:
+      tags:
+        - Compras & Licitações
+      summary: Contratos do exercício com vigência, saldo e notas
+      description: 'Acesso: módulo `compras` (403 sem permissão).'
+      parameters:
+        - name: ano
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+    post:
+      tags:
+        - Compras & Licitações
+      summary: Cadastra contrato
+      description: 'Acesso: módulo `compras` (403 sem permissão).'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                contratada:
+                  type: string
+                contrato:
+                  type: string
+                processo:
+                  type: string
+                assinatura:
+                  type: string
+                  format: date
+                fim:
+                  type: string
+                  format: date
+                empenhado:
+                  type: number
+                aditamentos:
+                  type: integer
+              required:
+                - contratada
+                - contrato
+                - assinatura
+                - fim
+      responses:
+        '201':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/compras/contratos/{id}:
+    put:
+      tags:
+        - Compras & Licitações
+      summary: Edita contrato
+      description: 'Acesso: módulo `compras` (403 sem permissão).'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                contratada:
+                  type: string
+                contrato:
+                  type: string
+                processo:
+                  type: string
+                assinatura:
+                  type: string
+                  format: date
+                fim:
+                  type: string
+                  format: date
+                empenhado:
+                  type: number
+                aditamentos:
+                  type: integer
+              required:
+                - contratada
+                - contrato
+                - assinatura
+                - fim
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+        '404':
+          $ref: '#/components/responses/Erro'
+  /api/compras/contratos/{id}/notas/{ano}/{mes}:
+    put:
+      tags:
+        - Compras & Licitações
+      summary: Lança o valor da nota fiscal do mês (0–11)
+      description: 'Acesso: módulo `compras` (403 sem permissão).'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: ano
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: mes
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                valor:
+                  type: number
+              required:
+                - valor
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+        '404':
+          $ref: '#/components/responses/Erro'
+  /api/compras/despesas:
+    get:
+      tags:
+        - Compras & Licitações
+      summary: Despesas e verbinha do exercício com limites legais
+      description: 'Acesso: módulo `compras` (403 sem permissão).'
+      parameters:
+        - name: ano
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+    post:
+      tags:
+        - Compras & Licitações
+      summary: Inclui despesa
+      description: 'Acesso: módulo `compras` (403 sem permissão).'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                processo:
+                  type: string
+                objeto:
+                  type: string
+                descricao:
+                  type: string
+                catmat:
+                  type: string
+                classe:
+                  type: string
+                catser:
+                  type: string
+                grupo:
+                  type: string
+                modalidade:
+                  type: string
+                empenhado:
+                  type: number
+                dataEmpenho:
+                  type: string
+                  format: date
+                ficha:
+                  type: string
+                sub:
+                  type: string
+              required:
+                - processo
+                - objeto
+                - empenhado
+                - dataEmpenho
+      responses:
+        '201':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/compras/despesas/{id}:
+    put:
+      tags:
+        - Compras & Licitações
+      summary: Edita despesa
+      description: 'Acesso: módulo `compras` (403 sem permissão).'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                processo:
+                  type: string
+                objeto:
+                  type: string
+                descricao:
+                  type: string
+                catmat:
+                  type: string
+                classe:
+                  type: string
+                catser:
+                  type: string
+                grupo:
+                  type: string
+                modalidade:
+                  type: string
+                empenhado:
+                  type: number
+                dataEmpenho:
+                  type: string
+                  format: date
+                ficha:
+                  type: string
+                sub:
+                  type: string
+              required:
+                - processo
+                - objeto
+                - empenhado
+                - dataEmpenho
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+        '404':
+          $ref: '#/components/responses/Erro'
+    patch:
+      tags:
+        - Compras & Licitações
+      summary: Atualiza AUDESP, TCN e vínculo com contrato
+      description: 'Acesso: módulo `compras` (403 sem permissão).'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                audesp:
+                  type: string
+                tcn:
+                  type: string
+                contratoId:
+                  type: integer
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+        '404':
+          $ref: '#/components/responses/Erro'
+  /api/compras/limites:
+    get:
+      tags:
+        - Compras & Licitações
+      summary: Limites de dispensa e acumulado por objeto
+      description: 'Acesso: módulo `compras` (403 sem permissão).'
+      parameters:
+        - name: ano
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/compras/limites/simular:
+    post:
+      tags:
+        - Compras & Licitações
+      summary: Simula nova despesa contra os limites
+      description: 'Acesso: módulo `compras` (403 sem permissão).'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                itemId:
+                  type: integer
+                valor:
+                  type: number
+              required:
+                - itemId
+                - valor
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/compras/catalogo/sync:
+    post:
+      tags:
+        - Compras & Licitações
+      summary: Sincroniza o catálogo CATMAT/CATSER
+      description: 'Acesso: módulo `compras` (403 sem permissão).'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/compras/dotacoes:
+    get:
+      tags:
+        - Compras & Licitações
+      summary: Dotações orçamentárias com execução
+      description: 'Acesso: módulo `compras` (403 sem permissão).'
+      parameters:
+        - name: ano
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+    post:
+      tags:
+        - Compras & Licitações
+      summary: Cadastra dotação
+      description: 'Acesso: módulo `compras` (403 sem permissão).'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ficha:
+                  type: string
+                sub:
+                  type: string
+                descricao:
+                  type: string
+                orcado:
+                  type: number
+                ano:
+                  type: integer
+              required:
+                - ficha
+                - orcado
+      responses:
+        '201':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/compras/dotacoes/{id}:
+    put:
+      tags:
+        - Compras & Licitações
+      summary: Edita dotação
+      description: 'Acesso: módulo `compras` (403 sem permissão).'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ficha:
+                  type: string
+                sub:
+                  type: string
+                descricao:
+                  type: string
+                orcado:
+                  type: number
+                ano:
+                  type: integer
+              required:
+                - ficha
+                - orcado
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+        '404':
+          $ref: '#/components/responses/Erro'
+  /api/compras/fornecedores:
+    get:
+      tags:
+        - Compras & Licitações
+      summary: Fornecedores por segmento
+      description: 'Acesso: módulo `compras` (403 sem permissão).'
+      parameters:
+        - name: segmento
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+    post:
+      tags:
+        - Compras & Licitações
+      summary: Cadastra fornecedor
+      description: 'Acesso: módulo `compras` (403 sem permissão).'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                cnpj:
+                  type: string
+                contact:
+                  type: string
+                email:
+                  type: string
+                segments:
+                  type: array
+                  items: {}
+                since:
+                  type: string
+                  format: date
+              required:
+                - name
+      responses:
+        '201':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/compras/fornecedores/export.csv:
+    get:
+      tags:
+        - Compras & Licitações
+      summary: Exporta fornecedores (CSV; auditado)
+      description: 'Acesso: módulo `compras` (403 sem permissão).'
+      parameters:
+        - name: segmento
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Arquivo CSV (UTF-8 com BOM, separador ;)
+          content:
+            text/csv:
+              schema:
+                type: string
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/compras/fornecedores/{id}:
+    put:
+      tags:
+        - Compras & Licitações
+      summary: Edita fornecedor
+      description: 'Acesso: módulo `compras` (403 sem permissão).'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                cnpj:
+                  type: string
+                contact:
+                  type: string
+                email:
+                  type: string
+                segments:
+                  type: array
+                  items: {}
+                since:
+                  type: string
+                  format: date
+              required:
+                - name
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+        '404':
+          $ref: '#/components/responses/Erro'
+  /api/compras/fornecedores/{id}/ativo:
+    patch:
+      tags:
+        - Compras & Licitações
+      summary: Ativa/inativa fornecedor
+      description: 'Acesso: módulo `compras` (403 sem permissão).'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ativo:
+                  type: boolean
+              required:
+                - ativo
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+        '404':
+          $ref: '#/components/responses/Erro'
+  /api/compras/fornecedores/{id}/historico:
+    get:
+      tags:
+        - Compras & Licitações
+      summary: Histórico do fornecedor
+      description: 'Acesso: módulo `compras` (403 sem permissão).'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+        '404':
+          $ref: '#/components/responses/Erro'
+  /api/almoxarifado/resumo:
+    get:
+      tags:
+        - Almoxarifado
+      summary: Estatísticas, críticos e capacidade da equipe
+      description: 'Acesso: módulo `almoxarifado` (403 sem permissão).'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/almoxarifado/materiais:
+    get:
+      tags:
+        - Almoxarifado
+      summary: Materiais, escala ativa e última contagem
+      description: 'Acesso: módulo `almoxarifado` (403 sem permissão).'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+    post:
+      tags:
+        - Almoxarifado
+      summary: Cadastra material (código 1 50 02 0018 0)
+      description: 'Acesso: módulo `almoxarifado` (403 sem permissão).'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                code:
+                  type: string
+                name:
+                  type: string
+                unit:
+                  type: string
+                category:
+                  type: string
+                priority:
+                  type: string
+                stock:
+                  type: number
+                avgConsumption:
+                  type: number
+              required:
+                - code
+                - name
+      responses:
+        '201':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/almoxarifado/materiais/{id}:
+    put:
+      tags:
+        - Almoxarifado
+      summary: Edita material
+      description: 'Acesso: módulo `almoxarifado` (403 sem permissão).'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                code:
+                  type: string
+                name:
+                  type: string
+                unit:
+                  type: string
+                category:
+                  type: string
+                priority:
+                  type: string
+                stock:
+                  type: number
+                avgConsumption:
+                  type: number
+              required:
+                - code
+                - name
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+        '404':
+          $ref: '#/components/responses/Erro'
+  /api/almoxarifado/params:
+    get:
+      tags:
+        - Almoxarifado
+      summary: Parâmetros da escala de contagem
+      description: 'Acesso: módulo `almoxarifado` (403 sem permissão).'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+    put:
+      tags:
+        - Almoxarifado
+      summary: Salva parâmetros (somente o responsável; pesos somam 100%)
+      description: 'Acesso: módulo `almoxarifado` (403 sem permissão).'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                team:
+                  type: array
+                  items: {}
+                days:
+                  type: array
+                  items: {}
+                weights:
+                  type: object
+                calcBase:
+                  type: string
+                perSession:
+                  type: integer
+                sessionsPerWeek:
+                  type: integer
+                tolerancePct:
+                  type: number
+                recountPct:
+                  type: number
+              required:
+                - team
+                - days
+                - weights
+                - calcBase
+                - perSession
+                - sessionsPerWeek
+                - tolerancePct
+                - recountPct
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/almoxarifado/params/reset:
+    post:
+      tags:
+        - Almoxarifado
+      summary: Restaura parâmetros padrão (responsável)
+      description: 'Acesso: módulo `almoxarifado` (403 sem permissão).'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/almoxarifado/escala:
+    post:
+      tags:
+        - Almoxarifado
+      summary: Gera a escala semanal por sorteio balanceado
+      description: 'Acesso: módulo `almoxarifado` (403 sem permissão).'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                category:
+                  type: string
+                method:
+                  type: string
+                responsible:
+                  type: string
+                size:
+                  type: integer
+              required:
+                - category
+                - method
+                - responsible
+                - size
+      responses:
+        '201':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+    delete:
+      tags:
+        - Almoxarifado
+      summary: Encerra a escala ativa
+      description: 'Acesso: módulo `almoxarifado` (403 sem permissão).'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/almoxarifado/contagens:
+    post:
+      tags:
+        - Almoxarifado
+      summary: Registra contagem (somente o responsável pelo item)
+      description: 'Acesso: módulo `almoxarifado` (403 sem permissão).'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                materialId:
+                  type: integer
+                contado:
+                  type: number
+              required:
+                - materialId
+                - contado
+      responses:
+        '201':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/almoxarifado/contagens/{materialId}/corrigir:
+    post:
+      tags:
+        - Almoxarifado
+      summary: Corrige o saldo pela contagem divergente
+      description: 'Acesso: módulo `almoxarifado` (403 sem permissão).'
+      parameters:
+        - name: materialId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+        '404':
+          $ref: '#/components/responses/Erro'
+  /api/almoxarifado/estoque:
+    get:
+      tags:
+        - Almoxarifado
+      summary: Visão de estoque
+      description: 'Acesso: módulo `almoxarifado` (403 sem permissão).'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/almoxarifado/estoque/documentos:
+    get:
+      tags:
+        - Almoxarifado
+      summary: RME/BRM computados (paginado)
+      description: 'Acesso: módulo `almoxarifado` (403 sem permissão).'
+      parameters:
+        - name: tipo
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/almoxarifado/estoque/arquivos-computados:
+    get:
+      tags:
+        - Almoxarifado
+      summary: Nomes de arquivos já computados (evita reenvio)
+      description: 'Acesso: módulo `almoxarifado` (403 sem permissão).'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/almoxarifado/estoque/upload:
+    post:
+      tags:
+        - Almoxarifado
+      summary: Envia PDFs de RME/BRM (multipart, até 200 arquivos de 10 MB)
+      description: 'Acesso: módulo `almoxarifado` (403 sem permissão).'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                files:
+                  type: string
+                  format: binary
+                tipo:
+                  type: string
+              required:
+                - files
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/almoxarifado/estoque/sync:
+    post:
+      tags:
+        - Almoxarifado
+      summary: Lê as pastas de RME/BRM no Google Drive (400 se não configurado)
+      description: 'Acesso: módulo `almoxarifado` (403 sem permissão).'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/almoxarifado/estoque/pendentes:
+    get:
+      tags:
+        - Almoxarifado
+      summary: Itens de documentos sem material cadastrado
+      description: 'Acesso: módulo `almoxarifado` (403 sem permissão).'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+    post:
+      tags:
+        - Almoxarifado
+      summary: Aceita (cadastra e aplica) ou recusa pendências
+      description: 'Acesso: módulo `almoxarifado` (403 sem permissão).'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                decisions:
+                  type: array
+                  items: {}
+              required:
+                - decisions
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/patrimonio/meta:
+    get:
+      tags:
+        - Patrimônio
+      summary: Etapas, centros de custo de patrimônio e servidores
+      description: 'Acesso: módulo `patrimonio` (403 sem permissão).'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/patrimonio/transferencias:
+    get:
+      tags:
+        - Patrimônio
+      summary: Transferências e pendência de assinatura do usuário
+      description: 'Acesso: módulo `patrimonio` (403 sem permissão).'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+    post:
+      tags:
+        - Patrimônio
+      summary: Registra transferência (bloqueio de duplicidade configurável)
+      description: 'Acesso: módulo `patrimonio` (403 sem permissão).'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                code:
+                  type: string
+                description:
+                  type: string
+                fromUser:
+                  type: string
+                toUser:
+                  type: string
+                fromCc:
+                  type: string
+                toCc:
+                  type: string
+                date:
+                  type: string
+                  format: date
+              required:
+                - code
+                - description
+                - fromUser
+                - toUser
+                - date
+      responses:
+        '201':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/patrimonio/transferencias/{id}:
+    put:
+      tags:
+        - Patrimônio
+      summary: Edita transferência
+      description: 'Acesso: módulo `patrimonio` (403 sem permissão).'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                code:
+                  type: string
+                description:
+                  type: string
+                fromUser:
+                  type: string
+                toUser:
+                  type: string
+                fromCc:
+                  type: string
+                toCc:
+                  type: string
+                date:
+                  type: string
+                  format: date
+              required:
+                - code
+                - description
+                - fromUser
+                - toUser
+                - date
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+        '404':
+          $ref: '#/components/responses/Erro'
+  /api/patrimonio/transferencias/{id}/etapa:
+    post:
+      tags:
+        - Patrimônio
+      summary: Avança (1) ou volta (−1) a etapa
+      description: 'Acesso: módulo `patrimonio` (403 sem permissão).'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                dir:
+                  type: integer
+              required:
+                - dir
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+        '404':
+          $ref: '#/components/responses/Erro'
+  /api/patrimonio/transferencias/{id}/assinar:
+    post:
+      tags:
+        - Patrimônio
+      summary: Assina o termo (somente o servidor de destino)
+      description: 'Acesso: módulo `patrimonio` (403 sem permissão).'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+        '404':
+          $ref: '#/components/responses/Erro'
+  /api/patrimonio/transferencias/{id}/recusar:
+    post:
+      tags:
+        - Patrimônio
+      summary: Contesta/recusa o termo (somente o servidor de destino)
+      description: 'Acesso: módulo `patrimonio` (403 sem permissão).'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+        '404':
+          $ref: '#/components/responses/Erro'
+  /api/patrimonio/termos:
+    get:
+      tags:
+        - Patrimônio
+      summary: Termos de responsabilidade do mês por centro de custo
+      description: 'Acesso: módulo `patrimonio` (403 sem permissão).'
+      parameters:
+        - name: mes
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/patrimonio/termos/{ccId}/{ym}:
+    put:
+      tags:
+        - Patrimônio
+      summary: Marca o termo como emitido
+      description: 'Acesso: módulo `patrimonio` (403 sem permissão).'
+      parameters:
+        - name: ccId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: ym
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+        '404':
+          $ref: '#/components/responses/Erro'
+    delete:
+      tags:
+        - Patrimônio
+      summary: Desfaz a emissão do termo
+      description: 'Acesso: módulo `patrimonio` (403 sem permissão).'
+      parameters:
+        - name: ccId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: ym
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+        '404':
+          $ref: '#/components/responses/Erro'
+  /api/protocolo/meta:
+    get:
+      tags:
+        - Protocolo
+      summary: Fluxo, prioridades, setores e prazos padrão
+      description: 'Acesso: módulo `protocolo` (403 sem permissão).'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/protocolo/documentos:
+    get:
+      tags:
+        - Protocolo
+      summary: Documentos protocolados
+      description: 'Acesso: módulo `protocolo` (403 sem permissão).'
+      parameters:
+        - name: q
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+    post:
+      tags:
+        - Protocolo
+      summary: Protocola documento (PRT-AAAA-NNN) com prazo opcional
+      description: 'Acesso: módulo `protocolo` (403 sem permissão).'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                assunto:
+                  type: string
+                interessado:
+                  type: string
+                setor:
+                  type: string
+                prazo:
+                  type: string
+                  format: date
+                prazoDesc:
+                  type: string
+              required:
+                - assunto
+                - interessado
+      responses:
+        '201':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/protocolo/documentos/{id}:
+    put:
+      tags:
+        - Protocolo
+      summary: Edita documento e seu prazo principal
+      description: 'Acesso: módulo `protocolo` (403 sem permissão).'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                assunto:
+                  type: string
+                interessado:
+                  type: string
+                setor:
+                  type: string
+                prazo:
+                  type: string
+                  format: date
+                prazoDesc:
+                  type: string
+              required:
+                - assunto
+                - interessado
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+        '404':
+          $ref: '#/components/responses/Erro'
+  /api/protocolo/documentos/{id}/etapa:
+    post:
+      tags:
+        - Protocolo
+      summary: Avança (1) ou volta (−1) no fluxo
+      description: 'Acesso: módulo `protocolo` (403 sem permissão).'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                dir:
+                  type: integer
+              required:
+                - dir
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+        '404':
+          $ref: '#/components/responses/Erro'
+  /api/protocolo/processos:
+    get:
+      tags:
+        - Protocolo
+      summary: Processos internos
+      description: 'Acesso: módulo `protocolo` (403 sem permissão).'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+    post:
+      tags:
+        - Protocolo
+      summary: Cria processo (PROC-NNN)
+      description: 'Acesso: módulo `protocolo` (403 sem permissão).'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                titulo:
+                  type: string
+                descricao:
+                  type: string
+                prioridade:
+                  type: string
+                responsavel:
+                  type: string
+                prazo:
+                  type: string
+                  format: date
+                prazoDesc:
+                  type: string
+              required:
+                - titulo
+      responses:
+        '201':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/protocolo/processos/{id}:
+    put:
+      tags:
+        - Protocolo
+      summary: Edita processo
+      description: 'Acesso: módulo `protocolo` (403 sem permissão).'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                titulo:
+                  type: string
+                descricao:
+                  type: string
+                prioridade:
+                  type: string
+                responsavel:
+                  type: string
+                prazo:
+                  type: string
+                  format: date
+                prazoDesc:
+                  type: string
+              required:
+                - titulo
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+        '404':
+          $ref: '#/components/responses/Erro'
+  /api/protocolo/processos/{id}/progresso:
+    post:
+      tags:
+        - Protocolo
+      summary: Ajusta o progresso em ±10%
+      description: 'Acesso: módulo `protocolo` (403 sem permissão).'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                delta:
+                  type: integer
+              required:
+                - delta
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+        '404':
+          $ref: '#/components/responses/Erro'
+  /api/protocolo/prazos:
+    get:
+      tags:
+        - Protocolo
+      summary: Prazos próprios em aberto
+      description: 'Acesso: módulo `protocolo` (403 sem permissão).'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+    post:
+      tags:
+        - Protocolo
+      summary: Cadastra prazo para documento ou processo
+      description: 'Acesso: módulo `protocolo` (403 sem permissão).'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refTipo:
+                  type: string
+                refId:
+                  type: integer
+                descricao:
+                  type: string
+                vencimento:
+                  type: string
+                  format: date
+              required:
+                - refTipo
+                - refId
+                - descricao
+                - vencimento
+      responses:
+        '201':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/protocolo/prazos/{id}:
+    put:
+      tags:
+        - Protocolo
+      summary: Edita prazo
+      description: 'Acesso: módulo `protocolo` (403 sem permissão).'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refTipo:
+                  type: string
+                refId:
+                  type: integer
+                descricao:
+                  type: string
+                vencimento:
+                  type: string
+                  format: date
+              required:
+                - refTipo
+                - refId
+                - descricao
+                - vencimento
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+        '404':
+          $ref: '#/components/responses/Erro'
+  /api/protocolo/prazos/{id}/concluir:
+    post:
+      tags:
+        - Protocolo
+      summary: Conclui prazo
+      description: 'Acesso: módulo `protocolo` (403 sem permissão).'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+        '404':
+          $ref: '#/components/responses/Erro'
+  /api/protocolo/calendario:
+    get:
+      tags:
+        - Protocolo
+      summary: Calendário integrado (eventos dos módulos acessíveis)
+      description: 'Acesso: módulo `protocolo` (403 sem permissão).'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/protocolo/prazos-criticos:
+    get:
+      tags:
+        - Protocolo
+      summary: Prazos vencidos, urgentes, próximos e a agendar
+      description: 'Acesso: módulo `protocolo` (403 sem permissão).'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/mocoes/meta:
+    get:
+      tags:
+        - Moções & Homenagens
+      summary: Tipos, status, legislaturas, cota e itens de bandeiras
+      description: 'Acesso: módulo `mocoes` (403 sem permissão).'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/mocoes/mocoes:
+    get:
+      tags:
+        - Moções & Homenagens
+      summary: Moções
+      description: 'Acesso: módulo `mocoes` (403 sem permissão).'
+      parameters:
+        - name: q
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+    post:
+      tags:
+        - Moções & Homenagens
+      summary: Registra moção (numeração sequencial anual)
+      description: 'Acesso: módulo `mocoes` (403 sem permissão).'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tipo:
+                  type: string
+                vereadorId:
+                  type: integer
+                assunto:
+                  type: string
+                data:
+                  type: string
+                  format: date
+                sessao:
+                  type: string
+                  format: date
+                status:
+                  type: string
+              required:
+                - tipo
+                - vereadorId
+                - assunto
+                - data
+      responses:
+        '201':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/mocoes/mocoes/{id}:
+    put:
+      tags:
+        - Moções & Homenagens
+      summary: Edita moção
+      description: 'Acesso: módulo `mocoes` (403 sem permissão).'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tipo:
+                  type: string
+                vereadorId:
+                  type: integer
+                assunto:
+                  type: string
+                data:
+                  type: string
+                  format: date
+                sessao:
+                  type: string
+                  format: date
+                status:
+                  type: string
+              required:
+                - tipo
+                - vereadorId
+                - assunto
+                - data
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+        '404':
+          $ref: '#/components/responses/Erro'
+  /api/mocoes/galeria:
+    get:
+      tags:
+        - Moções & Homenagens
+      summary: Galeria de homenageados e cota por vereador
+      description: 'Acesso: módulo `mocoes` (403 sem permissão).'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+    post:
+      tags:
+        - Moções & Homenagens
+      summary: Registra homenagem (409 quando a cota da legislatura foi atingida)
+      description: 'Acesso: módulo `mocoes` (403 sem permissão).'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                vereadorId:
+                  type: integer
+                homenageado:
+                  type: string
+              required:
+                - vereadorId
+                - homenageado
+      responses:
+        '201':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/mocoes/galeria/{id}:
+    put:
+      tags:
+        - Moções & Homenagens
+      summary: Edita homenageado
+      description: 'Acesso: módulo `mocoes` (403 sem permissão).'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                vereadorId:
+                  type: integer
+                homenageado:
+                  type: string
+                legislatura:
+                  type: string
+                quadro:
+                  type: string
+              required:
+                - vereadorId
+                - homenageado
+                - legislatura
+                - quadro
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+        '404':
+          $ref: '#/components/responses/Erro'
+  /api/mocoes/entregas:
+    get:
+      tags:
+        - Moções & Homenagens
+      summary: Entregas de arranjos e placas
+      description: 'Acesso: módulo `mocoes` (403 sem permissão).'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+    post:
+      tags:
+        - Moções & Homenagens
+      summary: Cadastra entrega (sem data = a agendar)
+      description: 'Acesso: módulo `mocoes` (403 sem permissão).'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                homenageado:
+                  type: string
+                honraria:
+                  type: string
+                vereadorId:
+                  type: integer
+                material:
+                  type: string
+                processo:
+                  type: string
+                decreto:
+                  type: string
+                data:
+                  type: string
+                  format: date
+                horario:
                   type: string
                 status:
                   type: string
-                  enum: [active, invited, archived]
+                obs:
+                  type: string
+              required:
+                - homenageado
+                - vereadorId
+                - status
       responses:
-        '200':
-          description: Usuário atualizado
+        '201':
+          description: Sucesso
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                type: object
         '400':
-          $ref: '#/components/responses/BadRequestError'
-        '404':
-          $ref: '#/components/responses/NotFoundError'
-
-  /users/{userId}/permissions:
-    patch:
-      operationId: updateUserPermissions
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/mocoes/entregas/{id}:
+    put:
       tags:
-        - Users (RH)
-      summary: Atualizar permissões RBAC de um usuário
-      security:
-        - BearerAuth: []
+        - Moções & Homenagens
+      summary: Edita entrega
+      description: 'Acesso: módulo `mocoes` (403 sem permissão).'
       parameters:
-        - name: userId
+        - name: id
           in: path
           required: true
           schema:
@@ -263,846 +3906,717 @@ paths:
             schema:
               type: object
               properties:
-                compras:
-                  type: boolean
+                homenageado:
+                  type: string
+                honraria:
+                  type: string
+                vereadorId:
+                  type: integer
+                material:
+                  type: string
+                processo:
+                  type: string
+                decreto:
+                  type: string
+                data:
+                  type: string
+                  format: date
+                horario:
+                  type: string
+                status:
+                  type: string
+                obs:
+                  type: string
+              required:
+                - homenageado
+                - vereadorId
+                - status
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+        '404':
+          $ref: '#/components/responses/Erro'
+  /api/mocoes/bandeiras:
+    get:
+      tags:
+        - Moções & Homenagens
+      summary: Empréstimos de bandeiras (leitura registrada — LGPD)
+      description: 'Acesso: módulo `mocoes` (403 sem permissão).'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+    post:
+      tags:
+        - Moções & Homenagens
+      summary: Registra solicitação de empréstimo
+      description: 'Acesso: módulo `mocoes` (403 sem permissão).'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                entidade:
+                  type: string
+                documento:
+                  type: string
+                telefone:
+                  type: string
+                solicitacao:
+                  type: string
+                  format: date
                 protocolo:
-                  type: boolean
-                rh:
-                  type: boolean
-                almoxarifado:
-                  type: boolean
-                mocoes:
-                  type: boolean
-      responses:
-        '200':
-          description: Permissões atualizadas
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  userId:
-                    type: integer
-                  permissions:
-                    type: object
-                  updatedAt:
-                    type: string
-                    format: date-time
-                  auditLog:
-                    type: string
-                    description: ID da entrada de auditoria criada
-        '403':
-          $ref: '#/components/responses/ForbiddenError'
-
-  /products:
-    get:
-      operationId: listProducts
-      tags:
-        - Almoxarifado (Inventory)
-      summary: Listar produtos no almoxarifado
-      security:
-        - BearerAuth: []
-      parameters:
-        - name: category
-          in: query
-          schema:
-            type: string
-            enum: [Higiene, Papelaria]
-        - name: verifyPending
-          in: query
-          schema:
-            type: boolean
-          description: Filtrar apenas items pendentes de verificação
-        - name: critical
-          in: query
-          schema:
-            type: boolean
-          description: Filtrar items com estoque crítico
-      responses:
-        '200':
-          description: Lista de produtos
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Product'
-
-    post:
-      operationId: createProduct
-      tags:
-        - Almoxarifado (Inventory)
-      summary: Criar novo produto
-      security:
-        - BearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ProductInput'
-      responses:
-        '201':
-          description: Produto criado
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Product'
-
-  /products/{productCode}:
-    get:
-      operationId: getProduct
-      tags:
-        - Almoxarifado (Inventory)
-      summary: Obter detalhes de um produto
-      security:
-        - BearerAuth: []
-      parameters:
-        - name: productCode
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Dados do produto
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Product'
-        '404':
-          $ref: '#/components/responses/NotFoundError'
-
-    patch:
-      operationId: updateProduct
-      tags:
-        - Almoxarifado (Inventory)
-      summary: Atualizar stock/dados de um produto
-      security:
-        - BearerAuth: []
-      parameters:
-        - name: productCode
-          in: path
-          required: true
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                stock:
-                  type: integer
-                  minimum: 0
-                avgConsumption:
-                  type: number
-                verify:
-                  type: boolean
-      responses:
-        '200':
-          description: Produto atualizado
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Product'
-
-  /inventory/sampling:
-    post:
-      operationId: createSamplingScale
-      tags:
-        - Almoxarifado (Inventory)
-      summary: Gerar nova escala de amostragem
-      security:
-        - BearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - method
-                - sampleSize
-                - responsibleUserId
-              properties:
-                method:
                   type: string
-                  enum: [alta, baixa, aleatorio]
-                  description: Método de seleção de items
-                sampleSize:
-                  type: integer
-                  minimum: 1
-                  maximum: 10
-                responsibleUserId:
-                  type: integer
-                  description: ID do usuário responsável pela contagem
-      responses:
-        '201':
-          description: Escala de amostragem criada
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SamplingScale'
-
-  /inventory/sampling/{scaleId}/submit:
-    post:
-      operationId: submitSamplingAudit
-      tags:
-        - Almoxarifado (Inventory)
-      summary: Submeter contagem da escala de amostragem
-      security:
-        - BearerAuth: []
-      parameters:
-        - name: scaleId
-          in: path
-          required: true
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - items
-              properties:
-                items:
+                itens:
                   type: array
-                  items:
-                    type: object
-                    required:
-                      - productCode
-                      - counted
-                    properties:
-                      productCode:
-                        type: string
-                      counted:
-                        type: integer
-                        minimum: 0
-      responses:
-        '200':
-          description: Auditoria submetida; saldos atualizados
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  scaleId:
-                    type: string
-                  status:
-                    type: string
-                    enum: [submitted, archived]
-                  divergences:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        productCode:
-                          type: string
-                        expected:
-                          type: integer
-                        counted:
-                          type: integer
-                        divergence:
-                          type: integer
-                  auditLog:
-                    type: string
-
-  /motions:
-    get:
-      operationId: listMotions
-      tags:
-        - Protocolo (Motions)
-      summary: Listar moções (Portaria DA 01/2026)
-      security:
-        - BearerAuth: []
-      parameters:
-        - name: councilmember
-          in: query
-          schema:
-            type: string
-          description: Filtrar por vereador proponente
-        - name: status
-          in: query
-          schema:
-            type: string
-            enum: [pending, approved, archived]
-      responses:
-        '200':
-          description: Lista de moções
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Motion'
-
-    post:
-      operationId: createMotion
-      tags:
-        - Protocolo (Motions)
-      summary: Registrar nova moção
-      security:
-        - BearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - reqId
-                - motionNum
-                - vereador
-              properties:
-                reqId:
-                  type: string
-                  example: "274/2026"
-                reqDate:
-                  type: string
-                  format: date
-                motionNum:
-                  type: string
-                  pattern: '^\d{3}/\d{4}$'
-                  example: "040/2026"
-                procNum:
-                  type: string
-                  example: "600/2026"
-                vereador:
-                  type: string
-                  minLength: 3
-                checked:
+                  items: {}
+                retirado:
                   type: boolean
-                  default: true
-      responses:
-        '201':
-          description: Moção registrada
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Motion'
-        '400':
-          $ref: '#/components/responses/BadRequestError'
-
-  /honors:
-    get:
-      operationId: listHonors
-      tags:
-        - Protocolo (Honors Gallery)
-      summary: Listar quadros de homenageados (Portaria DA 03/2023)
-      security:
-        - BearerAuth: []
-      parameters:
-        - name: councilmember
-          in: query
-          schema:
-            type: string
-        - name: legislature
-          in: query
-          schema:
-            type: string
-            example: "57ª Legislatura"
-      responses:
-        '200':
-          description: Lista de quadros de homenageados
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Honor'
-
-    post:
-      operationId: createHonor
-      tags:
-        - Protocolo (Honors Gallery)
-      summary: Registrar novo quadro (com validação Portaria 03/2023)
-      security:
-        - BearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
+                retirada:
+                  type: string
+                  format: date
+                devolucao:
+                  type: string
+                  format: date
+                conformidade:
+                  type: string
+                obs:
+                  type: string
               required:
-                - reqId
-                - honoree
-                - docNum
-                - vereador
-                - legislature
-              properties:
-                reqId:
-                  type: string
-                  example: "599/2025"
-                honoree:
-                  type: string
-                  minLength: 3
-                  example: "JP Chermont"
-                docNum:
-                  type: string
-                  example: "0100/2025"
-                procNum:
-                  type: string
-                  example: "1911/2025"
-                deliveryDate:
-                  type: string
-                  format: date
-                reqDate:
-                  type: string
-                  format: date
-                vereador:
-                  type: string
-                  minLength: 3
-                legislature:
-                  type: string
-                  example: "57ª Legislatura"
+                - entidade
+                - solicitacao
+                - itens
+                - retirado
       responses:
         '201':
-          description: Quadro registrado
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Honor'
-        '400':
-          description: Validação falhou ou limite de 1 quadro/vereador/legislatura atingido
+          description: Sucesso
           content:
             application/json:
               schema:
                 type: object
-                properties:
-                  error:
-                    type: string
-                    example: "Vereador Márcio Teixeira já possui um quadro na 57ª Legislatura (Portaria DA 03/2023, Art. 3º)"
-                  code:
-                    type: string
-                    enum: [HONOR_LIMIT_EXCEEDED, VALIDATION_ERROR]
-
-  /purchases:
-    get:
-      operationId: listPurchases
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/mocoes/bandeiras/{id}:
+    put:
       tags:
-        - Compras (Purchases)
-      summary: Listar requisições de compra
-      security:
-        - BearerAuth: []
+        - Moções & Homenagens
+      summary: Edita empréstimo (retirada, devolução, conformidade)
+      description: 'Acesso: módulo `mocoes` (403 sem permissão).'
       parameters:
-        - name: status
-          in: query
-          schema:
-            type: string
-            enum: [draft, submitted, approved, rejected, completed]
-        - name: category
-          in: query
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Lista de compras
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Purchase'
-
-    post:
-      operationId: createPurchase
-      tags:
-        - Compras (Purchases)
-      summary: Criar nova requisição de compra
-      security:
-        - BearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PurchaseInput'
-      responses:
-        '201':
-          description: Requisição criada
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Purchase'
-
-  /audit-log:
-    get:
-      operationId: listAuditLog
-      tags:
-        - Audit & Compliance
-      summary: Obter log de auditoria (requer role=admin)
-      security:
-        - BearerAuth: []
-      parameters:
-        - name: module
-          in: query
-          schema:
-            type: string
-            enum: [auth, users, products, inventory, motions, honors, purchases]
-        - name: action
-          in: query
-          schema:
-            type: string
-            enum: [create, read, update, delete]
-        - name: userId
-          in: query
+        - name: id
+          in: path
+          required: true
           schema:
             type: integer
-        - name: startDate
-          in: query
-          schema:
-            type: string
-            format: date
-        - name: endDate
-          in: query
-          schema:
-            type: string
-            format: date
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                entidade:
+                  type: string
+                documento:
+                  type: string
+                telefone:
+                  type: string
+                solicitacao:
+                  type: string
+                  format: date
+                protocolo:
+                  type: string
+                itens:
+                  type: array
+                  items: {}
+                retirado:
+                  type: boolean
+                retirada:
+                  type: string
+                  format: date
+                devolucao:
+                  type: string
+                  format: date
+                conformidade:
+                  type: string
+                obs:
+                  type: string
+              required:
+                - entidade
+                - solicitacao
+                - itens
+                - retirado
       responses:
         '200':
-          description: Registros de auditoria
+          description: Sucesso
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/AuditLog'
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
         '403':
-          $ref: '#/components/responses/ForbiddenError'
-
+          $ref: '#/components/responses/SemPermissao'
+        '404':
+          $ref: '#/components/responses/Erro'
+    delete:
+      tags:
+        - Moções & Homenagens
+      summary: Exclui o registro
+      description: 'Acesso: módulo `mocoes` (403 sem permissão).'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+        '404':
+          $ref: '#/components/responses/Erro'
+  /api/mocoes/bandeiras/{id}/retirada:
+    post:
+      tags:
+        - Moções & Homenagens
+      summary: Registra a retirada
+      description: 'Acesso: módulo `mocoes` (403 sem permissão).'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+        '404':
+          $ref: '#/components/responses/Erro'
+  /api/legislacoes/:
+    get:
+      tags:
+        - Legislações
+      summary: Normas e permissão de edição do usuário
+      description: 'Acesso: módulo `legislacoes` (403 sem permissão).'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+    post:
+      tags:
+        - Legislações
+      summary: Cadastra norma com PDF opcional (multipart; editores conforme leg.editores)
+      description: 'Acesso: módulo `legislacoes` (403 sem permissão).'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                tipo:
+                  type: string
+                numero:
+                  type: string
+                ementa:
+                  type: string
+                orgao:
+                  type: string
+                data:
+                  type: string
+                  format: date
+                link:
+                  type: string
+                tags:
+                  type: string
+                texto:
+                  type: string
+                ativa:
+                  type: boolean
+                pdf:
+                  type: string
+                  format: binary
+              required:
+                - tipo
+                - numero
+                - ementa
+      responses:
+        '201':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/legislacoes/{id}:
+    put:
+      tags:
+        - Legislações
+      summary: Edita norma, troca ou remove o PDF
+      description: 'Acesso: módulo `legislacoes` (403 sem permissão).'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                tipo:
+                  type: string
+                numero:
+                  type: string
+                ementa:
+                  type: string
+                orgao:
+                  type: string
+                data:
+                  type: string
+                  format: date
+                link:
+                  type: string
+                tags:
+                  type: string
+                texto:
+                  type: string
+                ativa:
+                  type: boolean
+                removerPdf:
+                  type: boolean
+                pdf:
+                  type: string
+                  format: binary
+              required:
+                - tipo
+                - numero
+                - ementa
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+        '404':
+          $ref: '#/components/responses/Erro'
+  /api/legislacoes/{id}/ativa:
+    patch:
+      tags:
+        - Legislações
+      summary: Ativa/inativa norma
+      description: 'Acesso: módulo `legislacoes` (403 sem permissão).'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ativa:
+                  type: boolean
+              required:
+                - ativa
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+        '404':
+          $ref: '#/components/responses/Erro'
+  /api/legislacoes/{id}/pdf:
+    get:
+      tags:
+        - Legislações
+      summary: PDF anexado à norma
+      description: 'Acesso: módulo `legislacoes` (403 sem permissão).'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Arquivo PDF
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+        '404':
+          $ref: '#/components/responses/Erro'
+  /api/notifications/:
+    get:
+      tags:
+        - Notificações
+      summary: Caixa de entrada, arquivadas, tipos e preferências
+      description: 'Acesso: módulo `notificacoes` (403 sem permissão).'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/notifications/summary:
+    get:
+      tags:
+        - Notificações
+      summary: Contador do sino (respeita horário de silêncio)
+      description: 'Acesso: módulo `notificacoes` (403 sem permissão).'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/notifications/read-all:
+    post:
+      tags:
+        - Notificações
+      summary: Marca todas como lidas
+      description: 'Acesso: módulo `notificacoes` (403 sem permissão).'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/notifications/archive-all:
+    post:
+      tags:
+        - Notificações
+      summary: Arquiva todas da caixa de entrada
+      description: 'Acesso: módulo `notificacoes` (403 sem permissão).'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/notifications/{id}/read:
+    post:
+      tags:
+        - Notificações
+      summary: Marca como lida
+      description: 'Acesso: módulo `notificacoes` (403 sem permissão).'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+        '404':
+          $ref: '#/components/responses/Erro'
+  /api/notifications/{id}/archive:
+    post:
+      tags:
+        - Notificações
+      summary: Arquiva
+      description: 'Acesso: módulo `notificacoes` (403 sem permissão).'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+        '404':
+          $ref: '#/components/responses/Erro'
+  /api/notifications/{id}/restore:
+    post:
+      tags:
+        - Notificações
+      summary: Restaura da lista de arquivadas
+      description: 'Acesso: módulo `notificacoes` (403 sem permissão).'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+        '404':
+          $ref: '#/components/responses/Erro'
+  /api/notifications/preferences:
+    put:
+      tags:
+        - Notificações
+      summary: Preferências de notificação do usuário
+      description: 'Acesso: módulo `notificacoes` (403 sem permissão).'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                types:
+                  type: object
+                tempoReal:
+                  type: boolean
+                email:
+                  type: boolean
+                silencio:
+                  type: object
+              required:
+                - types
+                - tempoReal
+                - email
+                - silencio
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/analytics/:
+    get:
+      tags:
+        - Analytics
+      summary: Visão consolidada (indicadores e blocos)
+      description: 'Acesso: módulo `analytics` (403 sem permissão).'
+      parameters:
+        - name: periodo
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/analytics/export.csv:
+    get:
+      tags:
+        - Analytics
+      summary: Exporta a visão consolidada (CSV; auditado)
+      description: 'Acesso: módulo `analytics` (403 sem permissão).'
+      parameters:
+        - name: periodo
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Arquivo CSV (UTF-8 com BOM, separador ;)
+          content:
+            text/csv:
+              schema:
+                type: string
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
 components:
-  schemas:
-    User:
-      type: object
-      properties:
-        id:
-          type: integer
-        name:
-          type: string
-        email:
-          type: string
-          format: email
-        matricula:
-          type: string
-        role:
-          type: string
-          enum: [admin, user]
-        sector:
-          type: string
-        status:
-          type: string
-          enum: [active, invited, archived]
-        phone:
-          type: string
-        permissions:
-          type: object
-          properties:
-            compras:
-              type: boolean
-            protocolo:
-              type: boolean
-            rh:
-              type: boolean
-            almoxarifado:
-              type: boolean
-            mocoes:
-              type: boolean
-        createdAt:
-          type: string
-          format: date-time
-        updatedAt:
-          type: string
-          format: date-time
-
-    Product:
-      type: object
-      properties:
-        code:
-          type: string
-          example: "1 50 05 0024 8"
-        name:
-          type: string
-        priority:
-          type: string
-          enum: [Alta, Baixa]
-        frequency:
-          type: string
-          enum: [Semanal, Mensal]
-        stock:
-          type: integer
-          minimum: 0
-        avgConsumption:
-          type: number
-          format: double
-        category:
-          type: string
-          enum: [Higiene, Papelaria]
-        verify:
-          type: boolean
-          description: Pendente de verificação física
-        createdAt:
-          type: string
-          format: date-time
-        updatedAt:
-          type: string
-          format: date-time
-
-    ProductInput:
-      type: object
-      required:
-        - code
-        - name
-        - priority
-        - frequency
-        - stock
-        - avgConsumption
-        - category
-      properties:
-        code:
-          type: string
-        name:
-          type: string
-        priority:
-          type: string
-          enum: [Alta, Baixa]
-        frequency:
-          type: string
-          enum: [Semanal, Mensal]
-        stock:
-          type: integer
-        avgConsumption:
-          type: number
-        category:
-          type: string
-
-    SamplingScale:
-      type: object
-      properties:
-        scaleId:
-          type: string
-          format: uuid
-        method:
-          type: string
-          enum: [alta, baixa, aleatorio]
-        sampleSize:
-          type: integer
-        responsibleUserId:
-          type: integer
-        items:
-          type: array
-          items:
-            type: object
-            properties:
-              productCode:
-                type: string
-              name:
-                type: string
-              expectedStock:
-                type: integer
-              counted:
-                type: integer
-              status:
-                type: string
-                enum: [pending, counted, submitted]
-        status:
-          type: string
-          enum: [active, submitted, archived]
-        createdAt:
-          type: string
-          format: date-time
-        submittedAt:
-          type: string
-          format: date-time
-
-    Motion:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        reqId:
-          type: string
-        reqDate:
-          type: string
-          format: date
-        motionNum:
-          type: string
-        procNum:
-          type: string
-        vereador:
-          type: string
-        checked:
-          type: boolean
-        status:
-          type: string
-          enum: [pending, approved, archived]
-        createdAt:
-          type: string
-          format: date-time
-
-    Honor:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        reqId:
-          type: string
-        docNum:
-          type: string
-        procNum:
-          type: string
-        honoree:
-          type: string
-        vereador:
-          type: string
-        legislature:
-          type: string
-        deliveryDate:
-          type: string
-          format: date
-        reqDate:
-          type: string
-          format: date
-        checked:
-          type: boolean
-        createdAt:
-          type: string
-          format: date-time
-
-    Purchase:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        reqNum:
-          type: string
-        items:
-          type: array
-          items:
-            type: object
-            properties:
-              productCode:
-                type: string
-              quantity:
-                type: integer
-              estimatedCost:
-                type: number
-        totalValue:
-          type: number
-        status:
-          type: string
-          enum: [draft, submitted, approved, rejected, completed]
-        createdBy:
-          type: integer
-        createdAt:
-          type: string
-          format: date-time
-        submittedAt:
-          type: string
-          format: date-time
-
-    PurchaseInput:
-      type: object
-      required:
-        - items
-      properties:
-        items:
-          type: array
-          minItems: 1
-          items:
-            type: object
-            required:
-              - productCode
-              - quantity
-            properties:
-              productCode:
-                type: string
-              quantity:
-                type: integer
-                minimum: 1
-              estimatedCost:
-                type: number
-
-    AuditLog:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        module:
-          type: string
-        action:
-          type: string
-        userId:
-          type: integer
-        ipAddress:
-          type: string
-          format: ipv4
-        details:
-          type: object
-          additionalProperties: true
-        timestamp:
-          type: string
-          format: date-time
-
   securitySchemes:
-    BearerAuth:
+    bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
-      description: JWT token obtido via /auth/login. Válido por 24 horas.
-
+  schemas:
+    Erro:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Mensagem em português
+        fields:
+          type: object
+          description: Erros por campo (validação)
+      required:
+        - error
   responses:
-    BadRequestError:
-      description: Requisição inválida
+    Erro:
+      description: Requisição inválida ou registro não encontrado
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              error:
-                type: string
-              details:
-                type: array
-                items:
-                  type: string
-
-    UnauthorizedError:
-      description: Não autenticado ou token expirado
+            $ref: '#/components/schemas/Erro'
+    NaoAutenticado:
+      description: Token ausente, inválido ou sessão expirada
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              error:
-                type: string
-                example: "Invalid or expired token"
-
-    ForbiddenError:
-      description: Acesso negado (permissão insuficiente)
+            $ref: '#/components/schemas/Erro'
+    SemPermissao:
+      description: Sem permissão para o módulo ou a ação
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              error:
-                type: string
-              requiredPermission:
-                type: string
-
-    NotFoundError:
-      description: Recurso não encontrado
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              error:
-                type: string
+            $ref: '#/components/schemas/Erro'

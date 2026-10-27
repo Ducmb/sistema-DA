@@ -1,35 +1,25 @@
-# Sistema DA — React
+# Sistema DA — Front-end (React + Vite)
 
-Prototipo migrado do design (.dc.html) para React + Vite + React Router. Mobile-first, paleta e tipografia do documento de requisitos v1.1.
+Interface mobile-first do Sistema DA, reescrita a partir do protótipo (`design/*.dc.html`). Todos os dados vêm da API (`../backend`); o front-end não guarda regras de negócio.
 
-## Rodar localmente
-```
-cd react-app
+## Rodar
+```bash
 npm install
-npm run dev
+npm run dev        # http://localhost:5173 — /api é encaminhado para http://localhost:3000 (vite.config.js)
+npm run build      # gera dist/ para servir atrás do mesmo domínio da API
+npm test           # Vitest
 ```
+A API precisa estar rodando (veja `../backend/README.md`).
 
 ## Estrutura
-- `src/components/Layout.jsx` — shell com sidebar (drawer no mobile) reutilizado em todas as telas
-- `src/theme.js` — tokens de cor/fonte
-- `src/pages/` — uma página por tela (Login, Dashboard, Usuários, Perfil, Moções, Almoxarifado, Patrimônio, Compras, Protocolo, RH, Inventário, Notificações, Analytics)
+- `src/theme.js` — design tokens claro/escuro (gerados como variáveis CSS em `main.jsx`) e níveis semânticos (crítico, atenção, informativo).
+- `src/styles.css` — utilitários (card, btn, input, tabela com rolagem horizontal, modal, drawer, skeleton, chips). Breakpoint 900px, alvos ≥ 44px.
+- `src/components/` — `Layout` (menu lateral/drawer, busca global, sino de notificações, aviso de acesso negado), `ui.jsx` (Modal, Tabs, Async, Kpi, Switch, Toast…).
+- `src/lib/` — `api.js` (fetch com token, 401 → login), `auth.jsx` (sessão, inatividade, preferências salvas no servidor), `nav.js` (telas e menu por módulo), `hooks.js`, `format.js`, `cadastros.jsx`.
+- `src/pages/` — uma pasta/arquivo por módulo: Painel, Compras, Almoxarifado, Patrimônio, Protocolo (calendário integrado), Moções & Homenagens, Gestão de Pessoal, Legislações, Analytics, Notificações, Auditoria, Configurações, Perfil, Login/Recuperação.
 
-## Credenciais de teste
-`admin/123456` ou `operador/senha123`
+## Permissões
+O menu e as rotas escondem o que o usuário não pode acessar (`Guard` em `App.jsx`), mas **quem protege é o servidor** (403). Ao cair numa rota negada, o usuário volta para a tela inicial do perfil com o aviso.
 
-## Estado atual
-Todas as telas usam dados mock em `useState` local — sem chamadas de API real. Login/Dashboard/Usuários/Perfil têm interatividade completa (paridade com o protótipo `.dc.html`); os 8 módulos complementares têm o shell e uma tabela funcional por aba — aprofundar conforme o backend (`../backend`, `../openapi.yaml`) for integrado.
-
-## Próximos passos sugeridos
-- Trocar mocks por chamadas fetch ao backend Node.js/PostgreSQL já especificado
-- Adicionar guarda de rotas por papel (RBAC) usando contexto de autenticação
-- Adicionar validação de formulário (regex e-mail, máscara de telefone) — já presente no protótipo original
-
-
-## Atualização (out/2026)
-- Permissões por servidor: as chaves de Usuários & Permissões (Gestão de Pessoal) são salvas em `DA_user_access` e `can()` (src/lib/session.js) as respeita antes do papel.
-- Log central: `src/lib/audit.js` (`logAudit`), usado nas chaves de acesso e no cadastro de servidores.
-- Exercício fiscal: `src/lib/exercicio.js`; seletor em Controle LICCONT filtra Contratos, Despesas e a nova aba Dotação Orçamentária.
-- Painel: feed mostra os 5 alertas mais recentes (alertas reais de `liccont.js`) com link para a Central.
-- Central de Notificações: alertas reais com "Ir para a ação", lidas e arquivadas persistidas.
-- Analytics: visão consolidada calculada dos dados, com links para cada módulo.
+## Credenciais de exemplo
+`admin/123456` · `operador/senha123` · `compras`, `almoxarifado`, `patrimonio`, `gerencia`, `visualizador` com `teste2026` (somente com o seed de desenvolvimento).

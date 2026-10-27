@@ -1,6 +1,16 @@
-# Sistema DA — Pacote de handoff para Claude Code
+# Sistema DA
 
-Sistema web **mobile-first** da Diretoria Administrativa da Câmara Municipal. Este pacote reúne o protótipo navegável, um esboço de front-end em React e um scaffold de back-end Node.js + PostgreSQL.
+Sistema web **mobile-first** da Diretoria Administrativa da Câmara Municipal: front-end React (`react-app/`) + API Node.js/Express com PostgreSQL (`backend/`), implementados a partir do protótipo navegável em `design/`.
+
+## Como rodar (desenvolvimento)
+```bash
+# 1) API
+cd backend && npm install && cp .env.example .env   # preencha DATABASE_URL e JWT_SECRET
+npm run migrate && npm run seed && npm run dev       # http://localhost:3000
+# 2) Front-end (outro terminal)
+cd react-app && npm install && npm run dev           # http://localhost:5173
+```
+Testes: `cd backend && npm test` (API, banco de teste real) e `cd react-app && npm test`. Detalhes de ambiente, segurança e e-mail/Drive em `backend/README.md`; contrato da API em `design/openapi.yaml` (gerado por `npm run openapi`).
 
 > **Leia primeiro `INTEGRACAO.md`** — passo a passo para colocar o sistema em produção com o Claude Code.
 > `CLAUDE.md` traz as regras que o Claude Code deve seguir. `HISTORICO.md` registra as decisões tomadas ao longo do protótipo.
@@ -9,16 +19,16 @@ Sistema web **mobile-first** da Diretoria Administrativa da Câmara Municipal. E
 
 | Pasta / arquivo | O que é | Status |
 |---|---|---|
-| `*.dc.html` | **Protótipo de referência** (design hi-fi). Cada tela tem o HTML e uma `class Component` com estado, regras e dados de exemplo. | Fonte da verdade de layout, textos e regras |
-| `*.js` (raiz) | Lógica compartilhada do protótipo, em `localStorage` | Referência de regras; trocar por API |
-| `support.js` | Motor do protótipo | **Ignorar** — não vai para produção |
-| `react-app/` | Esboço Vite + React Router | Parcial: Login, Painel, Usuários e Perfil completos; demais simplificados |
-| `backend/` | Express + PostgreSQL: auth JWT, RBAC, auditoria | Scaffold; faltam rotas de vários módulos |
-| `openapi.yaml` | Contrato da API | Atualizar ao criar rotas |
+| `design/*.dc.html` | **Protótipo de referência** (design hi-fi). Cada tela tem o HTML e uma `class Component` com estado, regras e dados de exemplo. | Fonte da verdade de layout, textos e regras |
+| `design/*.js` | Lógica compartilhada do protótipo, em `localStorage` | Portada para `backend/src/services/` |
+| `design/support.js` | Motor do protótipo | **Ignorar** — não vai para produção |
+| `react-app/` | Front-end React + Vite + React Router | Todas as telas implementadas e ligadas à API |
+| `backend/` | API Express + PostgreSQL: auth JWT + sessão, RBAC, auditoria, módulos | Todos os módulos implementados, com testes |
+| `design/openapi.yaml` | Contrato da API | Gerado das rotas (`npm run openapi`); teste garante que está atualizado |
 
-Para abrir o protótipo: `npx serve .` nesta pasta e abra `Index.dc.html` (hub de telas) ou `Login.dc.html`.
+Para abrir o protótipo: `npx serve design` e abra `Index.dc.html` (hub de telas) ou `Login.dc.html`.
 
-## Credenciais de teste (somente protótipo)
+## Credenciais de teste (seed de desenvolvimento)
 `admin/123456` · `operador/senha123` · `compras`, `almoxarifado`, `patrimonio`, `gerencia`, `visualizador` com senha `teste2026`.
 
 ## Telas
@@ -39,7 +49,7 @@ Para abrir o protótipo: `npx serve .` nesta pasta e abra `Index.dc.html` (hub d
 | Configurações do Sistema | `Configuracoes` | Parâmetros por módulo, matriz perfis × módulos, centros de custo (padrão/patrimônio) |
 | Meus Dados | `UserProfile` | Dados funcionais somente leitura, contato editável (LGPD), troca de senha |
 
-Arquivos legados mantidos só como referência: `UserManagement` (substituído por `PessoalUsuarios`), `InventoryModule` (incorporado ao Almoxarifado), `NotificationsModule`.
+Arquivos legados mantidos só como referência: `UserManagement` (substituído por `PessoalUsuarios`), `InventoryModule` (incorporado ao Almoxarifado). A Central de Notificações (`NotificationsModule`) foi implementada com os alertas reais dos módulos.
 
 ## Perfis de acesso
 - **Administrativo:** tudo.

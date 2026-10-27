@@ -10,7 +10,8 @@
     "migrate": "node src/db/migrate.js",
     "seed": "node src/db/seed.js",
     "test": "jest --runInBand",
-    "test:coverage": "jest --runInBand --coverage"
+    "test:coverage": "jest --runInBand --coverage",
+    "openapi": "node scripts/openapi.js"
   },
   "jest": {
     "testEnvironment": "node",
@@ -42,6 +43,7 @@
   },
   "devDependencies": {
     "jest": "^30.5.2",
+    "js-yaml": "^4.3.2",
     "nodemon": "^3.1.14",
     "supertest": "^7.3.1"
   }

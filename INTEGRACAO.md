@@ -96,8 +96,11 @@ Peça uma de cada vez; todas precisam de credenciais, que ficam no `.env` e nunc
 4. Publique primeiro em homologação, com HTTPS.
 5. Configure backup do banco e confirme a retenção da auditoria (padrão: 5 anos).
 
+## Situação atual (out/2026)
+As fases 1 a 8 estão implementadas, com testes de API (`backend/npm test`) e de front (`react-app/npm test`), e o `design/openapi.yaml` é gerado das rotas reais. Integrações da Etapa 5 já previstas no código: SMTP (`mailer.js`), Google Drive para RME/BRM (`jobs/estoqueSync.js`, conta de serviço) e catálogo CATMAT/CATSER (rotina diária) — basta configurar o `.env`.
+
 ## Pendências conhecidas
-- `backend/package.json` tem o comando `seed`, mas `src/db/seed.js` ainda não existe. Peça ao Claude Code para criá-lo com usuários de teste.
-- O back-end ainda não tem rotas de Moções, Patrimônio, Legislações, Configurações, Contratos, Despesas e Almoxarifado; elas surgem nas fases 3 a 8.
-- No React, os módulos além de Login, Painel, Usuários e Perfil são simplificados; refazer a partir do protótipo.
-- O feed de alertas e o calendário dependem de regras hoje no navegador (`liccont.js`, `calendar-feed.js`); devem migrar para o servidor, de preferência com atualização em tempo real (WebSocket ou SSE).
+- **Etapa 6 (dados reais):** ainda não há script de importação da planilha "CONTROLE GERAL LICCONT" e das bases do almoxarifado; os dados atuais são as amostras do protótipo (`npm run seed`).
+- **Tempo real:** o Painel e o sino de notificações atualizam por consulta periódica (Configurações › Painel › intervalo). WebSocket/SSE pode substituir isso depois.
+- **Notificações:** sem canal de SMS e sem o tipo "Mensagens" do protótipo, pois o sistema não tem comentários entre usuários; os tipos disponíveis vêm dos alertas reais dos módulos.
+- **Etapa 7:** revisão de segurança completa, testes por perfil em homologação, HTTPS e backup continuam a cargo da publicação.
