@@ -13,6 +13,7 @@ function mount(api) {
   api.use('/mocoes', requireModule('mocoes'), require('./mocoes'));
   api.use('/legislacoes', requireModule('legislacoes'), require('./legislacoes'));
   api.use('/notifications', requireModule('notificacoes'), require('./notifications'));
+  api.use('/analytics', requireModule('analytics'), require('./analytics'));
   return api;
 }
 
