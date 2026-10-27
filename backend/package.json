@@ -18,7 +18,7 @@
     "setupFiles": [
       "./tests/env.js"
     ],
-    "testTimeout": 20000
+    "testTimeout": 15000
   },
   "engines": {
     "node": ">=18.0.0",

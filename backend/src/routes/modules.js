@@ -11,6 +11,7 @@ function mount(api) {
   api.use('/protocolo', requireModule('protocolo'), require('./protocolo'));
   api.use('/mocoes', requireModule('mocoes'), require('./mocoes'));
   api.use('/legislacoes', requireModule('legislacoes'), require('./legislacoes'));
+  api.use('/notifications', requireModule('notificacoes'), require('./notifications'));
   return api;
 }
 

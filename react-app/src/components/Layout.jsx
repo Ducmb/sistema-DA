@@ -31,6 +31,7 @@ export default function Layout({ children }) {
   const loadUnread = () => { if (can('notificacoes')) api.get('/notifications/summary', { background: true }).then((r) => setUnread(r.unread)).catch(() => {}); };
   useEffect(loadUnread, [loc.pathname]); // eslint-disable-line react-hooks/exhaustive-deps
   useInterval(loadUnread, 60000);
+  useEffect(() => { window.addEventListener('da:notificacoes', loadUnread); return () => window.removeEventListener('da:notificacoes', loadUnread); }); // eslint-disable-line react-hooks/exhaustive-deps
 
   const groups = useMemo(() => menu(can), [can]);
   const current = screenByPath(loc.pathname);

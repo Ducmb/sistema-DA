@@ -6,6 +6,7 @@ const db = require('../db');
 const config = require('../services/config');
 const catalogo = require('../services/catalogo');
 const estoqueSync = require('./estoqueSync');
+const notifications = require('../services/notifications');
 
 async function purgeAudit() {
   const dias = await config.get('audit.retencaoDias');
@@ -29,6 +30,14 @@ function schedule() {
     if (Date.now() - lastDrive < every) return;
     running = true; lastDrive = Date.now();
     try { await estoqueSync.run(); } catch (e) { console.error('[jobs] estoque:', e.message); } finally { running = false; }
+  }, opt));
+  // Resumo diário de notificações por e-mail no horário de Configurações › Notificações
+  let lastDigest = '';
+  tasks.push(cron.schedule('* * * * *', async () => {
+    const hm = notifications.nowHM(), day = new Date().toDateString();
+    if (lastDigest === day || hm !== (await config.get('notif.resumoHora'))) return;
+    lastDigest = day;
+    try { const n = await notifications.sendDigests(); if (n) console.log(`[jobs] notificações: ${n} resumo(s) enviado(s)`); } catch (e) { console.error('[jobs] notificações:', e.message); }
   }, opt));
 }
 
