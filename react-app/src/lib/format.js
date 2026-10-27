@@ -27,3 +27,14 @@ export function maskPhone(v) {
 }
 export const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export const PHONE_RE = /^\(\d{2}\)\s*\d{4,5}-\d{4}$/;
+
+/** Prazo digitado: "dd/mm/aaaa", "aaaa-mm-dd" ou atalho "+X" (dias a partir de hoje) → AAAA-MM-DD ('' se inválido). */
+export function parsePrazo(t) {
+  t = String(t || '').trim();
+  const pad = (n) => String(n).padStart(2, '0'), iso = (d) => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+  let m = t.match(/^\+\s*(\d{1,4})(\s*dias?)?$/i);
+  if (m) { const d = new Date(); d.setDate(d.getDate() + parseInt(m[1], 10)); return iso(d); }
+  m = t.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (m) { const d = new Date(+m[3], +m[2] - 1, +m[1]); return d.getDate() === +m[1] && d.getMonth() === +m[2] - 1 ? iso(d) : ''; }
+  return /^\d{4}-\d{2}-\d{2}$/.test(t) ? t : '';
+}

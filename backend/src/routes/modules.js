@@ -7,6 +7,8 @@ function mount(api) {
   api.use('/pessoal', requireModule('rh'), require('./pessoal'));
   api.use('/compras', requireModule('compras'), require('./compras'));
   api.use('/almoxarifado', requireModule('almoxarifado'), require('./almoxarifado'));
+  api.use('/patrimonio', requireModule('patrimonio'), require('./patrimonio'));
+  api.use('/protocolo', requireModule('protocolo'), require('./protocolo'));
   return api;
 }
 
