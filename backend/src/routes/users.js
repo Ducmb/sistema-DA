@@ -19,7 +19,7 @@ const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 async function loadUsers(where = '', params = []) {
   const { rows } = await db.query(
-    `SELECT u.id, u.username, u.name, u.email, u.registration, u.position, u.hierarchy, u.department, u.status, u.last_login,
+    `SELECT u.id, u.username, u.name, u.email, u.registration, u.position, u.hierarchy, u.department, u.status, u.situacao, u.last_login,
             COALESCE((SELECT array_agg(role) FROM user_roles r WHERE r.user_id = u.id), '{}') AS roles,
             COALESCE((SELECT jsonb_object_agg(module, allowed) FROM user_module_overrides o WHERE o.user_id = u.id), '{}'::jsonb) AS overrides,
             EXISTS (SELECT 1 FROM password_resets p WHERE p.user_id = u.id AND p.purpose = 'convite' AND p.used_at IS NULL AND p.expires_at > NOW()) AS convite_pendente
@@ -124,6 +124,10 @@ router.put('/:id/roles', requireAdmin, ah(async (req, res) => {
   const b = parse(z.object({ roles: z.array(z.enum(ROLES)).min(1, 'O servidor precisa de ao menos um perfil.') }), req.body);
   const before = await getUser(id);
   const roles = sortRoles([...new Set(b.roles)]);
+  if (!before.roles.length) {
+    if (!before.email) throw badRequest('Cadastre o e-mail institucional do servidor (Gestão de Pessoal › Servidores) antes de conceder acesso.');
+    if (before.situacao === 'Desligado') throw badRequest('Servidor desligado não pode receber acesso.');
+  }
   if (before.roles.includes('Administrativo') && !roles.includes('Administrativo')) {
     const { rows } = await db.query("SELECT COUNT(*)::int n FROM user_roles r JOIN users u ON u.id = r.user_id WHERE r.role = 'Administrativo' AND u.status = 'active'");
     if (rows[0].n <= 1) throw badRequest('Não é possível remover o último administrador do sistema.');
@@ -132,6 +136,10 @@ router.put('/:id/roles', requireAdmin, ah(async (req, res) => {
     await c.query('DELETE FROM user_roles WHERE user_id = $1', [id]);
     for (const r of roles) await c.query('INSERT INTO user_roles (user_id, role) VALUES ($1,$2)', [id, r]);
   });
+  if (!before.roles.length) {
+    const { rows: pwr } = await db.query("UPDATE users SET status = 'active' WHERE id = $1 RETURNING password_hash", [id]);
+    if (pwr[0].password_hash === pw.UNUSABLE) await issueInvite(before);
+  }
   const added = roles.filter((r) => !before.roles.includes(r)), removed = before.roles.filter((r) => !roles.includes(r));
   for (const r of added) await audit.log(req, { action: 'Perfil adicionado', module: 'usuarios', detail: before.name + ' · ' + r, targetUserId: id });
   for (const r of removed) await audit.log(req, { action: 'Perfil removido', module: 'usuarios', detail: before.name + ' · ' + r, level: 'warning', targetUserId: id });

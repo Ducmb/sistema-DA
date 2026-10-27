@@ -1,46 +1,74 @@
 import React, { useState } from 'react';
-import { colors, fontSans } from '../theme.js';
+import { Link } from 'react-router-dom';
+import { api } from '../lib/api.js';
+import { EMAIL_RE } from '../lib/format.js';
+import { Loader } from '../components/ui.jsx';
 
-export default function ForgotPassword() {
-  const [email, setEmail] = useState('');
-  const [sent, setSent] = useState(false);
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setError('E-mail inv\u00e1lido'); return; }
-    setError(''); setLoading(true);
-    setTimeout(() => { setLoading(false); setSent(true); }, 900);
-  };
-
+export function AuthCard({ title, subtitle, children }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', padding: 20, backgroundColor: colors.white, fontFamily: fontSans }}>
-      <div style={{ width: '100%', maxWidth: 400 }}>
-        <div style={{ textAlign: 'center', marginBottom: 32 }}>
-          <div style={{ width: 60, height: 60, backgroundColor: colors.green, borderRadius: 8, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center', color: colors.white, fontWeight: 'bold', fontSize: 28 }}>DA</div>
-          <h1 style={{ fontSize: 22, fontWeight: 600, marginTop: 16 }}>Recuperar senha</h1>
-          <p style={{ fontSize: 13, color: colors.textMuted, marginTop: 4 }}>Informe seu e-mail cadastrado</p>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', padding: 20, background: 'var(--bg)' }}>
+      <div style={{ animation: 'fadeIn 0.6s ease-out', width: '100%', maxWidth: 400 }}>
+        <div style={{ textAlign: 'center', marginBottom: 40 }}>
+          <div style={{ width: 60, height: 60, background: '#1C543A', borderRadius: 8, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 'bold', fontSize: 28 }}>DA</div>
+          <h1 style={{ fontSize: 24, fontWeight: 600, marginTop: 16 }}>{title}</h1>
+          <p style={{ fontSize: 14, color: 'var(--text-3)', marginTop: 4 }}>{subtitle}</p>
         </div>
-        {!sent ? (
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <input type="email" value={email} onChange={e => { setEmail(e.target.value); setError(''); }} placeholder="nome@camara.gov.br" style={{ padding: '12px 14px', border: '1px solid #E0E0E0', borderRadius: 6, fontSize: 14 }} />
-            {error && <div style={{ padding: '10px 12px', backgroundColor: '#FEE', borderLeft: '3px solid #C33', borderRadius: 4, fontSize: 13, color: '#933' }}>{error}</div>}
-            <button type="submit" disabled={loading} style={{ padding: '12px 16px', backgroundColor: loading ? colors.disabled : colors.green, color: colors.white, border: 'none', borderRadius: 6, fontSize: 15, fontWeight: 600, cursor: loading ? 'not-allowed' : 'pointer' }}>
-              {loading ? 'Enviando...' : 'Enviar link de redefini\u00e7\u00e3o'}
-            </button>
-          </form>
-        ) : (
-          <div style={{ textAlign: 'center', padding: '28px 20px', border: '1px solid #E8E8E8', borderRadius: 8, backgroundColor: '#F9F9F9' }}>
-            <div style={{ width: 48, height: 48, borderRadius: '50%', backgroundColor: 'rgba(28,84,58,0.1)', color: colors.green, fontSize: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px' }}>\u2713</div>
-            <h2 style={{ fontSize: 16, fontWeight: 600 }}>Verifique seu e-mail</h2>
-            <p style={{ fontSize: 13, color: '#666', marginTop: 8 }}>Se <strong>{email}</strong> constar na base, um link foi enviado.</p>
-          </div>
-        )}
+        {children}
         <div style={{ textAlign: 'center', marginTop: 20 }}>
-          <a href="/login" style={{ fontSize: 13, color: colors.green, textDecoration: 'none' }}>\u2190 Voltar ao login</a>
+          <Link to="/login" style={{ fontSize: 13, textDecoration: 'none' }}>← Voltar ao login</Link>
         </div>
       </div>
     </div>
+  );
+}
+
+/** Recuperar senha (RF03): resposta sempre igual, exista ou não o e-mail. */
+export default function ForgotPassword() {
+  const [email, setEmail] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [sent, setSent] = useState(false);
+  const [resent, setResent] = useState(false);
+  const [error, setError] = useState('');
+
+  const send = async () => {
+    await api.post('/auth/forgot-password', { email: email.trim() });
+  };
+  const submit = async (e) => {
+    e.preventDefault();
+    const v = email.trim();
+    if (!v) { setError('Informe o e-mail cadastrado'); return; }
+    if (!EMAIL_RE.test(v)) { setError('E-mail inválido'); return; }
+    setLoading(true); setError('');
+    try { await send(); setSent(true); } catch (err) { setError(err.message); } finally { setLoading(false); }
+  };
+  const resend = async () => {
+    setResent(false);
+    try { await send(); setResent(true); } catch (err) { setError(err.message); }
+  };
+
+  return (
+    <AuthCard title="Recuperar senha" subtitle="Informe seu e-mail cadastrado para receber o link de redefinição">
+      {!sent ? (
+        <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }} noValidate>
+          <div className="field">
+            <label htmlFor="fp-email" style={{ fontSize: 13, fontWeight: 500 }}>E-mail cadastrado</label>
+            <input id="fp-email" className="input" type="email" autoComplete="email" placeholder="nome@camara.gov.br" value={email} onChange={(e) => { setEmail(e.target.value); setError(''); }} />
+          </div>
+          {error && <div className="alert-box error" role="alert">{error}</div>}
+          <button type="submit" className="btn btn-primary" disabled={loading} style={{ fontSize: 15, fontWeight: 600 }}>{loading ? 'Enviando...' : 'Enviar link de redefinição'}</button>
+          {loading && <Loader />}
+        </form>
+      ) : (
+        <div style={{ textAlign: 'center', padding: '28px 20px', border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface-2)' }}>
+          <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'var(--accent-soft)', color: 'var(--accent)', fontSize: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px' }}>✓</div>
+          <h2 style={{ fontSize: 16, fontWeight: 600 }}>Verifique seu e-mail</h2>
+          <p style={{ fontSize: 13, color: 'var(--text-2)', marginTop: 8, lineHeight: 1.5 }}>Se <strong>{email}</strong> constar na base de dados, um link único e temporário de redefinição de senha foi enviado.</p>
+          <p style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 12 }}>O link expira em 30 minutos. Verifique também a caixa de spam.</p>
+          <button type="button" className="btn btn-outline" style={{ marginTop: 18 }} onClick={resend}>Reenviar e-mail</button>
+          {resent && <p style={{ fontSize: 12, color: 'var(--accent)', marginTop: 10, fontWeight: 600 }}>E-mail reenviado.</p>}
+          {error && <p className="field-error" style={{ marginTop: 10 }}>{error}</p>}
+        </div>
+      )}
+    </AuthCard>
   );
 }

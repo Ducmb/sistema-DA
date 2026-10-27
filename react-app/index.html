@@ -3,9 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sistema DA - Diretoria Administrativa</title>
+    <meta name="theme-color" content="#1C543A" />
+    <title>Sistema DA — Diretoria Administrativa</title>
+    <script>
+      // Aplica o tema antes da primeira pintura (evita piscar)
+      try { var t = localStorage.getItem('DA_theme'); if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t); } catch (e) {}
+    </script>
   </head>
-  <body style="margin:0;">
+  <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

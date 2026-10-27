@@ -1,8 +1,10 @@
 /**
- * Registro das rotas dos módulos setoriais. Cada módulo valida o próprio acesso.
+ * Registro das rotas dos módulos setoriais. Cada módulo exige o próprio acesso (403 caso contrário).
  */
+const { requireModule } = require('../middleware/auth');
+
 function mount(api) {
-  // preenchido nas fases 4–8
+  api.use('/pessoal', requireModule('rh'), require('./pessoal'));
   return api;
 }
 
