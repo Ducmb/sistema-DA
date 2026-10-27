@@ -4,6 +4,7 @@
 const cron = require('node-cron');
 const db = require('../db');
 const config = require('../services/config');
+const catalogo = require('../services/catalogo');
 
 async function purgeAudit() {
   const dias = await config.get('audit.retencaoDias');
@@ -17,6 +18,8 @@ const tasks = [];
 function schedule() {
   const opt = { timezone: 'America/Sao_Paulo' };
   tasks.push(cron.schedule('30 3 * * *', () => purgeAudit().catch((e) => console.error('[jobs] limpeza:', e.message)), opt));
+  // Catálogo compras.gov.br (CATMAT/CATSER) — diário às 03h
+  tasks.push(cron.schedule('0 3 * * *', () => catalogo.sync().catch((e) => console.error('[jobs] catálogo:', e.message)), opt));
 }
 
 module.exports = { schedule, purgeAudit, tasks };

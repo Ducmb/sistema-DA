@@ -128,7 +128,7 @@ export function ConfirmModal({ title, message, confirmLabel = 'Confirmar', dange
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
   const go = async () => {
-    if (requireText && !text.trim()) { setErr('Informe ' + (textLabel || 'a justificativa').toLowerCase() + '.'); return; }
+    if (requireText !== undefined && !text.trim()) { setErr('Informe ' + (textLabel || 'a justificativa').toLowerCase() + '.'); return; }
     setBusy(true);
     try { await onConfirm(text.trim()); onClose(); } catch (e) { setErr(e.message); setBusy(false); }
   };

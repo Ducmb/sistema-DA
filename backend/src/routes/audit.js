@@ -6,6 +6,7 @@ const db = require('../db');
 const audit = require('../services/audit');
 const config = require('../services/config');
 const { ah } = require('../lib/http');
+const { csv } = require('../lib/csv');
 const { MODULE_LABEL } = require('../services/access');
 
 const router = express.Router();
@@ -43,14 +44,10 @@ router.get('/export.csv', ah(async (req, res) => {
   const { rows } = await db.query(`SELECT * FROM audit_logs ${sql} ORDER BY ts DESC, id DESC LIMIT 50000`, p);
   const fmt = (d) => new Date(d).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }).replace(',', '');
   const LV = { info: 'Informativo', warning: 'Atenção', critical: 'Crítico' };
-  // Prefixo ' evita que planilhas interpretem células como fórmulas (injeção CSV)
-  const cell = (c) => { let v = String(c == null ? '' : c); if (/^[=+\-@]/.test(v)) v = "'" + v; return '"' + v.replace(/"/g, '""') + '"'; };
   const lines = [['Data/hora', 'Usuário', 'Perfil', 'Ação', 'Módulo', 'Detalhe', 'Gravidade', 'Dispositivo', 'IP']]
     .concat(rows.map((a) => [fmt(a.ts), a.user_name, a.user_role, a.action, MODS[a.module] || a.module, a.detail, LV[a.level], a.device, a.ip]));
   await audit.log(req, { kind: 'exportacao', action: 'Exportação do log', module: 'auditoria', detail: rows.length + ' registro(s)' });
-  res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-  res.setHeader('Content-Disposition', `attachment; filename="auditoria_${new Date().toISOString().slice(0, 10)}.csv"`);
-  res.send('\uFEFF' + lines.map((l) => l.map(cell).join(';')).join('\n'));
+  csv(res, `auditoria_${new Date().toISOString().slice(0, 10)}.csv`, lines);
 }));
 
 module.exports = router;

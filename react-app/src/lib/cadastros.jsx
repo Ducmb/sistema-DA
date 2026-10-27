@@ -1,3 +1,5 @@
+import React from 'react';
+import { useAuth } from './auth.jsx';
 import { useEffect, useState } from 'react';
 import { api } from './api.js';
 
@@ -31,4 +33,21 @@ export function useExercicioAnos() {
   const [anos, setAnos] = useState([]);
   useEffect(() => { load('exercicio', '/exercicio').then((r) => setAnos(r.anos)).catch(() => {}); }, []);
   return anos;
+}
+
+/** Exercício fiscal do usuário (preferência salva no servidor). */
+export function useExercicio() {
+  const { user, setPreference } = useAuth();
+  const anos = useExercicioAnos();
+  const ano = (user && user.preferences && +user.preferences.exercicio) || anos[0] || new Date().getFullYear();
+  return [ano, (a) => setPreference({ exercicio: +a }), anos.length ? anos : [ano]];
+}
+
+/** Seletor "Exercício fiscal" usado nos cabeçalhos. */
+export function ExercicioSelect({ label = 'Exercício fiscal' }) {
+  const [ano, setAno, anos] = useExercicio();
+  return React.createElement('label', { className: 'row', style: { gap: 8, fontSize: 12, fontWeight: 600, background: 'var(--surface)', border: '1px solid var(--border-input)', borderRadius: 8, padding: '0 6px 0 14px', minHeight: 44, flexWrap: 'nowrap', whiteSpace: 'nowrap' } },
+    label + ':',
+    React.createElement('select', { value: ano, onChange: (e) => setAno(e.target.value), 'aria-label': 'Selecionar exercício fiscal', className: 'select', style: { minHeight: 34, height: 34, width: 'auto', fontWeight: 700, color: 'var(--accent)' } },
+      anos.map((a) => React.createElement('option', { key: a, value: a }, a))));
 }

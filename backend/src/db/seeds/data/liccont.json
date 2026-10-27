@@ -1,0 +1,1924 @@
+{
+ "processes": [
+  {
+   "id": "P1",
+   "interno": "772/2026",
+   "externo": "1172/2026",
+   "objeto": "Instalação de Protetor Parede Eva Anti Impacto Batida",
+   "concorrencia": false,
+   "agente": "Marina Duarte",
+   "stages": [
+    {
+     "s": "ok"
+    },
+    {
+     "s": "ok"
+    },
+    {
+     "s": "ok"
+    },
+    {
+     "s": "ok"
+    },
+    {
+     "s": "ok"
+    },
+    {
+     "s": "ok"
+    },
+    {
+     "s": "ok"
+    },
+    {
+     "s": "ok"
+    },
+    {
+     "s": "ok"
+    },
+    {
+     "s": "ok"
+    },
+    {
+     "s": "ok"
+    },
+    {
+     "s": "ok"
+    },
+    {
+     "s": "ok"
+    },
+    {
+     "s": "ok"
+    },
+    {
+     "s": "ok"
+    },
+    {
+     "s": "ok"
+    },
+    {
+     "s": "ok"
+    },
+    {
+     "s": "ok"
+    },
+    {
+     "s": "ok"
+    },
+    {
+     "s": "ok"
+    },
+    {
+     "s": "ok"
+    },
+    {
+     "s": "ok"
+    },
+    {
+     "s": "ok"
+    },
+    {
+     "s": "pend",
+     "since": "2026-09-28"
+    }
+   ],
+   "modo": "Dispensa",
+   "setor": "Diretoria Administrativa",
+   "valor": 18500
+  },
+  {
+   "id": "P2",
+   "interno": "1759/2025",
+   "externo": "146/2026",
+   "objeto": "Serviço de publicidade",
+   "concorrencia": true,
+   "agente": "Marina Duarte",
+   "stages": [
+    {
+     "s": "ok"
+    },
+    {
+     "s": "ok"
+    },
+    {
+     "s": "ok"
+    },
+    {
+     "s": "ok"
+    },
+    {
+     "s": "ok"
+    },
+    {
+     "s": "ok"
+    },
+    {
+     "s": "pend",
+     "since": "2026-09-28"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    }
+   ],
+   "modo": "Licitação",
+   "setor": "Serviço de Licitações e Contratos",
+   "valor": 42300
+  },
+  {
+   "id": "P3",
+   "interno": "1515/2026",
+   "externo": "1548/2026",
+   "objeto": "Contratação de links de acesso à internet dedicados com redundância física",
+   "concorrencia": false,
+   "agente": "Marina Duarte",
+   "stages": [
+    {
+     "s": "ok"
+    },
+    {
+     "s": "ok"
+    },
+    {
+     "s": "ok"
+    },
+    {
+     "s": "ok",
+     "date": "2026-09-28"
+    },
+    {
+     "s": "ok"
+    },
+    {
+     "s": "ok"
+    },
+    {
+     "s": "ok"
+    },
+    {
+     "s": "ok"
+    },
+    {
+     "s": "ok"
+    },
+    {
+     "s": "ok"
+    },
+    {
+     "s": "ok"
+    },
+    {
+     "s": "ok"
+    },
+    {
+     "s": "ok"
+    },
+    {
+     "s": "pend",
+     "since": "2026-09-28"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    }
+   ],
+   "modo": "Dispensa",
+   "setor": "Serviço de Almoxarifado e Patrimônio",
+   "valor": 7600
+  },
+  {
+   "id": "P4",
+   "interno": "1043/2026",
+   "externo": "1561/2026",
+   "objeto": "Manutenção em todo telhado do prédio principal",
+   "concorrencia": false,
+   "agente": "Marina Duarte",
+   "stages": [
+    {
+     "s": "ok"
+    },
+    {
+     "s": "refazer",
+     "just": "Documento devolvido para correção",
+     "date": "2026-10-05"
+    },
+    {
+     "s": "ok"
+    },
+    {
+     "s": "ok"
+    },
+    {
+     "s": "ok"
+    },
+    {
+     "s": "ok"
+    },
+    {
+     "s": "ok"
+    },
+    {
+     "s": "ok"
+    },
+    {
+     "s": "ok"
+    },
+    {
+     "s": "ok"
+    },
+    {
+     "s": "refazer",
+     "just": "Documento devolvido para correção",
+     "date": "2026-10-05"
+    },
+    {
+     "s": "pend",
+     "since": "2026-09-28"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    }
+   ],
+   "modo": "Inexigibilidade",
+   "setor": "Diretoria Administrativa",
+   "valor": 128000
+  },
+  {
+   "id": "P5",
+   "interno": "245/2026",
+   "externo": "287/2026",
+   "objeto": "Aquisição de veículos",
+   "concorrencia": false,
+   "agente": "Otávio Lemos",
+   "stages": [
+    {
+     "s": "ok"
+    },
+    {
+     "s": "ok"
+    },
+    {
+     "s": "ok"
+    },
+    {
+     "s": "ok"
+    },
+    {
+     "s": "ok"
+    },
+    {
+     "s": "ok"
+    },
+    {
+     "s": "pend",
+     "since": "2026-09-28"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    }
+   ],
+   "modo": "Dispensa",
+   "setor": "Serviço de Licitações e Contratos",
+   "valor": 54990
+  },
+  {
+   "id": "P6",
+   "interno": "2046/2026",
+   "externo": "2311/2026",
+   "objeto": "Manutenção Porta Automática Recepção",
+   "concorrencia": false,
+   "agente": "Marina Duarte",
+   "stages": [
+    {
+     "s": "ok"
+    },
+    {
+     "s": "ok"
+    },
+    {
+     "s": "ok"
+    },
+    {
+     "s": "ok",
+     "date": "2026-09-25"
+    },
+    {
+     "s": "ok"
+    },
+    {
+     "s": "ok"
+    },
+    {
+     "s": "ok"
+    },
+    {
+     "s": "ok"
+    },
+    {
+     "s": "ok",
+     "note": "Reserva nº 98"
+    },
+    {
+     "s": "ok",
+     "date": "2026-10-02"
+    },
+    {
+     "s": "ok",
+     "date": "2026-10-02"
+    },
+    {
+     "s": "pend",
+     "since": "2026-10-02"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    }
+   ],
+   "modo": "Inexigibilidade",
+   "setor": "Serviço de Almoxarifado e Patrimônio",
+   "valor": 23400
+  },
+  {
+   "id": "P7",
+   "interno": "2125/2026",
+   "externo": "—",
+   "objeto": "Serviço de troca de pneus da Livina, alinhamento, balanceamento e troca dos bicos",
+   "concorrencia": false,
+   "agente": "Sílvia Prado",
+   "stages": [
+    {
+     "s": "ok",
+     "date": "2026-09-08"
+    },
+    {
+     "s": "ok",
+     "date": "2026-09-28"
+    },
+    {
+     "s": "ok",
+     "date": "2026-09-28"
+    },
+    {
+     "s": "pend",
+     "since": "2026-09-28"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    }
+   ],
+   "modo": "Dispensa",
+   "setor": "Diretoria Administrativa",
+   "valor": 9800
+  },
+  {
+   "id": "P8",
+   "interno": "2213/2026",
+   "externo": "2356/2026",
+   "objeto": "Papel toalha branco, em bobina",
+   "concorrencia": false,
+   "agente": "Sílvia Prado",
+   "stages": [
+    {
+     "s": "ok",
+     "date": "2026-09-21"
+    },
+    {
+     "s": "ok",
+     "date": "2026-09-24"
+    },
+    {
+     "s": "ok",
+     "date": "2026-09-24"
+    },
+    {
+     "s": "ok",
+     "date": "2026-09-30"
+    },
+    {
+     "s": "ok",
+     "date": "2026-10-02"
+    },
+    {
+     "s": "ok",
+     "date": "2026-10-06"
+    },
+    {
+     "s": "ok",
+     "date": "2026-10-06"
+    },
+    {
+     "s": "ok",
+     "date": "2026-10-06"
+    },
+    {
+     "s": "ok",
+     "date": "2026-10-06"
+    },
+    {
+     "s": "ok",
+     "date": "2026-10-06"
+    },
+    {
+     "s": "ok",
+     "date": "2026-10-09"
+    },
+    {
+     "s": "ok",
+     "date": "2026-10-13"
+    },
+    {
+     "s": "pend",
+     "since": "2026-10-13"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    }
+   ],
+   "modo": "Inexigibilidade",
+   "setor": "Serviço de Licitações e Contratos",
+   "valor": 310000
+  },
+  {
+   "id": "P9",
+   "interno": "2166/2026",
+   "externo": "—",
+   "objeto": "Cartões de memória e leitores de cartões de memória",
+   "concorrencia": false,
+   "agente": "Sílvia Prado",
+   "stages": [
+    {
+     "s": "ok",
+     "date": "2026-09-25"
+    },
+    {
+     "s": "ok",
+     "date": "2026-09-28"
+    },
+    {
+     "s": "ok",
+     "date": "2026-09-28"
+    },
+    {
+     "s": "ok",
+     "date": "2026-10-02"
+    },
+    {
+     "s": "ok",
+     "date": "2026-10-13"
+    },
+    {
+     "s": "pend",
+     "since": "2026-10-13"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    }
+   ],
+   "modo": "Dispensa",
+   "setor": "Serviço de Almoxarifado e Patrimônio",
+   "valor": 61200
+  },
+  {
+   "id": "P10",
+   "interno": "2284/2026",
+   "externo": "—",
+   "objeto": "Relogio de ponto",
+   "concorrencia": false,
+   "agente": "Sílvia Prado",
+   "stages": [
+    {
+     "s": "ok",
+     "date": "2026-09-28"
+    },
+    {
+     "s": "ok",
+     "date": "2026-10-02"
+    },
+    {
+     "s": "ok",
+     "date": "2026-10-02"
+    },
+    {
+     "s": "pend",
+     "since": "2026-10-02"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    }
+   ],
+   "modo": "Inexigibilidade",
+   "setor": "Diretoria Administrativa",
+   "valor": 15750
+  },
+  {
+   "id": "P11",
+   "interno": "2344/2026",
+   "externo": "—",
+   "objeto": "Seguro para os veículos novos",
+   "concorrencia": false,
+   "agente": "Marina Duarte",
+   "stages": [
+    {
+     "s": "ok",
+     "date": "2026-10-06"
+    },
+    {
+     "s": "ok",
+     "date": "2026-10-06"
+    },
+    {
+     "s": "ok",
+     "date": "2026-10-14"
+    },
+    {
+     "s": "ok",
+     "date": "2026-10-14"
+    },
+    {
+     "s": "pend",
+     "since": "2026-10-14"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    }
+   ],
+   "modo": "Dispensa",
+   "setor": "Serviço de Licitações e Contratos",
+   "valor": 87400
+  },
+  {
+   "id": "P12",
+   "interno": "2361/2026",
+   "externo": "—",
+   "objeto": "Aquisição de Salgados e Bolos - Dia do Servidor",
+   "concorrencia": false,
+   "agente": "Paulo Reis",
+   "stages": [
+    {
+     "s": "ok"
+    },
+    {
+     "s": "ok"
+    },
+    {
+     "s": "ok"
+    },
+    {
+     "s": "ok",
+     "date": "2026-10-07"
+    },
+    {
+     "s": "pend",
+     "since": "2026-10-07"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    },
+    {
+     "s": "pend"
+    }
+   ],
+   "modo": "Inexigibilidade",
+   "setor": "Serviço de Almoxarifado e Patrimônio",
+   "valor": 33900
+  }
+ ],
+ "contracts": [
+  {
+   "id": "C1",
+   "contratada": "1DOC TECNOLOGIA S.A",
+   "contrato": "31/2023",
+   "processo": "120/2023",
+   "aditamentos": 0,
+   "fim": "2026-12-13",
+   "empenhado": 52613,
+   "mensal": [
+    4201,
+    4201,
+    4201,
+    4201,
+    4201,
+    4201,
+    4201,
+    4201,
+    4201,
+    0,
+    0,
+    0
+   ],
+   "hist2025": {
+    "assinatura": "2023-12-15",
+    "inicio": "2023-12-15",
+    "fim": "2026-12-14",
+    "mensal": [
+     3400,
+     3400,
+     3400,
+     3400,
+     4201,
+     4201,
+     4201,
+     4201,
+     4201,
+     4201,
+     4201,
+     4201
+    ]
+   },
+   "assinatura": "2023-12-15"
+  },
+  {
+   "id": "C2",
+   "contratada": "FMK BETIO SELF STORAGE",
+   "contrato": "19/2025",
+   "processo": "2564/2025",
+   "aditamentos": 0,
+   "fim": "2026-12-14",
+   "empenhado": 23520,
+   "mensal": [
+    1960,
+    1960,
+    1960,
+    1960,
+    1960,
+    1960,
+    1960,
+    1960,
+    1960,
+    0,
+    0,
+    0
+   ],
+   "hist2025": null,
+   "assinatura": "2025-12-14"
+  },
+  {
+   "id": "C3",
+   "contratada": "VIGOS SOLUCOES EM TELECOMUNICACOES",
+   "contrato": "29/2023",
+   "processo": "205/2023",
+   "aditamentos": 0,
+   "fim": "2026-12-14",
+   "empenhado": 17688,
+   "mensal": [
+    1474,
+    1474,
+    1474,
+    1474,
+    1474,
+    1474,
+    1474,
+    1474,
+    1474,
+    0,
+    0,
+    0
+   ],
+   "hist2025": {
+    "assinatura": "2023-12-15",
+    "inicio": "2023-12-15",
+    "fim": "2026-12-14",
+    "mensal": [
+     1474,
+     1474,
+     1474,
+     1474,
+     1474,
+     1474,
+     1474,
+     1474,
+     1474,
+     1474,
+     1474,
+     1474
+    ]
+   },
+   "assinatura": "2023-12-15"
+  },
+  {
+   "id": "C4",
+   "contratada": "RODRIGO GODOY EIRELI - MOTOFRETE",
+   "contrato": "34/2024",
+   "processo": "1015/2024",
+   "aditamentos": 0,
+   "fim": "2026-12-22",
+   "empenhado": 64359.98,
+   "mensal": [
+    5850.68,
+    5850.68,
+    5850.68,
+    5850.68,
+    5850.68,
+    5850.68,
+    5850.68,
+    5850.68,
+    5850.68,
+    0,
+    0,
+    0
+   ],
+   "hist2025": {
+    "assinatura": "2024-12-23",
+    "inicio": "2024-12-23",
+    "fim": "2025-12-22",
+    "mensal": [
+     null,
+     5431.31,
+     5431.31,
+     5431.31,
+     5431.31,
+     5431.31,
+     5431.31,
+     5431.31,
+     5431.31,
+     5431.31,
+     5431.31,
+     5674.81
+    ]
+   },
+   "assinatura": "2024-12-23"
+  },
+  {
+   "id": "C5",
+   "contratada": "SMARAPD",
+   "contrato": "01/2023",
+   "processo": "30/2023",
+   "aditamentos": 0,
+   "fim": "2026-12-30",
+   "empenhado": 74580.93,
+   "mensal": [
+    6241.12,
+    6241.12,
+    6241.12,
+    7521.87,
+    6561.3,
+    6561.3,
+    6561.3,
+    6561.3,
+    6561.3,
+    0,
+    0,
+    0
+   ],
+   "hist2025": {
+    "assinatura": "2023-01-25",
+    "inicio": "2023-01-25",
+    "fim": "2024-12-29",
+    "mensal": [
+     5957.54,
+     6241.12,
+     6241.12,
+     6241.12,
+     6241.12,
+     6241.12,
+     6241.12,
+     6241.12,
+     6241.12,
+     6241.12,
+     6241.12,
+     6241.12
+    ]
+   },
+   "assinatura": "2023-01-25"
+  },
+  {
+   "id": "C6",
+   "contratada": "MINETTO",
+   "contrato": "03/2026",
+   "processo": "352/2024",
+   "aditamentos": 0,
+   "fim": "2027-02-22",
+   "empenhado": 56002.8,
+   "mensal": [
+    0,
+    949.2,
+    4746,
+    4746,
+    4746,
+    4746,
+    4746,
+    4746,
+    4746,
+    0,
+    0,
+    0
+   ],
+   "hist2025": null,
+   "assinatura": "2026-02-22"
+  },
+  {
+   "id": "C7",
+   "contratada": "ESCRITORIO CENTRAL DE ARREC. E DISTRIB. - ECAD",
+   "contrato": "10/2024",
+   "processo": "614/2024",
+   "aditamentos": 0,
+   "fim": "2027-03-04",
+   "empenhado": 37725.91,
+   "mensal": [
+    2810.94,
+    2810.94,
+    2810.94,
+    2810.94,
+    2810.94,
+    2810.94,
+    2810.94,
+    2810.94,
+    2810.94,
+    2810.93,
+    0,
+    0
+   ],
+   "hist2025": {
+    "assinatura": "2024-09-05",
+    "inicio": "2024-09-05",
+    "fim": "2025-09-04",
+    "mensal": [
+     2816.52,
+     591.64,
+     5073.88,
+     2381.34,
+     3286.35,
+     2694.71,
+     2694.71,
+     2694.71,
+     2694.71,
+     3178.01,
+     2694.71,
+     2383.51
+    ]
+   },
+   "assinatura": "2024-09-05"
+  },
+  {
+   "id": "C9",
+   "contratada": "INDUSTRIA TORRES LTDA",
+   "contrato": "5/2026",
+   "processo": "521/2026",
+   "aditamentos": 0,
+   "fim": "2027-03-17",
+   "empenhado": 12000,
+   "mensal": [
+    0,
+    0,
+    435,
+    1305,
+    0,
+    0,
+    1635,
+    1860,
+    1740,
+    0,
+    0,
+    0
+   ],
+   "hist2025": null,
+   "assinatura": "2026-03-17"
+  },
+  {
+   "id": "C10",
+   "contratada": "EDGAR LEITE FERNANDES ALIMENTOS LTDA ME",
+   "contrato": "02/2024",
+   "processo": "031/2024 (522/2024)",
+   "aditamentos": 0,
+   "fim": "2027-03-19",
+   "empenhado": 7005,
+   "mensal": [
+    1092.72,
+    1110,
+    735,
+    1110,
+    1110,
+    360,
+    1110,
+    1110,
+    360,
+    0,
+    0,
+    0
+   ],
+   "hist2025": {
+    "assinatura": "2024-03-19",
+    "inicio": "2024-03-20",
+    "fim": "2027-03-19",
+    "mensal": [
+     880,
+     360,
+     1110,
+     360,
+     360,
+     750,
+     735,
+     342.72,
+     375,
+     713.22,
+     1092.72,
+     685.44
+    ]
+   },
+   "assinatura": "2024-03-19"
+  }
+ ],
+ "expenses": [
+  {
+   "id": "D1",
+   "processo": "333",
+   "catmat": "245803",
+   "classe": "8920",
+   "catser": "",
+   "grupo": "",
+   "objeto": "BISCOITO REDONDO, SABOR COCO, TIPO ROSQUINHA",
+   "descricao": "Produtos de panificação e cereais",
+   "reserva": 3453.36,
+   "data": "2026-02-10",
+   "modalidade": "Dispensa",
+   "empenhado": 3470.4,
+   "ficha": "3",
+   "sub": "7",
+   "dataEmpenho": "2026-03-03",
+   "audesp": "",
+   "contrato": "",
+   "tcn": ""
+  },
+  {
+   "id": "D2",
+   "processo": "333",
+   "catmat": "232930",
+   "classe": "8920",
+   "catser": "",
+   "grupo": "",
+   "objeto": "BISCOITO QUADRADO, CREAM CRACKER",
+   "descricao": "Produtos de panificação e cereais",
+   "reserva": 2209.06,
+   "data": "2026-02-10",
+   "modalidade": "Dispensa",
+   "empenhado": 2496,
+   "ficha": "3",
+   "sub": "7",
+   "dataEmpenho": "2026-03-03",
+   "audesp": "Enviado",
+   "contrato": "",
+   "tcn": ""
+  },
+  {
+   "id": "D3",
+   "processo": "1720",
+   "catmat": "610531",
+   "classe": "8920",
+   "catser": "",
+   "grupo": "",
+   "objeto": "Bolo Confeitado",
+   "descricao": "Produtos de panificação e cereais",
+   "reserva": 1405.6,
+   "data": "2026-07-22",
+   "modalidade": "Dispensa",
+   "empenhado": 1400,
+   "ficha": "3",
+   "sub": "7",
+   "dataEmpenho": "2026-07-29",
+   "audesp": "",
+   "contrato": "",
+   "tcn": ""
+  },
+  {
+   "id": "D4",
+   "processo": "341",
+   "catmat": "483278",
+   "classe": "7510",
+   "catser": "",
+   "grupo": "",
+   "objeto": "BORRACHA BRANCA ESCOLAR",
+   "descricao": "Artigos para escritório",
+   "reserva": 27.6,
+   "data": "2026-02-10",
+   "modalidade": "Dispensa",
+   "empenhado": 30.8,
+   "ficha": "3",
+   "sub": "16",
+   "dataEmpenho": "2026-04-17",
+   "audesp": "",
+   "contrato": "",
+   "tcn": ""
+  },
+  {
+   "id": "D5",
+   "processo": "341",
+   "catmat": "430307",
+   "classe": "7510",
+   "catser": "",
+   "grupo": "",
+   "objeto": "CADERNO UNIVERSITÁRIO DE 01 MATÉRIA (80 FOLHAS)",
+   "descricao": "Artigos para escritório",
+   "reserva": 330.8,
+   "data": "2026-02-10",
+   "modalidade": "Dispensa",
+   "empenhado": 466.8,
+   "ficha": "3",
+   "sub": "16",
+   "dataEmpenho": "2026-04-17",
+   "audesp": "",
+   "contrato": "31/2023",
+   "tcn": ""
+  },
+  {
+   "id": "D6",
+   "processo": "341",
+   "catmat": "392276",
+   "classe": "7510",
+   "catser": "",
+   "grupo": "",
+   "objeto": "CANETA ESFERIOGRÁFICA AZUL, TIPO CRISTAL",
+   "descricao": "Artigos para escritório",
+   "reserva": 170,
+   "data": "2026-02-10",
+   "modalidade": "Dispensa",
+   "empenhado": 148,
+   "ficha": "3",
+   "sub": "16",
+   "dataEmpenho": "2026-04-17",
+   "audesp": "Enviado",
+   "contrato": "",
+   "tcn": ""
+  },
+  {
+   "id": "D7",
+   "processo": "285",
+   "catmat": "445099",
+   "classe": "6850",
+   "catser": "",
+   "grupo": "",
+   "objeto": "ESSÊNCIA AROMATIZANTE 280ML BAMBU",
+   "descricao": "Especialidades químicas diversas",
+   "reserva": 1260,
+   "data": "2026-02-11",
+   "modalidade": "Dispensa",
+   "empenhado": 641.76,
+   "ficha": "3",
+   "sub": "22",
+   "dataEmpenho": "2026-03-31",
+   "audesp": "",
+   "contrato": "",
+   "tcn": ""
+  },
+  {
+   "id": "D8",
+   "processo": "285",
+   "catmat": "445099",
+   "classe": "6850",
+   "catser": "",
+   "grupo": "",
+   "objeto": "ESSÊNCIA AROMATIZANTE 280ML LAVANDA",
+   "descricao": "Especialidades químicas diversas",
+   "reserva": 1260,
+   "data": "2026-02-11",
+   "modalidade": "Dispensa",
+   "empenhado": 641.76,
+   "ficha": "3",
+   "sub": "22",
+   "dataEmpenho": "2026-03-31",
+   "audesp": "",
+   "contrato": "",
+   "tcn": ""
+  },
+  {
+   "id": "D9",
+   "processo": "285",
+   "catmat": "445099",
+   "classe": "6850",
+   "catser": "",
+   "grupo": "",
+   "objeto": "ESSÊNCIA AROMATIZANTE 280ML CHÁ BRANCO",
+   "descricao": "Especialidades químicas diversas",
+   "reserva": 1260,
+   "data": "2026-02-11",
+   "modalidade": "Dispensa",
+   "empenhado": 641.76,
+   "ficha": "3",
+   "sub": "22",
+   "dataEmpenho": "2026-03-31",
+   "audesp": "",
+   "contrato": "",
+   "tcn": ""
+  },
+  {
+   "id": "D10",
+   "processo": "285",
+   "catmat": "626261",
+   "classe": "7920",
+   "catser": "",
+   "grupo": "",
+   "objeto": "ESPONJA LIMPEZA",
+   "descricao": "Vassouras, escovas, rodos, esponjas e esfregões",
+   "reserva": 42,
+   "data": "2026-02-11",
+   "modalidade": "Dispensa",
+   "empenhado": 45,
+   "ficha": "3",
+   "sub": "22",
+   "dataEmpenho": "2026-03-31",
+   "audesp": "Enviado",
+   "contrato": "",
+   "tcn": ""
+  },
+  {
+   "id": "D11",
+   "processo": "285",
+   "catmat": "626317",
+   "classe": "7920",
+   "catser": "",
+   "grupo": "",
+   "objeto": "PANO DE LIMPEZA EM MICROFIBRA",
+   "descricao": "Vassouras, escovas, rodos, esponjas e esfregões",
+   "reserva": 580,
+   "data": "2026-02-11",
+   "modalidade": "Dispensa",
+   "empenhado": 900,
+   "ficha": "3",
+   "sub": "22",
+   "dataEmpenho": "2026-03-31",
+   "audesp": "",
+   "contrato": "",
+   "tcn": ""
+  },
+  {
+   "id": "D12",
+   "processo": "285",
+   "catmat": "357462",
+   "classe": "7920",
+   "catser": "",
+   "grupo": "",
+   "objeto": "PANO DE LIMPEZA PARA CHÃO",
+   "descricao": "Vassouras, escovas, rodos, esponjas e esfregões",
+   "reserva": 330,
+   "data": "2026-02-11",
+   "modalidade": "Dispensa",
+   "empenhado": 330,
+   "ficha": "3",
+   "sub": "22",
+   "dataEmpenho": "2026-03-31",
+   "audesp": "",
+   "contrato": "",
+   "tcn": ""
+  },
+  {
+   "id": "D13",
+   "processo": "163",
+   "catmat": "614879",
+   "classe": "8455",
+   "catser": "",
+   "grupo": "",
+   "objeto": "Aquisição de medalhas para honrarias",
+   "descricao": "Distintivos e Insígnias",
+   "reserva": 11550,
+   "data": "2026-02-05",
+   "modalidade": "Dispensa",
+   "empenhado": 11550,
+   "ficha": "3",
+   "sub": "15",
+   "dataEmpenho": "2026-02-20",
+   "audesp": "",
+   "contrato": "",
+   "tcn": ""
+  }
+ ],
+ "verbinha": [
+  {
+   "id": "V1",
+   "origem": "2026.01",
+   "classe": "8455",
+   "grupo": "",
+   "data": "2026-01-30",
+   "valor": 90
+  },
+  {
+   "id": "V2",
+   "origem": "2026.02",
+   "classe": "8455",
+   "grupo": "",
+   "data": "2026-02-28",
+   "valor": 180
+  },
+  {
+   "id": "V3",
+   "origem": "2026.03",
+   "classe": "8455",
+   "grupo": "",
+   "data": "2026-03-31",
+   "valor": 18
+  },
+  {
+   "id": "V4",
+   "origem": "2026.04",
+   "classe": "7510",
+   "grupo": "",
+   "data": "2026-04-30",
+   "valor": 29.94
+  },
+  {
+   "id": "V5",
+   "origem": "2026.04",
+   "classe": "8455",
+   "grupo": "",
+   "data": "2026-04-30",
+   "valor": 36
+  },
+  {
+   "id": "V6",
+   "origem": "2026.05",
+   "classe": "8920",
+   "grupo": "",
+   "data": "2026-05-31",
+   "valor": 300
+  },
+  {
+   "id": "V7",
+   "origem": "2026.06",
+   "classe": "7510",
+   "grupo": "",
+   "data": "2026-06-05",
+   "valor": 105
+  },
+  {
+   "id": "V8",
+   "origem": "2026.06",
+   "classe": "8455",
+   "grupo": "",
+   "data": "2026-06-05",
+   "valor": 45
+  },
+  {
+   "id": "V9",
+   "origem": "2026.01",
+   "classe": "7110",
+   "grupo": "",
+   "data": "2026-01-30",
+   "valor": 102.4
+  },
+  {
+   "id": "V10",
+   "origem": "2026.01",
+   "classe": "7060",
+   "grupo": "",
+   "data": "2026-01-30",
+   "valor": 329
+  }
+ ],
+ "homenagens": [
+  {
+   "id": "H1",
+   "material": "Placa e Arranjo",
+   "processo": "1051/2026",
+   "decreto": "2412/2026",
+   "data": "2026-10-16",
+   "dataTexto": "",
+   "horario": "19h",
+   "honraria": "Cidadão Bauruense",
+   "homenageado": "RAFAEL MOIA FILHO",
+   "vereador": "Natalino",
+   "status": "PLACA ENTREGUE E ARRANJO ENCOMENDADO",
+   "obs": ""
+  },
+  {
+   "id": "H2",
+   "material": "Placa e Arranjo",
+   "processo": "1728/2025",
+   "decreto": "2393/2025",
+   "data": "2026-10-22",
+   "dataTexto": "",
+   "horario": "19h",
+   "honraria": "Cidadão Bauruense",
+   "homenageado": "Luiz Deoclécio Massaro Galina",
+   "vereador": "Marcos Antonio de Souza",
+   "status": "PLACA ENTREGUE E ARRANJO ENCOMENDADO",
+   "obs": ""
+  },
+  {
+   "id": "H3",
+   "material": "Placa e Arranjo",
+   "processo": "1886/2026",
+   "decreto": "2471/2026",
+   "data": "2026-10-23",
+   "dataTexto": "",
+   "horario": "19h",
+   "honraria": "Cidadão Bauruense",
+   "homenageado": "Evandro Rino Ribeiro",
+   "vereador": "Arnaldo Ribeiro",
+   "status": "PLACA ENTREGUE E ARRANJO ENCOMENDADO",
+   "obs": ""
+  },
+  {
+   "id": "H4",
+   "material": "Arranjo",
+   "processo": "2293/2026",
+   "decreto": "2470/2026",
+   "data": "2026-10-29",
+   "dataTexto": "",
+   "horario": "19h",
+   "honraria": "Medalha Proteção Comunitária",
+   "homenageado": "Miguel Zaidan Daré",
+   "vereador": "Hélio Venâncio",
+   "status": "ARRANJO ENCOMENDADO",
+   "obs": ""
+  },
+  {
+   "id": "H5",
+   "material": "Medalha, Placa e Arranjo",
+   "processo": "1896/2026",
+   "decreto": "2414/2025",
+   "data": "2026-11-12",
+   "dataTexto": "",
+   "horario": "18h",
+   "honraria": "Custos Vigilat",
+   "homenageado": "1º Sgt PM CASSIANO PINHEIRO DA SILVA",
+   "vereador": "Julio Cesar",
+   "status": "PLACA ENTREGUE E ARRANJO ENCOMENDADO",
+   "obs": ""
+  },
+  {
+   "id": "H6",
+   "material": "Arranjo",
+   "processo": "2234/2026",
+   "decreto": "2473/2026",
+   "data": "2026-11-27",
+   "dataTexto": "",
+   "horario": "19h",
+   "honraria": "Medalha Proteção Comunitária",
+   "homenageado": "Polícia Penal do Estado de São Paulo",
+   "vereador": "Hélio Venâncio",
+   "status": "ARRANJO ENCOMENDADO",
+   "obs": ""
+  },
+  {
+   "id": "H7",
+   "material": "Placa",
+   "processo": "1212/2026",
+   "decreto": "2444/2026",
+   "data": null,
+   "dataTexto": "AGENDAR",
+   "horario": "AGENDAR",
+   "honraria": "Cidadão Bauruense",
+   "homenageado": "CORONEL NILSON CESAR PEREIRA",
+   "vereador": "Hélio Venâncio",
+   "status": "PLACA ENTREGUE - EVENTO FORA",
+   "obs": ""
+  },
+  {
+   "id": "H8",
+   "material": "Placa",
+   "processo": "1771/2026",
+   "decreto": "2466/2026",
+   "data": null,
+   "dataTexto": "AGENDAR",
+   "horario": "AGENDAR",
+   "honraria": "Custos Vigilat",
+   "homenageado": "Pastor DELTON TADEU MATHEUS",
+   "vereador": "André Maldonado",
+   "status": "PLACA ENTREGUE - EVENTO FORA",
+   "obs": ""
+  },
+  {
+   "id": "H9",
+   "material": "Placa",
+   "processo": "2043/2026",
+   "decreto": "2327/2026",
+   "data": null,
+   "dataTexto": "AGENDAR",
+   "horario": "AGENDAR",
+   "honraria": "Cidadão Bauruense",
+   "homenageado": "Jair Messias Bolsonaro",
+   "vereador": "Borgo",
+   "status": "PLACA ENTREGUE - EVENTO FORA",
+   "obs": ""
+  },
+  {
+   "id": "H10",
+   "material": "Placa",
+   "processo": "-",
+   "decreto": "2476/2026",
+   "data": null,
+   "dataTexto": "AGENDAR",
+   "horario": "AGENDAR",
+   "honraria": "Cidadão Bauruense",
+   "homenageado": "ANA CAROLINA OLIVEIRA",
+   "vereador": "EDMILSON MARINHO DA SILVA JÚNIOR",
+   "status": "PLACA ENTREGUE - EVENTO FORA",
+   "obs": "Não sabe se terá arranjo"
+  }
+ ],
+ "dotacoes": [
+  {
+   "ficha": "3",
+   "sub": "7",
+   "descricao": "BISCOITO REDONDO, SABOR COCO, TIPO ROSQUINHA",
+   "orcado": 12000,
+   "ano": 2026
+  },
+  {
+   "ficha": "3",
+   "sub": "16",
+   "descricao": "BORRACHA BRANCA ESCOLAR",
+   "orcado": 2000,
+   "ano": 2026
+  },
+  {
+   "ficha": "3",
+   "sub": "22",
+   "descricao": "ESSÊNCIA AROMATIZANTE 280ML BAMBU",
+   "orcado": 6000,
+   "ano": 2026
+  },
+  {
+   "ficha": "3",
+   "sub": "15",
+   "descricao": "Aquisição de medalhas para honrarias",
+   "orcado": 19000,
+   "ano": 2026
+  }
+ ]
+}

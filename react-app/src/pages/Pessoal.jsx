@@ -6,7 +6,7 @@ import { api } from '../lib/api.js';
 import { useAuth } from '../lib/auth.jsx';
 import { useApi, useQueryState } from '../lib/hooks.js';
 import { fmtDate, fmtDateTime, initials } from '../lib/format.js';
-import { useCostCenters } from '../lib/cadastros.js';
+import { useCostCenters } from '../lib/cadastros.jsx';
 
 const SIT_STYLE = { Ativo: ['var(--accent-soft)', 'var(--accent)'], Afastado: ['var(--warn-bg)', 'var(--warn)'], Desligado: ['var(--surface-3)', 'var(--text-2)'] };
 const VAC_STYLE = { Aprovado: ['var(--accent-soft)', 'var(--accent)'], Pendente: ['var(--warn-bg)', 'var(--warn)'], Recusado: ['var(--crit-bg)', 'var(--crit)'] };
