@@ -6,6 +6,7 @@ const { requireModule } = require('../middleware/auth');
 function mount(api) {
   api.use('/pessoal', requireModule('rh'), require('./pessoal'));
   api.use('/compras', requireModule('compras'), require('./compras'));
+  api.use('/almoxarifado', requireModule('almoxarifado'), require('./almoxarifado'));
   return api;
 }
 
