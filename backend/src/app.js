@@ -39,6 +39,7 @@ app.use((err, req, res, next) => {
   if (err.type === 'entity.parse.failed') return res.status(400).json({ error: 'JSON inválido.' });
   if (err.type === 'entity.too.large') return res.status(413).json({ error: 'Conteúdo muito grande.' });
   if (err.code === 'LIMIT_FILE_SIZE') return res.status(413).json({ error: 'Arquivo muito grande.' });
+  if (err.name === 'MulterError') return res.status(400).json({ error: err.code === 'LIMIT_FILE_COUNT' || err.code === 'LIMIT_UNEXPECTED_FILE' ? 'Arquivos demais nesta remessa.' : 'Envio de arquivo inválido.' });
   if (err.expose && err.status >= 400 && err.status < 500) return res.status(err.status).json({ error: err.message, ...(err.extra || {}) });
   console.error('[erro]', req.method, req.originalUrl, err);
   res.status(500).json({ error: 'Erro interno. Tente novamente.' });

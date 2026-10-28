@@ -103,4 +103,4 @@ As fases 1 a 8 estão implementadas, com testes de API (`backend/npm test`) e de
 - **Etapa 6 (dados reais):** ainda não há script de importação da planilha "CONTROLE GERAL LICCONT" e das bases do almoxarifado; os dados atuais são as amostras do protótipo (`npm run seed`).
 - **Tempo real:** o Painel e o sino de notificações atualizam por consulta periódica (Configurações › Painel › intervalo). WebSocket/SSE pode substituir isso depois.
 - **Notificações:** sem canal de SMS e sem o tipo "Mensagens" do protótipo, pois o sistema não tem comentários entre usuários; os tipos disponíveis vêm dos alertas reais dos módulos.
-- **Etapa 7:** revisão de segurança completa, testes por perfil em homologação, HTTPS e backup continuam a cargo da publicação.
+- **Etapa 7:** a revisão de segurança foi feita (`SEGURANCA.md`); testes por perfil em homologação, HTTPS com os cabeçalhos recomendados e backup continuam a cargo da publicação.

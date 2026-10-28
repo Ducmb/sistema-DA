@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PageHeader } from '../components/Layout.jsx';
 import { Async, SkeletonRows, Switch, Tabs, useToast } from '../components/ui.jsx';
+import { safePath } from '../lib/nav.js';
 import { api } from '../lib/api.js';
 import { useApi, useQueryState } from '../lib/hooks.js';
 import { MODULE_NAMES } from '../lib/modules.js';
@@ -28,7 +29,7 @@ export default function NotificationsModule() {
   const [tab, setTab] = useQueryState('tab', 'inbox');
   const st = useApi(() => api.get('/notifications'), []);
   const act = async (path, msg) => { try { await api.post('/notifications' + path); if (msg) toast(msg); st.reload(); changed(); } catch (e) { toast(e.message, 'error'); } };
-  const open = async (n) => { if (n.unread) await api.post(`/notifications/${encodeURIComponent(n.id)}/read`).catch(() => {}); changed(); if (n.href) nav(n.href); };
+  const open = async (n) => { if (n.unread) await api.post(`/notifications/${encodeURIComponent(n.id)}/read`).catch(() => {}); changed(); if (safePath(n.href)) nav(safePath(n.href)); };
   const unread = st.data ? st.data.inbox.filter((n) => n.unread).length : 0;
   const TABS = [{ key: 'inbox', label: '📬 Caixa de Entrada' }, { key: 'unread', label: `🔴 Não Lidas (${unread})` }, { key: 'archived', label: '📦 Arquivadas' }, { key: 'preferences', label: '⚙️ Preferências' }];
   const t = TABS.some((x) => x.key === tab) ? tab : 'inbox';

@@ -19,3 +19,15 @@ describe('navegação por perfil', () => {
     expect(searchScreens('compras', canOf(['mocoes']))).toHaveLength(0);
   });
 });
+
+import { safePath } from '../lib/nav.js';
+describe('redirecionamento seguro', () => {
+  test('aceita só caminhos internos conhecidos', () => {
+    expect(safePath('/compras?tab=contratos')).toBe('/compras?tab=contratos');
+    expect(safePath('//evil.com')).toBeNull();
+    expect(safePath('/\\evil.com')).toBeNull();
+    expect(safePath('https://evil.com')).toBeNull();
+    expect(safePath('javascript:alert(1)')).toBeNull();
+    expect(safePath('/nao-existe')).toBeNull();
+  });
+});

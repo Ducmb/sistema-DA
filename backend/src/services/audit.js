@@ -30,9 +30,8 @@ async function log(req, e, client = db) {
   }
 }
 
-/** Leitura de dados pessoais (LGPD), condicionada à configuração rh.lgpdLog. */
+/** Leitura de dados pessoais (LGPD/RNF03): sempre registrada, não pode ser desligada. */
 async function logPersonalRead(req, detail, targetUserId) {
-  if ((await config.get('rh.lgpdLog')) === false) return;
   await log(req, { action: 'Leitura de dados pessoais', module: 'rh', detail, targetUserId });
 }
 

@@ -15,7 +15,7 @@ const { today } = require('../lib/dates');
 const router = express.Router();
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 10 * 1024 * 1024, files: 200 },
+  limits: { fileSize: 10 * 1024 * 1024, files: 25 },
   fileFilter: (req, f, cb) => cb(null, /\.pdf$/i.test(f.originalname) || f.mimetype === 'application/pdf')
 });
 const nf = (v) => Number(v).toLocaleString('pt-BR', { maximumFractionDigits: 3 });
@@ -222,7 +222,7 @@ router.get('/estoque/arquivos-computados', ah(async (req, res) => {
   res.json(rows.map((r) => r.arquivo));
 }));
 
-router.post('/estoque/upload', upload.array('files', 200), ah(async (req, res) => {
+router.post('/estoque/upload', upload.array('files', 25), ah(async (req, res) => {
   const tipo = ['RME', 'BRM'].includes(req.body.tipo) ? req.body.tipo : null;
   const files = req.files || [];
   if (!files.length) throw badRequest('Nenhum PDF enviado.');

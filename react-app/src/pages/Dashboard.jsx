@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { PageHeader } from '../components/Layout.jsx';
 import { Async, SkeletonCards } from '../components/ui.jsx';
+import { safePath } from '../lib/nav.js';
 import { api, qs } from '../lib/api.js';
 import { useApi, useInterval, useIsMobile } from '../lib/hooks.js';
 import { ExercicioSelect, useExercicio } from '../lib/cadastros.jsx';
@@ -211,7 +212,7 @@ function Feed({ alertas, cfg }) {
           const anim = isNew ? 'feedIn .5s cubic-bezier(.2,.8,.2,1) both' : idx === 0 ? `feedDown .45s ease-out both` : pulsing ? 'feedPulse 1s ease-out' : 'none';
           return (
             <div key={a.id + (idx === 0 ? '-' + rot + '-' + hidden.length : '')} role="link" tabIndex={0} title="Abrir a origem do alerta"
-              onClick={() => a.href && nav(a.href)} onKeyDown={(e) => { if (e.key === 'Enter' && a.href) nav(a.href); }}
+              onClick={() => safePath(a.href) && nav(safePath(a.href))} onKeyDown={(e) => { if (e.key === 'Enter' && safePath(a.href)) nav(safePath(a.href)); }}
               style={{ position: 'relative', background: L.bg, borderRadius: 8, padding: '12px 40px 12px 14px', cursor: 'pointer', animation: anim, outline: idx === 0 && list.length > 1 ? '2px solid ' + L.color : 'none', outlineOffset: -1 }}>
               <div className="row" style={{ gap: 6, marginBottom: 4 }}>
                 <span style={{ width: 6, height: 6, borderRadius: '50%', background: L.color }} />

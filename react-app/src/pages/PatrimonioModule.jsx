@@ -69,6 +69,7 @@ export default function PatrimonioModule() {
                           <td onClick={(e) => e.stopPropagation()}>
                             <div className="stack" style={{ gap: 6 }}>
                               <Badge level={LEVEL[t.status]} style={{ width: 'fit-content' }}>{t.status}</Badge>
+                              {t.aguardaAssinatura && <span className="muted" style={{ fontSize: 11 }}>Aguardando assinatura de {t.toUser}</span>}
                               {(t.prev || t.next) && (
                                 <div className="row" style={{ gap: 6 }}>
                                   {t.prev && <button type="button" className="btn btn-secondary btn-sm" title={'Voltar para ' + t.prev} onClick={() => move(t, -1)}>← Voltar</button>}

@@ -11,7 +11,8 @@
     "seed": "node src/db/seed.js",
     "test": "jest --runInBand",
     "test:coverage": "jest --runInBand --coverage",
-    "openapi": "node scripts/openapi.js"
+    "openapi": "node scripts/openapi.js",
+    "create-admin": "node scripts/create-admin.js"
   },
   "jest": {
     "testEnvironment": "node",

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth, applyTheme, deviceTheme } from '../lib/auth.jsx';
-import { homePath } from '../lib/nav.js';
+import { homePath, safePath } from '../lib/nav.js';
 
 const REMEMBER = 'DA_user';
 const MOTIVOS = { expirada: 'Sessão expirada por inatividade. Entre novamente.', login: 'Faça login para continuar.' };
@@ -26,7 +26,7 @@ export default function Login() {
     } catch (e) { /* sem dados salvos */ }
   }, []);
 
-  if (ready && user) return <Navigate to={homePath((m) => user.modules.includes(m))} replace />;
+  if (ready && user) return <Navigate to={safePath(params.get('volta')) || homePath((m) => user.modules.includes(m))} replace />;
 
   const submit = async (e) => {
     e.preventDefault();
@@ -39,7 +39,7 @@ export default function Login() {
         else localStorage.removeItem(REMEMBER);
       } catch (er) { /* armazenamento indisponível */ }
       const volta = params.get('volta');
-      nav(volta && volta.startsWith('/') && !volta.startsWith('//') ? volta : homePath((m) => u.modules.includes(m)), { replace: true });
+      nav(safePath(volta) || homePath((m) => u.modules.includes(m)), { replace: true });
     } catch (err) {
       setError(err.message || 'Erro ao fazer login. Tente novamente.');
       setPassword('');

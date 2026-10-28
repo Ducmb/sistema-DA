@@ -22,7 +22,8 @@ router.get('/meta', ah(async (req, res) => {
 
 const decorate = (t, me) => {
   const s = P.stageInfo(t.status);
-  return { ...t, ...s, canSign: t.status === 'Pendente' && t.toUserId === me };
+  const aguarda = t.status === 'Pendente' && !!t.toUserId;
+  return { ...t, ...s, next: aguarda ? null : s.next, aguardaAssinatura: aguarda, canSign: aguarda && t.toUserId === me };
 };
 
 router.get('/transferencias', ah(async (req, res) => {
@@ -77,6 +78,10 @@ router.put('/transferencias/:id', ah(async (req, res) => {
   const id = idParam(req.params.id);
   const before = await getT(id);
   const b = parse(trSchema, req.body);
+  // Depois de assinado, o termo não muda: só os centros de custo podem ser completados
+  if (before.signedAt && (b.code !== before.code || b.description !== before.description || b.fromUser !== before.fromUser || b.toUser !== before.toUser || b.date !== before.date)) {
+    throw conflict('Termo já assinado: somente os centros de custo podem ser alterados.');
+  }
   const r = await resolve(b);
   await db.query(
     `UPDATE patrimonio_transferencias SET code=$2, description=$3, from_user=$4, to_user=$5, to_user_id=$6, from_cc_id=$7, to_cc_id=$8, data=$9, updated_at=NOW() WHERE id=$1`,
@@ -91,7 +96,10 @@ router.post('/transferencias/:id/etapa', ah(async (req, res) => {
   const t = await getT(id), s = P.stageInfo(t.status);
   const st = dir > 0 ? s.next : s.prev;
   if (!st) throw badRequest(t.status === 'Recusado' ? 'Transferência recusada não muda de etapa.' : 'Não há etapa ' + (dir > 0 ? 'seguinte.' : 'anterior.'));
-  await db.query('UPDATE patrimonio_transferencias SET status=$2, updated_at=NOW() WHERE id=$1', [id, st]);
+  // O termo só se formaliza com a assinatura do servidor de destino: não se pula essa etapa
+  if (t.status === 'Pendente' && t.toUserId) throw forbidden('Aguardando a assinatura de ' + t.toUser + '. Somente o novo responsável assina o termo.');
+  // Voltar para Pendente invalida a assinatura (o termo precisa ser assinado de novo)
+  await db.query(`UPDATE patrimonio_transferencias SET status=$2, updated_at=NOW()${st === 'Pendente' ? ', assinado_em=NULL, assinado_por=NULL' : ''} WHERE id=$1`, [id, st]);
   await audit.log(req, { action: 'Transferência: etapa alterada', module: 'patrimonio', detail: `${t.code} · ${t.status} → ${st}` });
   res.json({ ok: true, status: st });
 }));

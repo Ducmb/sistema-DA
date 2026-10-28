@@ -33,6 +33,12 @@ O servidor **não inicia** sem `JWT_SECRET` forte (≥ 32 caracteres, sem palavr
 `admin/123456` (Administrativo) · `operador/senha123` (Almoxarifado, chefia) · `compras`, `almoxarifado`, `patrimonio`, `gerencia`, `visualizador` com senha `teste2026`. Agentes de contratação: `marina.duarte`, `paulo.reis`, `silvia.prado`, `otavio.lemos` (`teste2026`).
 **Troque todas antes de qualquer uso real** — o seed não roda em produção.
 
+### Primeiro administrador em produção
+```bash
+npm run create-admin -- --nome "Nome completo" --email nome@camara.sp.gov.br --matricula 0000 [--cargo "Cargo"]
+```
+Não recebe senha: imprime um link de convite de uso único (72 h) para a pessoa definir a própria senha. Recusa se já existir administrador ativo.
+
 ## Estrutura
 ```
 src/
@@ -55,6 +61,9 @@ tests/                Jest + Supertest contra banco real (TEST_DATABASE_URL), "h
 - Alterações de permissão/configuração e leituras de dados pessoais (servidores, usuários, empréstimos de bandeiras com CPF/telefone) vão para a auditoria.
 - Nome, matrícula, cargo e e-mail institucional não podem ser alterados pelo próprio usuário (403).
 - Exportações CSV com proteção contra injeção de fórmulas; uploads validados pelo conteúdo (%PDF-).
+- Log de auditoria somente de inclusão (gatilho no banco). Em produção, dê ao usuário da aplicação apenas `INSERT/SELECT/DELETE` em `audit_logs` e nenhum privilégio de DDL.
+
+Revisão de segurança completa, com achados e recomendações de publicação: [`../SEGURANCA.md`](../SEGURANCA.md).
 
 ## API
 O contrato completo está em [`../design/openapi.yaml`](../design/openapi.yaml), **gerado** a partir das rotas registradas:

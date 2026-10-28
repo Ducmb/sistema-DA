@@ -13,7 +13,7 @@ describe('API de Legislações', () => {
     const r = await api(op).get('/legislacoes');
     expect(r.status).toBe(200);
     expect(r.body.canEdit).toBe(false);
-    expect(r.body.items).toHaveLength(6);
+    expect(r.body.items.filter((n) => n.numero !== 'P-SEC')).toHaveLength(6);
     expect((await api(op).patch(`/legislacoes/${r.body.items[0].id}/ativa`).send({ ativa: false })).status).toBe(403);
     expect((await api(ger).post('/legislacoes').field('tipo', 'Portaria').field('numero', 'X').field('ementa', 'Y')).status).toBe(403);
   });

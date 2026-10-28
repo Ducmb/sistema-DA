@@ -47,7 +47,7 @@ const SCHEMA = [
   ] },
   { key: 'pessoal', label: 'Gestão de Pessoal', icon: '🧑‍💼', groups: [
     { title: 'Férias e licenças', fields: [N('rh.antecedencia', 'Antecedência mínima da solicitação', 30, 'dias', 0, 120), T('rh.aprovaChefia', 'Exigir aprovação da chefia', true), N('rh.alertaParada', 'Alertar solicitação parada após', 5, 'dias úteis', 1, 30)] },
-    { title: 'Cadastro de servidores', fields: [T('rh.lgpdLog', 'Registrar leituras de dados pessoais (LGPD)', true), S('rh.perfilPadrao', 'Perfil de acesso padrão de novos servidores', 'Visualizador', ROLES.slice(1))] }
+    { title: 'Cadastro de servidores', fields: [S('rh.perfilPadrao', 'Perfil de acesso padrão de novos servidores', 'Visualizador', ROLES.slice(1))] }
   ] },
   { key: 'legislacoes', label: 'Legislações', icon: '⚖', groups: [
     { title: 'Exibição', fields: [T('leg.mostrarInativas', 'Mostrar normas inativas por padrão', false), N('leg.pagina', 'Normas por página', 20, 'itens', 5, 100)] },

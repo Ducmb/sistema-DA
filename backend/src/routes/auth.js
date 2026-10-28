@@ -108,11 +108,9 @@ router.post('/forgot-password', limiter(10), ah(async (req, res) => {
     const raw = pw.randomToken();
     await db.query("UPDATE password_resets SET used_at = NOW() WHERE user_id = $1 AND used_at IS NULL AND purpose = 'reset'", [u.id]);
     await db.query("INSERT INTO password_resets (user_id, token_hash, purpose, expires_at) VALUES ($1,$2,'reset', NOW() + make_interval(mins => $3))", [u.id, pw.sha256(raw), minutes]);
-    try {
-      await mailer.sendResetEmail(email, (process.env.APP_URL || '') + '/redefinir-senha?token=' + raw, minutes);
-    } catch (e) {
-      console.error('[auth] falha ao enviar e-mail de redefinição:', e.message);
-    }
+    // Sem await: o tempo de resposta não revela se o e-mail existe
+    mailer.sendResetEmail(email, (process.env.APP_URL || '') + '/redefinir-senha?token=' + raw, minutes)
+      .catch((e) => console.error('[auth] falha ao enviar e-mail de redefinição:', e.message));
     await audit.log(req, { action: 'Redefinição de senha solicitada', module: 'auth', detail: 'Link enviado ao e-mail institucional', actor: { id: u.id, name: u.name, roles: [] }, targetUserId: u.id });
   }
   res.json(generic);

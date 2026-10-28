@@ -5,12 +5,17 @@ const config = require('./config');
 const ROUNDS = process.env.NODE_ENV === 'test' ? 4 : 12;
 
 const hash = (p) => bcrypt.hash(p, ROUNDS);
-const compare = (p, h) => bcrypt.compare(String(p || ''), h || '');
 const sha256 = (v) => crypto.createHash('sha256').update(v).digest('hex');
 const randomToken = () => crypto.randomBytes(32).toString('hex');
 // Hash inválido para contas ainda sem senha definida (convite pendente) e comparação de tempo constante
 const UNUSABLE = '!' + crypto.randomBytes(16).toString('hex');
-const DUMMY_HASH = bcrypt.hashSync('dummy-password-for-timing', 4);
+const DUMMY_HASH = bcrypt.hashSync('dummy-password-for-timing', ROUNDS);
+const BCRYPT = /^\$2[aby]\$\d{2}\$/;
+/** Compara a senha; hash inutilizável (convite pendente) ou ausente leva o mesmo tempo de um hash real. */
+async function compare(p, h) {
+  if (!BCRYPT.test(h || '')) { await bcrypt.compare(String(p || ''), DUMMY_HASH); return false; }
+  return bcrypt.compare(String(p || ''), h);
+}
 
 /** Regras de senha conforme Configurações › Geral › Senhas. Retorna lista de { label, ok }. */
 async function rules(p) {

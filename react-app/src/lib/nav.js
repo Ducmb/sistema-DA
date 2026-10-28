@@ -50,3 +50,10 @@ export function homePath(can) {
 }
 
 export const screenByPath = (path) => SCREENS.find((s) => path === s.path || path.startsWith(s.path + '/'));
+
+/** Caminho interno seguro para redirecionar (evita open redirect: //host, /\host, esquemas). */
+export function safePath(p) {
+  const s = String(p || '');
+  if (!/^\/(?![/\\])[^\\\s]*$/.test(s)) return null;
+  return screenByPath(s.split(/[?#]/)[0]) || s === '/' ? s : null;
+}

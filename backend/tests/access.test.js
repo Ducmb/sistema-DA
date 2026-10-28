@@ -52,6 +52,7 @@ describe('RBAC no servidor', () => {
     expect(hist.body[0].action).toBe('Acesso Concedido');
     // Gerenciamento com rh não pode alterar permissões (somente Administrativo)
     expect((await api(tg).put(`/users/${id}/access/compras`).send({ allowed: true })).status).toBe(403);
+    await api(admin).delete(`/users/${id}/access/rh`);
   });
 
   test('não remove o último administrador', async () => {

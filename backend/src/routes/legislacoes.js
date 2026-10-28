@@ -108,6 +108,7 @@ router.get('/:id/pdf', ah(async (req, res) => {
   res.setHeader('Content-Type', 'application/pdf');
   res.setHeader('Content-Disposition', `inline; filename="${encodeURIComponent(n.pdf_nome)}"`);
   res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('Content-Security-Policy', "sandbox; default-src 'none'");
   fs.createReadStream(file).pipe(res);
 }));
 

@@ -69,8 +69,19 @@ router.put('/servidores/:id', ah(async (req, res) => {
   const { rows: old } = await db.query('SELECT u.*, EXISTS (SELECT 1 FROM user_roles r WHERE r.user_id = u.id) AS has_access FROM users u WHERE id = $1', [id]);
   if (!old.length) throw notFound('Servidor não encontrado.');
   const o = old[0];
-  // E-mail institucional de quem tem acesso ao sistema é credencial: somente o Administrativo altera
-  if ((b.email || '') !== (o.email || '') && o.has_access && !req.user.isAdmin) throw forbidden('Somente o Administrativo altera o e-mail de quem tem acesso ao sistema.');
+  // RNF04: o próprio servidor não altera nome, matrícula, cargo nem e-mail institucional
+  const proprio = ['name', 'registration', 'position', 'email'].filter((k) => String(b[k] || '') !== String(o[k] || ''));
+  if (id === req.user.id && !req.user.isAdmin && proprio.length) {
+    await audit.log(req, { action: 'Alteração bloqueada', module: 'rh', detail: 'Tentativa de alterar os próprios dados funcionais: ' + proprio.join(', '), level: 'warning', targetUserId: id });
+    throw forbidden('Nome, matrícula, cargo e e-mail institucional não podem ser alterados pelo próprio servidor.');
+  }
+  // Cadastro de quem tem acesso ao sistema: e-mail (credencial), desligamento e dados de administradores só pelo Administrativo
+  if (o.has_access && !req.user.isAdmin) {
+    if ((b.email || '') !== (o.email || '')) throw forbidden('Somente o Administrativo altera o e-mail de quem tem acesso ao sistema.');
+    if (b.situacao !== o.situacao && (b.situacao === 'Desligado' || o.situacao === 'Desligado')) throw forbidden('Somente o Administrativo desliga ou reativa quem tem acesso ao sistema.');
+    const adm = await db.query("SELECT 1 FROM user_roles WHERE user_id = $1 AND role = 'Administrativo'", [id]);
+    if (adm.rows.length) throw forbidden('Somente o Administrativo altera o cadastro de um administrador.');
+  }
   if (id === req.user.id && b.situacao === 'Desligado') throw badRequest('Você não pode desligar o próprio cadastro.');
   await checkDup(b, id);
   const desligar = b.situacao === 'Desligado' && o.situacao !== 'Desligado';
