@@ -55,6 +55,12 @@ describe('RBAC no servidor', () => {
     await api(admin).delete(`/users/${id}/access/rh`);
   });
 
+  test('lista de usuários traz a matriz perfil × módulo para leitura', async () => {
+    const r = await api(admin).get('/users');
+    expect(r.body.matrix.Compras).toEqual(expect.arrayContaining(['compras', 'mocoes']));
+    expect(r.body.allModules.find((m) => m.key === 'auditoria').adminOnly).toBe(true);
+  });
+
   test('não remove o último administrador', async () => {
     const { rows } = await db.query("SELECT id FROM users WHERE username = 'admin'");
     const r = await api(admin).put(`/users/${rows[0].id}/roles`).send({ roles: ['Compras'] });

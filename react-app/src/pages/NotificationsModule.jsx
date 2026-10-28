@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PageHeader } from '../components/Layout.jsx';
 import { Async, SkeletonRows, Switch, Tabs, useToast } from '../components/ui.jsx';
@@ -127,11 +127,12 @@ const EmptyBox = () => (
 );
 
 function Preferencias({ data, onSaved }) {
-  const toast = useToast();
   const [p, setP] = useState(data.prefs);
   const [err, setErr] = useState('');
+  const [saved, setSaved] = useState(false);
+  useEffect(() => { if (!saved) return undefined; const t = setTimeout(() => setSaved(false), 2500); return () => clearTimeout(t); }, [saved]);
   const save = async () => {
-    try { setP(await api.put('/notifications/preferences', p)); setErr(''); toast('Preferências salvas'); onSaved(); } catch (e) { setErr(e.message); }
+    try { setP(await api.put('/notifications/preferences', p)); setErr(''); setSaved(true); onSaved(); } catch (e) { setErr(e.message); }
   };
   const box = (title, children) => <section className="card lg" style={{ marginBottom: 20 }}><h3 className="card-title" style={{ marginBottom: 16 }}>{title}</h3>{children}</section>;
   const check = (label, on, onChange, disabled, hint) => (
@@ -155,7 +156,8 @@ function Preferencias({ data, onSaved }) {
       {box('Método de Entrega', (
         <div className="stack" style={{ gap: 4 }}>
           {check('Notificações em tempo real no aplicativo', p.tempoReal, () => setP({ ...p, tempoReal: !p.tempoReal }))}
-          {check(`Notificações por e-mail (resumo diário às ${data.resumoHora})`, p.email, () => setP({ ...p, email: !p.email }), !data.emailHabilitado, !data.emailHabilitado ? 'Canal de e-mail desativado em Configurações › Notificações.' : '')}
+          {check(`Notificações por e-mail (diárias às ${String(data.resumoHora).replace(/^(\d{2}):00$/, '$1h')})`, p.email, () => setP({ ...p, email: !p.email }), !data.emailHabilitado, !data.emailHabilitado ? 'Canal de e-mail desativado em Configurações › Notificações.' : '')}
+          {check('Notificações por SMS (apenas críticas)', false, () => {}, true, 'Canal de SMS ainda não disponível.')}
         </div>
       ))}
       {box('Horário de Silêncio', (
@@ -166,10 +168,11 @@ function Preferencias({ data, onSaved }) {
             <span className="muted-3" style={{ fontSize: 13 }}>até</span>
             <input type="time" className="input" style={{ width: 'auto' }} aria-label="Fim do silêncio" value={p.silencio.fim} onChange={(e) => setP({ ...p, silencio: { ...p.silencio, fim: e.target.value } })} />
           </div>
-          <p className="muted-3" style={{ fontSize: 11, marginTop: 8 }}>Apenas notificações críticas são contadas no sino fora do horário de trabalho</p>
+          <p className="muted-3" style={{ fontSize: 11, marginTop: 8 }}>Apenas notificações críticas serão entregues fora do horário de trabalho</p>
         </>
       ))}
       <button type="button" className="btn btn-primary" style={{ width: '100%' }} onClick={save}>💾 Salvar Preferências</button>
+      {saved && <p role="status" style={{ marginTop: 10, fontSize: 12.5, fontWeight: 600, color: 'var(--accent)', textAlign: 'center' }}>✓ Preferências salvas</p>}
       {err && <p role="alert" style={{ marginTop: 10, fontSize: 12.5, color: 'var(--crit-strong)', textAlign: 'center' }}>{err}</p>}
     </div>
   );

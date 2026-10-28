@@ -65,7 +65,7 @@ export default function Dashboard() {
                     {d.capacidade.length > 0 && (
                       <section className="card" style={{ padding: 20, borderRadius: 12 }}>
                         <h3 style={{ fontSize: 14.5, fontWeight: 700, marginBottom: 4 }}>Capacidade Operacional de Contagem</h3>
-                        <p className="muted-3" style={{ fontSize: 11.5, marginBottom: 16 }}>Demandas ativas por setor</p>
+                        <p className="muted-3" style={{ fontSize: 11.5, marginBottom: 16 }}>Parâmetros calibrados de pessoal ativo</p>
                         <div className="stack" style={{ gap: 12 }}>
                           {d.capacidade.map((r) => (
                             <div key={r.label} className="row between" style={{ borderTop: '1px solid var(--divider)', paddingTop: 12, flexWrap: 'nowrap' }}>
@@ -94,7 +94,7 @@ export default function Dashboard() {
                     {d.metas && (
                       <section className="card" style={{ padding: 20, borderRadius: 12 }}>
                         <h3 style={{ fontSize: 14.5, fontWeight: 700, marginBottom: 4 }}>Indicador Metas Legislativas (DA)</h3>
-                        <p className="muted-3" style={{ fontSize: 11.5, marginBottom: 18 }}>Documentos do Protocolo por fase no exercício</p>
+                        <p className="muted-3" style={{ fontSize: 11.5, marginBottom: 18 }}>Progresso de atividades regulatórias</p>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, alignItems: 'end', height: 90 }}>
                           {d.metas.map((m, i) => <div key={m.nome} style={{ display: 'flex', justifyContent: 'center', height: '100%', alignItems: 'flex-end' }}><div title={m.nome + ': ' + m.n} style={{ width: '100%', maxWidth: 34, height: Math.max(6, (m.pct / 100) * 70) + 'px', background: ['var(--primary)', '#2E6B4E', '#4E8A6C', '#9DBFAD'][i], borderRadius: '4px 4px 0 0' }} /></div>)}
                         </div>
@@ -128,7 +128,7 @@ function Fluxo({ fluxo }) {
       <div className="row between" style={{ alignItems: 'flex-start', marginBottom: 18 }}>
         <div>
           <h3 style={{ fontSize: 15.5, fontWeight: 700 }}>Fluxo de Processos</h3>
-          <p className="muted-3" style={{ fontSize: 12, marginTop: 3 }}>Movimentações mensais na Diretoria Administrativa (etapas concluídas e documentos protocolados)</p>
+          <p className="muted-3" style={{ fontSize: 12, marginTop: 3 }}>Média histórica de fluxo na Diretoria Administrativa</p>
         </div>
         {v !== null && <span className="badge" style={{ fontSize: 11.5, background: v >= 0 ? 'var(--accent-soft)' : 'var(--crit-bg)', color: v >= 0 ? 'var(--accent)' : 'var(--crit-strong)', padding: '5px 10px', whiteSpace: 'nowrap' }}>{v >= 0 ? '↗ +' : '↘ '}{String(v).replace('.', ',')}% este mês</span>}
       </div>

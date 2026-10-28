@@ -194,19 +194,19 @@ function BaseCompleta({ st, toast, onChange }) {
         </table>
       </div>
       {!all.length && <p style={{ padding: 24, textAlign: 'center', color: 'var(--text-2)' }}>Nenhum produto encontrado.</p>}
-      <Pages total={all.length} page={pg} pages={pages} ps={PS} onPage={setPage} />
+      <Pages total={all.length} page={pg} pages={pages} ps={PS} onPage={setPage} label="Paginação da Base Completa" />
     </section>
   );
 }
 
-export function Pages({ total, page, pages, ps, onPage }) {
+export function Pages({ total, page, pages, ps, onPage, label = 'Paginação' }) {
   const nums = [];
   for (let k = Math.max(0, page - 2); k <= Math.min(pages - 1, page + 2); k++) nums.push(k);
   return (
     <div className="row between" style={{ paddingTop: 12 }}>
       <span style={{ fontSize: 12, color: 'var(--text-2)' }}>{total ? `Mostrando ${page * ps + 1}–${Math.min(total, page * ps + ps)} de ${total}` : ''}</span>
       {pages > 1 && (
-        <nav aria-label="Paginação" className="row" style={{ gap: 6 }}>
+        <nav aria-label={label} className="row" style={{ gap: 6 }}>
           <button type="button" className="btn btn-secondary btn-sm" disabled={page === 0} onClick={() => onPage(page - 1)} aria-label="Página anterior">‹ Anterior</button>
           {nums.map((k) => <button key={k} type="button" className={'btn btn-sm ' + (k === page ? 'btn-primary' : 'btn-secondary')} style={{ minWidth: 36 }} aria-current={k === page ? 'page' : undefined} onClick={() => onPage(k)}>{k + 1}</button>)}
           <button type="button" className="btn btn-secondary btn-sm" disabled={page >= pages - 1} onClick={() => onPage(page + 1)} aria-label="Próxima página">Próxima ›</button>

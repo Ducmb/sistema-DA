@@ -15,9 +15,12 @@ function load(key, path) {
 export const invalidateCadastros = () => Object.keys(cache).forEach((k) => delete cache[k]);
 
 /** Nomes dos centros de custo ativos ('padrao' ou 'patrimonio'). */
-export function useCostCenters(tipo = 'padrao') {
+export function useCostCenters(tipo = 'padrao', versao = 0) {
   const [list, setList] = useState([]);
-  useEffect(() => { load('cc-' + tipo, '/cost-centers?tipo=' + tipo).then((r) => setList(r.items.map((c) => c.nome))).catch(() => {}); }, [tipo]);
+  useEffect(() => {
+    if (versao) delete cache['cc-' + tipo]; // recarrega após cadastrar um setor
+    load('cc-' + tipo, '/cost-centers?tipo=' + tipo).then((r) => setList(r.items.map((c) => c.nome))).catch(() => {});
+  }, [tipo, versao]);
   return list;
 }
 

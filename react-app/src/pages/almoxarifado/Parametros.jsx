@@ -57,7 +57,7 @@ export default function Parametros() {
                 ))}
                 <div className="row" style={{ gap: 8, marginTop: 4, flexWrap: 'nowrap' }}>
                   <select className="select" value={newMember} onChange={(e) => setNewMember(e.target.value)} aria-label="Servidor a adicionar">
-                    <option value="">Selecione o servidor…</option>{p.candidates.filter((c) => !draft.team.some((m) => m.userId === c.id)).map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                    <option value="">Nome do servidor</option>{p.candidates.filter((c) => !draft.team.some((m) => m.userId === c.id)).map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
                   </select>
                   <button type="button" className="btn btn-primary" disabled={!newMember} onClick={() => { const c = p.candidates.find((x) => x.id === +newMember); upd((x) => x.team.push({ userId: c.id, name: c.name, active: true })); setNewMember(''); }}>Adicionar</button>
                 </div>
@@ -87,7 +87,7 @@ export default function Parametros() {
 
             <section className="card lg">
               <h3 className="card-title">Pesos por prioridade</h3>
-              <p className="card-sub" style={{ marginBottom: 14 }}>Participação de cada curva no sorteio aleatório balanceado (soma deve ser 100%)</p>
+              <p className="card-sub" style={{ marginBottom: 14 }}>Participação de cada curva no sorteio (soma deve ser 100%)</p>
               <div className="stack" style={{ gap: 12 }}>
                 {W.map(([k, label]) => (
                   <div key={k}>

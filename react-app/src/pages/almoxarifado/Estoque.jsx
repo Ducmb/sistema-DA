@@ -48,6 +48,16 @@ export default function Estoque() {
     setRep(null);
     toast(`Pasta de ${tipo}s "${name}": ${pdfs.length} PDF(s). Clique em Atualizar estoque.`);
   };
+  /** "Usar pastas de exemplo" (modo de teste do protótipo): um RME e um BRM de amostra. */
+  const useSample = async () => {
+    try {
+      const get = async (n) => { const r = await fetch('/exemplos/' + n); if (!r.ok) throw new Error(); return new File([await r.blob()], n, { type: 'application/pdf', lastModified: Date.now() }); };
+      const [rme, brm] = await Promise.all([get('rme-1300-2026.pdf'), get('brm-700-2026.pdf')]);
+      setFolders({ RME: { name: 'Exemplo — RMEs', files: [rme], total: 1 }, BRM: { name: 'Exemplo — BRMs', files: [brm], total: 1 } });
+      setRep(null);
+      toast('Pastas de exemplo carregadas: 1 RME e 1 BRM. Clique em Atualizar estoque.');
+    } catch (e) { toast('Não foi possível carregar os PDFs de exemplo.', 'error'); }
+  };
   const computados = new Set(st.data ? st.data.computados : []);
   const localFiles = ['RME', 'BRM'].flatMap((t) => (folders[t] ? folders[t].files.map((f) => ({ name: f.name, modified: new Date(f.lastModified).toISOString(), tipo: t, computado: computados.has(f.name), file: f })) : []));
   const usingLocal = !!(folders.RME || folders.BRM);
@@ -87,7 +97,7 @@ export default function Estoque() {
         <div className="row between" style={{ alignItems: 'flex-start', gap: 14 }}>
           <div style={{ minWidth: 0, maxWidth: 640 }}>
             <h3 style={{ fontSize: 15, fontWeight: 700 }}>Atualização de estoque por RME e BRM</h3>
-            <p style={{ fontSize: 12.5, color: 'var(--text-2)', marginTop: 4, lineHeight: 1.5 }}>A rotina lê os PDFs de <strong>RME</strong> (saídas) e <strong>BRM</strong> (entradas), identifica os documentos ainda não computados e atualiza o saldo dos materiais pelo código cadastrado. {d && d.drive.configured ? 'As pastas do Google Drive são verificadas automaticamente; você também pode enviar uma pasta do computador.' : 'Até a integração com o Google Drive, selecione as pastas do computador.'}</p>
+            <p style={{ fontSize: 12.5, color: 'var(--text-2)', marginTop: 4, lineHeight: 1.5 }}>A rotina lê os PDFs de <strong>RME</strong> (saídas) e <strong>BRM</strong> (entradas) da pasta, identifica os documentos ainda não computados e atualiza o saldo dos materiais pelo código cadastrado. {d && d.drive.configured ? 'As pastas do Google Drive são verificadas automaticamente; você também pode enviar uma pasta do computador.' : 'Até a integração com o Google Drive, selecione uma pasta do computador para testar.'}</p>
           </div>
           <button type="button" className="btn btn-primary" disabled={syncing || (!usingLocal && !(d && d.drive.configured))} onClick={run} style={{ fontSize: 14 }}>{syncing ? 'Atualizando…' : '↻ Atualizar estoque'}</button>
         </div>
@@ -95,7 +105,10 @@ export default function Estoque() {
           {() => (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 300px), 1fr))', gap: 12 }}>
               <div style={{ gridColumn: 'span 2', minWidth: 0, display: 'flex', flexDirection: 'column', gap: 10, padding: 14, border: '1px solid var(--border)', borderRadius: 8 }}>
-                <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-2)', textTransform: 'uppercase', letterSpacing: 0.4 }}>Pastas monitoradas · {d.drive.configured ? 'Google Drive' : 'envio do computador'}</p>
+                <div className="row between">
+                  <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-2)', textTransform: 'uppercase', letterSpacing: 0.4 }}>Pastas monitoradas · {d.drive.configured ? 'Google Drive' : 'modo de teste'}</p>
+                  {!d.drive.configured && <button type="button" className="btn btn-secondary btn-sm" style={{ minHeight: 32 }} onClick={useSample}>Usar pastas de exemplo</button>}
+                </div>
                 {d.drive.error && <p className="field-error">{d.drive.error}</p>}
                 <div className="row" style={{ alignItems: 'stretch' }}>
                   {[['RME', 'Saídas — RMEs', 'Requisições de material', '−', 'var(--warn)', 'var(--warn-bg)'], ['BRM', 'Entradas — BRMs', 'Boletins de recebimento', '+', 'var(--accent)', 'var(--accent-soft)']].map(([t, title, sub, sign, color, bg]) => (
@@ -274,7 +287,7 @@ function Documentos({ tick }) {
               </table>
             </div>
             {!x.items.length && <p style={{ padding: 24, textAlign: 'center', color: 'var(--text-2)' }}>Nenhum documento encontrado.</p>}
-            <Pages total={x.filtered} page={x.page} pages={Math.max(1, Math.ceil(x.filtered / x.pageSize))} ps={x.pageSize} onPage={(p) => setF({ ...f, page: p })} />
+            <Pages total={x.filtered} page={x.page} pages={Math.max(1, Math.ceil(x.filtered / x.pageSize))} ps={x.pageSize} onPage={(p) => setF({ ...f, page: p })} label="Paginação dos documentos" />
           </>
         )}
       </Async>

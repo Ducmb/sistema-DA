@@ -4,6 +4,7 @@ import { api } from '../../lib/api.js';
 import { useApi, useQueryState } from '../../lib/hooks.js';
 import { brl, fmtDate } from '../../lib/format.js';
 import { useCostCenters } from '../../lib/cadastros.jsx';
+import { useAuth } from '../../lib/auth.jsx';
 
 const COLOR = { ok: 'var(--primary)', na: '#B8C7BF', refazer: '#D97706', pend: 'var(--track)' };
 const STBG = { ok: 'var(--accent-soft)', na: 'var(--surface-2)', refazer: 'var(--warn-bg)', pend: 'var(--surface)' };
@@ -11,6 +12,7 @@ const MB = { Dispensa: ['var(--info-bg)', 'var(--info)'], Inexigibilidade: ['var
 
 /** Compras › Controle de Processos (24 etapas: 6 internas + 18 externas). */
 export default function Processos() {
+  const { user } = useAuth();
   const toast = useToast();
   const meta = useApi(() => api.get('/compras/meta'), []);
   const st = useApi(() => api.get('/compras/processos'), []);
@@ -65,7 +67,9 @@ export default function Processos() {
           <p style={{ fontSize: 12.5, color: 'var(--text-2)', marginTop: 2 }}>Fase interna (6 etapas) e fase externa (18 etapas). Etapa parada há mais de {m.sla} dias úteis fica marcada como atrasada.</p>
         </div>
         <div className="row">
-          <Badge color="var(--accent)" bg="var(--accent-soft)">{m.isChefia ? 'Você atua como Chefia' : 'Você atua como Agente'}</Badge>
+          <label className="row" style={{ gap: 8, fontSize: 12, fontWeight: 600, color: 'var(--text-2)', flexWrap: 'nowrap' }} title="Definido pelo seu perfil de acesso">Atuando como
+            <select className="select" style={{ width: 'auto', minHeight: 40 }} disabled value="eu"><option value="eu">{(user ? user.name : '') + (m.isChefia ? ' (Chefia)' : ' (Agente de contratação)')}</option></select>
+          </label>
           {(m.isChefia || !m.chefiaConfirma) && <button type="button" className="btn btn-primary" onClick={() => openNew()}>+ Novo processo</button>}
         </div>
       </div>
@@ -133,7 +137,7 @@ export default function Processos() {
                   </div>
                   <p style={{ fontSize: 14, fontWeight: 600 }}>{p.objeto}</p>
                   <p style={{ fontSize: 12, color: 'var(--text-2)' }}>Requisitante: <strong>{p.setor}</strong> · Valor estimado: <strong>{brl(p.valor)}</strong></p>
-                  <div style={{ display: 'flex', alignItems: 'flex-end', gap: 2, height: 22 }} aria-label={`Progresso: ${p.done} de 24 etapas`}>
+                  <div style={{ display: 'flex', alignItems: 'flex-end', gap: 2, height: 22 }} aria-label={`Progresso das 24 etapas: ${p.done} concluída(s)`}>
                     {p.stages.map((s, i) => <div key={i} title={`${i + 1}. ${m.stages[i].label}`} style={{ width: 7, height: i === p.current ? 22 : 16, borderRadius: 2, background: COLOR[s.s], marginLeft: i === 6 ? 8 : 0 }} />)}
                   </div>
                 </div>
@@ -188,7 +192,7 @@ export default function Processos() {
 
       {just && (
         <ConfirmModal title='Justificar "Refazer"' message={`Etapa ${just.idx + 1} — ${m.stages[just.idx].label} (${just.p.interno}). A justificativa é obrigatória e gera um alerta amarelo no Painel.`}
-          requireText="" textLabel="Justificativa" confirmLabel="Marcar para refazer" onClose={() => setJust(null)} onConfirm={(t) => changeStage(just.p, just.idx, 'refazer', t)} />
+          requireText="" textLabel="Justificativa" textPlaceholder="Ex.: Pesquisa de preços com apenas 2 cotações válidas" confirmLabel="Marcar para refazer" onClose={() => setJust(null)} onConfirm={(t) => changeStage(just.p, just.idx, 'refazer', t)} />
       )}
       {confirmDel && (
         <ConfirmModal title="Remover processo" danger confirmLabel="Remover processo" message={`Remover o processo ${confirmDel.interno}? Esta ação fica registrada na auditoria.`}

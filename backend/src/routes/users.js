@@ -9,7 +9,7 @@ const audit = require('../services/audit');
 const config = require('../services/config');
 const pw = require('../services/passwords');
 const mailer = require('../services/mailer');
-const { roleMatrix, computeModules, sortRoles, primaryRole, ROLES, MODULE_LABEL, OVERRIDABLE } = require('../services/access');
+const { roleMatrix, computeModules, sortRoles, primaryRole, ROLES, MODULES, ADMIN_ONLY, MODULE_LABEL, OVERRIDABLE } = require('../services/access');
 const { requireModule, requireAdmin } = require('../middleware/auth');
 const { ah, parse, idParam, notFound, badRequest, conflict } = require('../lib/http');
 
@@ -52,7 +52,11 @@ async function issueInvite(user) {
 router.get('/', requireModule('rh'), ah(async (req, res) => {
   const users = await loadUsers();
   await audit.logPersonalRead(req, 'Lista de servidores (LGPD)');
-  res.json({ users, roles: ROLES, modules: OVERRIDABLE.map((k) => ({ key: k, label: MODULE_LABEL[k] })) });
+  res.json({
+    users, roles: ROLES, modules: OVERRIDABLE.map((k) => ({ key: k, label: MODULE_LABEL[k] })),
+    // Matriz perfil × módulo (somente leitura aqui; alteração em PUT /config/access, exclusiva do Administrativo)
+    matrix: await roleMatrix(), allModules: MODULES.map(([key, label]) => ({ key, label, adminOnly: ADMIN_ONLY.includes(key) }))
+  });
 }));
 
 // GET /api/users/history — auditoria de alterações de permissões e cadastro

@@ -1,5 +1,4 @@
 import React, { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { PageHeader } from '../components/Layout.jsx';
 import { Async, Badge, Empty, Field, Modal, SkeletonCards, SkeletonRows, Switch, Tabs, useToast } from '../components/ui.jsx';
 import { api } from '../lib/api.js';
@@ -248,7 +247,16 @@ function Usuarios() {
   const [q, setQ] = useState('');
   const [rf, setRf] = useState('todos');
   const [novo, setNovo] = useState(null);
-  const sectors = useCostCenters('padrao');
+  const [setores, setSetores] = useState(false);
+  const [qa, setQa] = useState('');
+  const [ccTick, setCcTick] = useState(0);
+  const sectors = useCostCenters('padrao', ccTick);
+  const toggleMatrix = async (role, mod, on) => {
+    try {
+      const r = await api.put('/config/access', { role, module: mod, on: !on });
+      st.setData((d) => ({ ...d, matrix: r.matrix })); st.refresh(); toast('Salvo com sucesso');
+    } catch (e) { toast(e.message, 'error'); }
+  };
 
   const users = st.data ? st.data.users.filter((u) => ATIVO(u.situacao)) : [];
   const term = q.trim().toLowerCase();
@@ -278,7 +286,7 @@ function Usuarios() {
           </div>
           {isAdmin && (
             <div className="row">
-              <Link to="/configuracoes?tab=centros" className="btn btn-outline">🏢 Setores</Link>
+              <button type="button" className="btn btn-outline" onClick={() => setSetores(true)}>🏢 Setores</button>
               <button type="button" className="btn btn-primary" onClick={() => setNovo({ name: '', email: '', department: sectors[0] || '', hierarchy: 'Funcionário', roles: ['Visualizador'] })}>👤⁺ Novo Servidor</button>
             </div>
           )}
@@ -379,14 +387,90 @@ function Usuarios() {
                 <Badge bg="var(--accent-soft)" color="var(--accent)">{roleCount[r] || 0} usuários</Badge>
               </div>
               <p style={{ fontSize: 11, color: 'var(--text-3)', marginBottom: 10 }}>{ROLE_HINT[r]}</p>
-              {isAdmin && <Link to="/configuracoes?tab=acessos" className="btn btn-secondary btn-sm" style={{ width: '100%' }}>Gerenciar Permissões</Link>}
+              <button type="button" className="btn btn-secondary btn-sm" style={{ width: '100%' }} onClick={() => document.getElementById('matriz-funcao')?.scrollIntoView({ behavior: 'smooth' })}>Gerenciar Permissões</button>
             </div>
           ))}
         </div>
       </section>
 
+      {st.data && st.data.matrix && (
+        <section className="card lg" id="matriz-funcao">
+          <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 16 }}>Matriz de Permissões por Função</h3>
+          <div className="table-wrap">
+            <table className="table" style={{ fontSize: 12, minWidth: 720 }}>
+              <thead>
+                <tr><th>Permissão</th>{st.data.roles.map((r) => <th key={r} style={{ textAlign: 'center', borderLeft: '1px solid var(--border)' }}>{r}</th>)}</tr>
+              </thead>
+              <tbody>
+                {st.data.allModules.map((m) => (
+                  <tr key={m.key}>
+                    <td style={{ fontWeight: 500 }}>{m.label}</td>
+                    {st.data.roles.map((r) => {
+                      const on = r === 'Administrativo' || (st.data.matrix[r] || []).includes(m.key);
+                      const fixo = r === 'Administrativo' || (m.adminOnly && !on);
+                      return (
+                        <td key={r} style={{ textAlign: 'center', borderLeft: '1px solid var(--border)' }}>
+                          <input type="checkbox" checked={on} disabled={!isAdmin || fixo} aria-label={r + ' — ' + m.label}
+                            title={r === 'Administrativo' ? 'Administrativo tem acesso a todos os módulos' : m.adminOnly ? 'Exclusivo do Administrativo' : undefined}
+                            onChange={() => toggleMatrix(r, m.key, on)} style={{ width: 18, height: 18, accentColor: 'var(--primary)', cursor: isAdmin && !fixo ? 'pointer' : 'not-allowed' }} />
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="hint" style={{ marginTop: 10 }}>{isAdmin ? 'Alterações valem para todos os servidores do perfil e ficam registradas na auditoria. Log e Auditoria e Configurações são exclusivos do Administrativo.' : 'Somente o Administrativo altera a matriz.'}</p>
+        </section>
+      )}
+
+      <section className="card lg">
+        <div className="row between" style={{ marginBottom: 16 }}>
+          <h3 style={{ fontSize: 14, fontWeight: 600 }}>Atribuição de Funções aos Usuários</h3>
+          <input type="search" className="input" style={{ width: 220, minHeight: 36 }} placeholder="🔍 Buscar usuário..." aria-label="Buscar usuário" value={qa} onChange={(e) => setQa(e.target.value)} />
+        </div>
+        <div className="grid" style={{ '--min': '300px', gap: 12 }}>
+          {users.filter((u) => u.roles.length && (!qa.trim() || (u.name + ' ' + (u.email || '')).toLowerCase().includes(qa.trim().toLowerCase()))).map((u) => (
+            <div key={u.id} className="stack" style={{ padding: 12, border: '1px solid var(--border)', borderRadius: 6, gap: 8 }}>
+              <div><p style={{ fontSize: 12, fontWeight: 600 }}>{u.name}</p><p className="muted-3" style={{ fontSize: 11 }}>{u.email}</p></div>
+              <div className="row" style={{ gap: 4 }}>
+                {st.data.roles.map((r) => { const on = u.roles.includes(r); return <button key={r} type="button" className={'chip' + (r === 'Administrativo' ? ' admin' : '')} aria-pressed={on} disabled={!isAdmin} onClick={() => toggleRole(u, r)} style={{ minHeight: 28, fontSize: 10.5 }}>{on ? '✓' : '+'} {r}</button>; })}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {setores && <SetoresModal onClose={() => setSetores(false)} onChange={() => setCcTick((t) => t + 1)} />}
       {novo && <NovoServidorModal form={novo} setForm={setNovo} sectors={sectors} roles={st.data ? st.data.roles : []} me={me} onDone={() => { setNovo(null); st.refresh(); hist.refresh(); toast('Salvo com sucesso'); }} />}
     </div>
+  );
+}
+
+/** Gerenciar Setores (protótipo PessoalUsuarios): subsetores = centros de custo do tipo padrão. */
+function SetoresModal({ onClose, onChange }) {
+  const toast = useToast();
+  const st = useApi(() => api.get('/cost-centers?tipo=padrao'), []);
+  const [nome, setNome] = useState('');
+  const [err, setErr] = useState('');
+  const add = async () => {
+    try { await api.post('/cost-centers', { nome, tipo: 'padrao' }); setNome(''); setErr(''); st.reload(); onChange(); toast('Salvo com sucesso'); } catch (e) { setErr(e.message); }
+  };
+  return (
+    <Modal title="Gerenciar Setores" sub="Subsetores da Diretoria Administrativa" onClose={onClose}>
+      <div className="stack" style={{ gap: 10 }}>
+        <Async state={st} skeleton={<SkeletonRows n={3} />}>
+          {(d) => d.items.map((c) => <div key={c.id} className="row" style={{ gap: 10, padding: '10px 14px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 13, fontWeight: 600 }}>🏢 {c.nome}<span className="muted-3 mono" style={{ fontSize: 11, marginLeft: 'auto' }}>{c.codigo}</span></div>)}
+        </Async>
+        <div className="row" style={{ gap: 8, marginTop: 8, flexWrap: 'nowrap' }}>
+          <input className="input" style={{ flex: 1 }} value={nome} onChange={(e) => { setNome(e.target.value); setErr(''); }} onKeyDown={(e) => { if (e.key === 'Enter' && nome.trim()) add(); }} placeholder="Nome do novo setor" aria-label="Nome do novo setor" />
+          <button type="button" className="btn btn-primary" disabled={!nome.trim()} onClick={add}>Adicionar</button>
+        </div>
+        {err && <p role="alert" style={{ fontSize: 12.5, color: 'var(--crit-strong)' }}>{err}</p>}
+        <p className="hint">Os setores são os centros de custo do tipo padrão. Arquivar ou renomear: Configurações › Centros de Custo.</p>
+      </div>
+    </Modal>
   );
 }
 
@@ -424,7 +508,7 @@ function NovoServidorModal({ form, setForm, sectors, roles, onDone }) {
           {roles.map((r) => { const on = form.roles.includes(r); return <button key={r} type="button" className={'chip' + (r === 'Administrativo' ? ' admin' : '')} aria-pressed={on} title={ROLE_HINT[r]} onClick={() => toggle(r)}>{on ? '✓' : '+'} {r}</button>; })}
         </div>
         <p className="hint">Marque um ou mais perfis. O acesso final é a soma dos módulos de cada perfil.</p>
-        <p className="hint" style={{ color: 'var(--text-3)' }}>O servidor recebe por e-mail um link para definir a própria senha. Administradores recebem acesso a todos os módulos; os privilégios podem ser ajustados na matriz após o cadastro.</p>
+        <p className="hint" style={{ color: 'var(--text-3)' }}>O servidor recebe por e-mail um link para definir a própria senha. Administradores recebem acesso a todos os módulos por padrão; os privilégios podem ser ajustados na matriz após o cadastro.</p>
       </div>
       {err._ && <div className="alert-box error" role="alert">{err._}</div>}
     </Modal>

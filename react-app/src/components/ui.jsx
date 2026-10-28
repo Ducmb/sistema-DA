@@ -123,7 +123,7 @@ export function Drawer({ title, sub, onClose, children, footer }) {
 }
 
 /** Confirmação com justificativa opcional. */
-export function ConfirmModal({ title, message, confirmLabel = 'Confirmar', danger, requireText, textLabel, onConfirm, onClose }) {
+export function ConfirmModal({ title, message, confirmLabel = 'Confirmar', danger, requireText, textLabel, textPlaceholder, onConfirm, onClose }) {
   const [text, setText] = useState('');
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
@@ -140,7 +140,7 @@ export function ConfirmModal({ title, message, confirmLabel = 'Confirmar', dange
       {message && <p style={{ fontSize: 13, color: 'var(--text-2)' }}>{message}</p>}
       {requireText !== undefined && (
         <Field label={textLabel || 'Justificativa'} error={err}>
-          <textarea className="textarea" value={text} onChange={(e) => { setText(e.target.value); setErr(''); }} autoFocus />
+          <textarea className="textarea" value={text} placeholder={textPlaceholder} onChange={(e) => { setText(e.target.value); setErr(''); }} autoFocus />
         </Field>
       )}
       {err && requireText === undefined && <div className="alert-box error">{err}</div>}
