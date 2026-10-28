@@ -8,7 +8,8 @@ import { useApi, useQueryState } from '../lib/hooks.js';
 import { fmtDate, fmtDateTime, initials } from '../lib/format.js';
 import { useCostCenters } from '../lib/cadastros.jsx';
 
-const SIT_STYLE = { Ativo: ['var(--accent-soft)', 'var(--accent)'], Afastado: ['var(--warn-bg)', 'var(--warn)'], Desligado: ['var(--surface-3)', 'var(--text-2)'] };
+const SIT_STYLE = { Ativo: ['var(--accent-soft)', 'var(--accent)'], Afastado: ['var(--warn-bg)', 'var(--warn)'], Aposentado: ['var(--info-bg)', 'var(--info-strong)'], Desligado: ['var(--surface-3)', 'var(--text-2)'] };
+const ATIVO = (s) => s !== 'Desligado' && s !== 'Aposentado';
 const VAC_STYLE = { Aprovado: ['var(--accent-soft)', 'var(--accent)'], Pendente: ['var(--warn-bg)', 'var(--warn)'], Recusado: ['var(--crit-bg)', 'var(--crit)'] };
 
 /** Módulo de Gestão de Pessoal: servidores, férias/licenças, indicadores e usuários & permissões. */
@@ -43,7 +44,7 @@ function Servidores() {
       <div className="card row between" style={{ padding: 16 }}>
         <div className="row">
           <select className="select" style={{ width: 'auto' }} value={f.situacao} onChange={(e) => setF({ ...f, situacao: e.target.value })} aria-label="Situação">
-            <option value="">Todos os Status</option><option>Ativo</option><option>Afastado</option><option>Desligado</option>
+            <option value="">Todos os Status</option><option>Ativo</option><option>Afastado</option><option>Aposentado</option><option>Desligado</option>
           </select>
           <select className="select" style={{ width: 'auto', maxWidth: 280 }} value={f.setor} onChange={(e) => setF({ ...f, setor: e.target.value })} aria-label="Setor">
             <option value="">Todos os Setores</option>{sectors.map((s) => <option key={s}>{s}</option>)}
@@ -120,7 +121,7 @@ function ServidorModal({ modal, setModal, sectors, onSaved }) {
         <input id="sv-email" type="email" className="input" value={form.email} onChange={set('email')} readOnly={emailLocked} />
       </Field>
       <Field label="Situação" htmlFor="sv-sit">
-        <select id="sv-sit" className="select" value={form.situacao} onChange={set('situacao')} disabled={ro}><option>Ativo</option><option>Afastado</option><option>Desligado</option></select>
+        <select id="sv-sit" className="select" value={form.situacao} onChange={set('situacao')} disabled={ro}><option>Ativo</option><option>Afastado</option><option>Aposentado</option><option>Desligado</option></select>
       </Field>
       {err._ && <div className="alert-box error" role="alert">{err._}</div>}
     </Modal>
@@ -130,7 +131,7 @@ function ServidorModal({ modal, setModal, sectors, onSaved }) {
 /* ---------------- Férias e licenças ---------------- */
 function Ferias() {
   const toast = useToast();
-  const st = useApi(() => Promise.all([api.get('/pessoal/ausencias'), api.get('/pessoal/servidores')]).then(([a, s]) => ({ ...a, servidores: s.filter((x) => x.situacao !== 'Desligado') })), []);
+  const st = useApi(() => Promise.all([api.get('/pessoal/ausencias'), api.get('/pessoal/servidores')]).then(([a, s]) => ({ ...a, servidores: s.filter((x) => ATIVO(x.situacao)) })), []);
   const [form, setForm] = useState(null);
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
@@ -249,7 +250,7 @@ function Usuarios() {
   const [novo, setNovo] = useState(null);
   const sectors = useCostCenters('padrao');
 
-  const users = st.data ? st.data.users.filter((u) => u.situacao !== 'Desligado') : [];
+  const users = st.data ? st.data.users.filter((u) => ATIVO(u.situacao)) : [];
   const term = q.trim().toLowerCase();
   const filtered = users.filter((u) => (!term || u.name.toLowerCase().includes(term) || (u.department || '').toLowerCase().includes(term))
     && (rf === 'todos' || (rf === 'admin' ? u.roles.includes('Administrativo') : !u.roles.includes('Administrativo'))));

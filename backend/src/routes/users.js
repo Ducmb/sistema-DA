@@ -126,7 +126,7 @@ router.put('/:id/roles', requireAdmin, ah(async (req, res) => {
   const roles = sortRoles([...new Set(b.roles)]);
   if (!before.roles.length) {
     if (!before.email) throw badRequest('Cadastre o e-mail institucional do servidor (Gestão de Pessoal › Servidores) antes de conceder acesso.');
-    if (before.situacao === 'Desligado') throw badRequest('Servidor desligado não pode receber acesso.');
+    if (['Desligado', 'Aposentado'].includes(before.situacao)) throw badRequest('Servidor com vínculo encerrado (desligado ou aposentado) não pode receber acesso.');
   }
   if (before.roles.includes('Administrativo') && !roles.includes('Administrativo')) {
     const { rows } = await db.query("SELECT COUNT(*)::int n FROM user_roles r JOIN users u ON u.id = r.user_id WHERE r.role = 'Administrativo' AND u.status = 'active'");

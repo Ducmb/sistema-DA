@@ -12,7 +12,10 @@ const { ah, parse, idParam, notFound, badRequest, conflict, forbidden } = requir
 const { today, daysTo, bizDays, fmtBR } = require('../lib/dates');
 
 const router = express.Router();
-const SITUACOES = ['Ativo', 'Afastado', 'Desligado'];
+const SITUACOES = ['Ativo', 'Afastado', 'Aposentado', 'Desligado'];
+/** Vínculo encerrado: sem acesso ao sistema e fora dos totais. */
+const ENCERRADO = ['Desligado', 'Aposentado'];
+const encerrado = (s) => ENCERRADO.includes(s);
 const TIPOS = ['Férias', 'Licença Médica', 'Licença Maternidade', 'Licença Paternidade', 'Licença Capacitação', 'Licença para Tratar de Interesses Particulares'];
 const ISO = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -78,16 +81,16 @@ router.put('/servidores/:id', ah(async (req, res) => {
   // Cadastro de quem tem acesso ao sistema: e-mail (credencial), desligamento e dados de administradores só pelo Administrativo
   if (o.has_access && !req.user.isAdmin) {
     if ((b.email || '') !== (o.email || '')) throw forbidden('Somente o Administrativo altera o e-mail de quem tem acesso ao sistema.');
-    if (b.situacao !== o.situacao && (b.situacao === 'Desligado' || o.situacao === 'Desligado')) throw forbidden('Somente o Administrativo desliga ou reativa quem tem acesso ao sistema.');
+    if (b.situacao !== o.situacao && (encerrado(b.situacao) || encerrado(o.situacao))) throw forbidden('Somente o Administrativo desliga, aposenta ou reativa quem tem acesso ao sistema.');
     const adm = await db.query("SELECT 1 FROM user_roles WHERE user_id = $1 AND role = 'Administrativo'", [id]);
     if (adm.rows.length) throw forbidden('Somente o Administrativo altera o cadastro de um administrador.');
   }
-  if (id === req.user.id && b.situacao === 'Desligado') throw badRequest('Você não pode desligar o próprio cadastro.');
+  if (id === req.user.id && encerrado(b.situacao)) throw badRequest('Você não pode encerrar o próprio vínculo.');
   await checkDup(b, id);
-  const desligar = b.situacao === 'Desligado' && o.situacao !== 'Desligado';
+  const desligar = encerrado(b.situacao) && !encerrado(o.situacao);
   const { rows } = await db.query(
     `UPDATE users SET name=$1, registration=$2, position=$3, department=$4, situacao=$5::varchar, email=$6,
-            status = CASE WHEN $5::varchar = 'Desligado' THEN 'inactive' WHEN status = 'inactive' AND $7::boolean THEN 'active' ELSE status END,
+            status = CASE WHEN $5::varchar IN ('Desligado', 'Aposentado') THEN 'inactive' WHEN status = 'inactive' AND $7::boolean THEN 'active' ELSE status END,
             token_version = token_version + CASE WHEN $8::boolean THEN 1 ELSE 0 END, updated_at = NOW()
       WHERE id = $9 RETURNING *, $7::boolean AS has_access`,
     [b.name, b.registration, b.position || null, b.department || null, b.situacao, b.email || null, o.has_access && o.password_hash !== pw.UNUSABLE, desligar, id]);
@@ -128,7 +131,7 @@ router.post('/ausencias', ah(async (req, res) => {
   }
   const { rows: u } = await db.query("SELECT name, situacao FROM users WHERE id = $1", [b.userId]);
   if (!u.length) throw notFound('Servidor não encontrado.');
-  if (u[0].situacao === 'Desligado') throw badRequest('Servidor desligado não pode ter solicitações.');
+  if (encerrado(u[0].situacao)) throw badRequest('Servidor com vínculo encerrado não pode ter solicitações.');
   const { rows: overlap } = await db.query("SELECT 1 FROM rh_ausencias WHERE user_id = $1 AND status <> 'Recusado' AND inicio <= $3 AND fim >= $2", [b.userId, b.start, b.end]);
   if (overlap.length) throw conflict('Já existe solicitação para este servidor no período.');
   const { rows } = await db.query(
@@ -155,12 +158,12 @@ router.patch('/ausencias/:id/status', ah(async (req, res) => {
 router.get('/indicadores', ah(async (req, res) => {
   const hoje = today(), ano = hoje.slice(0, 4);
   const [{ rows: k }, { rows: setores }, { rows: aus }] = await Promise.all([
-    db.query(`SELECT COUNT(*) FILTER (WHERE situacao <> 'Desligado')::int total,
+    db.query(`SELECT COUNT(*) FILTER (WHERE situacao NOT IN ('Desligado', 'Aposentado'))::int total,
                      COUNT(*) FILTER (WHERE situacao = 'Ativo')::int ativos,
                      COUNT(*) FILTER (WHERE situacao = 'Afastado')::int afastados,
-                     COUNT(*) FILTER (WHERE situacao <> 'Desligado' AND created_at >= date_trunc('year', NOW()))::int novos
+                     COUNT(*) FILTER (WHERE situacao NOT IN ('Desligado', 'Aposentado') AND created_at >= date_trunc('year', NOW()))::int novos
                 FROM users`),
-    db.query(`SELECT c.nome AS label, COUNT(u.id)::int n FROM cost_centers c LEFT JOIN users u ON u.department = c.nome AND u.situacao <> 'Desligado'
+    db.query(`SELECT c.nome AS label, COUNT(u.id)::int n FROM cost_centers c LEFT JOIN users u ON u.department = c.nome AND u.situacao NOT IN ('Desligado', 'Aposentado')
                WHERE c.ativo AND c.tipo = 'padrao' GROUP BY c.nome ORDER BY c.nome`),
     db.query(`SELECT COUNT(DISTINCT user_id) FILTER (WHERE tipo = 'Férias' AND status = 'Aprovado' AND to_char(inicio, 'YYYY') = $1)::int ferias_ano,
                      COUNT(DISTINCT user_id) FILTER (WHERE status = 'Aprovado' AND inicio <= $2 AND fim >= $2)::int ausentes_hoje,

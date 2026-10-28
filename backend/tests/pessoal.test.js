@@ -58,4 +58,16 @@ describe('Gestão de Pessoal', () => {
     expect(r.body.kpis).toHaveLength(4);
     expect(r.body.sectorHeadcount.length).toBeGreaterThan(0);
   });
+
+  test('aposentado perde o acesso e sai das listas, como desligado', async () => {
+    const admin = await login('admin');
+    const u = (await db.query("SELECT id, name, registration, position, department, email FROM users WHERE username = 'visualizador'")).rows[0];
+    const r = await api(admin).put(`/pessoal/servidores/${u.id}`).send({ name: u.name, registration: u.registration, position: u.position || '', department: u.department || '', situacao: 'Aposentado', email: u.email });
+    expect(r.status).toBe(200);
+    expect((await db.query('SELECT status FROM users WHERE id = $1', [u.id])).rows[0].status).toBe('inactive');
+    expect((await api(admin).put(`/users/${u.id}/roles`).send({ roles: ['Visualizador'] })).status).toBe(200);
+    const back = await api(admin).put(`/pessoal/servidores/${u.id}`).send({ name: u.name, registration: u.registration, position: u.position || '', department: u.department || '', situacao: 'Ativo', email: u.email });
+    expect(back.status).toBe(200);
+    expect((await db.query('SELECT status FROM users WHERE id = $1', [u.id])).rows[0].status).toBe('active');
+  });
 });

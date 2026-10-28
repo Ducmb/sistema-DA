@@ -4537,7 +4537,7 @@ paths:
     get:
       tags:
         - Analytics
-      summary: Visão consolidada (indicadores e blocos)
+      summary: Visão consolidada (indicadores e blocos); periodo=custom exige de e ate
       description: 'Acesso: módulo `analytics` (403 sem permissão).'
       parameters:
         - name: periodo
@@ -4545,6 +4545,18 @@ paths:
           required: false
           schema:
             type: string
+        - name: de
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: ate
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
       responses:
         '200':
           description: Sucesso
@@ -4570,6 +4582,18 @@ paths:
           required: false
           schema:
             type: string
+        - name: de
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: ate
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
       responses:
         '200':
           description: Arquivo CSV (UTF-8 com BOM, separador ;)

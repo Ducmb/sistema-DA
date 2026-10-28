@@ -8,7 +8,7 @@ const audit = require('../services/audit');
 const config = require('../services/config');
 const C = require('../services/compras');
 const feed = require('../services/feed');
-const { ah } = require('../lib/http');
+const { ah, badRequest } = require('../lib/http');
 const { csv } = require('../lib/csv');
 const { today, addDays, year, brl } = require('../lib/dates');
 
@@ -17,14 +17,19 @@ const PERIODOS = ['7', '30', '90', '365', 'ano'];
 
 async function consolidado(req) {
   const cfg = await config.snapshot();
-  const periodo = PERIODOS.includes(String(req.query.periodo)) ? String(req.query.periodo) : String(cfg('analytics.periodo'));
   const hoje = today(), ano = year(hoje);
-  const desde = periodo === 'ano' ? ano + '-01-01' : addDays(hoje, -+periodo);
+  const ISO = /^\d{4}-\d{2}-\d{2}$/;
+  const custom = req.query.periodo === 'custom' && ISO.test(String(req.query.de)) && ISO.test(String(req.query.ate));
+  if (req.query.periodo === 'custom' && !custom) throw badRequest('Informe as datas inicial e final do período.');
+  if (custom && req.query.de > req.query.ate) throw badRequest('A data inicial deve ser anterior à final.');
+  const periodo = custom ? 'custom' : PERIODOS.includes(String(req.query.periodo)) ? String(req.query.periodo) : String(cfg('analytics.periodo'));
+  const desde = custom ? String(req.query.de) : periodo === 'ano' ? ano + '-01-01' : addDays(hoje, -+periodo);
+  const ate = custom ? String(req.query.ate) : hoje;
   const sla = cfg('compras.sla');
   const procs = (await C.loadProcesses()).map((p) => ({ p, i: C.procInfo(p, sla) }));
   const ativos = procs.filter((x) => !x.i.concluido);
   const atras = procs.filter((x) => x.i.atrasado).length;
-  const noPeriodo = procs.filter((x) => new Date(x.p.createdAt).toISOString().slice(0, 10) >= desde);
+  const noPeriodo = procs.filter((x) => { const d = new Date(x.p.createdAt).toISOString().slice(0, 10); return d >= desde && d <= ate; });
   const contr = (await C.loadContracts()).map((c) => ({ c, ci: C.contractInfo(c, ano, cfg) }));
   const venc = contr.filter((x) => x.ci.dias >= 0 && x.ci.dias <= 120).length;
   const { expenses } = await C.loadExpenses();
@@ -42,7 +47,7 @@ async function consolidado(req) {
   const loads = C.loads(procs.map((x) => x.p), await C.agents(), sla);
 
   return {
-    periodo, desde,
+    periodo, desde, ate,
     kpis: [
       { label: 'Processos ativos', value: String(ativos.length), sub: atras + ' com etapa atrasada', level: atras ? 'warning' : 'ok', href: '/compras?tab=processos', module: 'compras' },
       { label: 'Valor estimado em curso', value: brl(ativos.reduce((a, x) => a + (x.p.valor || 0), 0)), sub: 'Soma dos processos ativos', level: 'neutral', href: '/compras?tab=processos', module: 'compras' },
@@ -71,7 +76,7 @@ router.get('/export.csv', ah(async (req, res) => {
   const rows = [['Seção', 'Indicador', 'Valor', 'Detalhe']];
   d.kpis.forEach((k) => rows.push(['Indicadores', k.label, k.value, k.sub]));
   d.blocks.forEach((b) => b.rows.forEach((r) => rows.push([b.title, r.label, r.value, ''])));
-  await audit.log(req, { action: 'Relatório exportado', module: 'analytics', detail: 'Visão consolidada (CSV) · período ' + d.periodo, kind: 'exportacao' });
+  await audit.log(req, { action: 'Relatório exportado', module: 'analytics', detail: 'Visão consolidada (CSV) · período ' + (d.periodo === 'custom' ? d.desde + ' a ' + d.ate : d.periodo), kind: 'exportacao' });
   csv(res, `analytics_visao_consolidada_${today()}.csv`, rows);
 }));
 

@@ -16,7 +16,7 @@ const YM = /^\d{4}-(0[1-9]|1[0-2])$/;
 const patCcs = async () => (await db.query("SELECT id, codigo, nome FROM cost_centers WHERE tipo = 'patrimonio' AND ativo ORDER BY codigo")).rows;
 
 router.get('/meta', ah(async (req, res) => {
-  const { rows: users } = await db.query("SELECT id, name FROM users WHERE status = 'active' AND situacao <> 'Desligado' ORDER BY name");
+  const { rows: users } = await db.query("SELECT id, name FROM users WHERE status = 'active' AND situacao NOT IN ('Desligado', 'Aposentado') ORDER BY name");
   res.json({ stages: P.STAGES, patCcs: await patCcs(), users, prazoTermo: await config.get('patrim.prazoTermo') });
 }));
 

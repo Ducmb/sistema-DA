@@ -21,7 +21,7 @@ const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'o
 async function agents() {
   const { rows } = await db.query(
     `SELECT u.id, u.name FROM users u JOIN user_roles r ON r.user_id = u.id AND r.role = 'Compras'
-      WHERE u.status = 'active' AND u.situacao <> 'Desligado' AND u.hierarchy = 'Funcionário' ORDER BY u.name`);
+      WHERE u.status = 'active' AND u.situacao NOT IN ('Desligado', 'Aposentado') AND u.hierarchy = 'Funcionário' ORDER BY u.name`);
   return rows;
 }
 /** Chefia de compras: Administrativo, ou acesso a Compras com hierarquia Chefia/Diretoria. */

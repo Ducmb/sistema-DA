@@ -178,6 +178,6 @@ module.exports = {
   'PUT /api/notifications/preferences': { s: 'Preferências de notificação do usuário', m: 'notificacoes', b: 'types*:o, tempoReal*:b, email*:b, silencio*:o' },
 
   // ---------- Analytics ----------
-  'GET /api/analytics/': { s: 'Visão consolidada (indicadores e blocos)', m: 'analytics', q: 'periodo:s' },
-  'GET /api/analytics/export.csv': { s: 'Exporta a visão consolidada (CSV; auditado)', m: 'analytics', q: 'periodo:s', csv: true }
+  'GET /api/analytics/': { s: 'Visão consolidada (indicadores e blocos); periodo=custom exige de e ate', m: 'analytics', q: 'periodo:s, de:d, ate:d' },
+  'GET /api/analytics/export.csv': { s: 'Exporta a visão consolidada (CSV; auditado)', m: 'analytics', q: 'periodo:s, de:d, ate:d', csv: true }
 };

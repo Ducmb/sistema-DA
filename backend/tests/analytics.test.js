@@ -20,6 +20,14 @@ describe('Analytics', () => {
     expect(log.rows.length).toBe(1);
   });
 
+  test('período customizado', async () => {
+    const t = await login('visualizador');
+    const r = await api(t).get('/analytics?periodo=custom&de=2026-01-01&ate=2026-12-31');
+    expect(r.body).toMatchObject({ periodo: 'custom', desde: '2026-01-01', ate: '2026-12-31' });
+    expect((await api(t).get('/analytics?periodo=custom&de=2026-12-31&ate=2026-01-01')).status).toBe(400);
+    expect((await api(t).get('/analytics?periodo=custom')).body.error).toMatch(/datas/);
+  });
+
   test('sem acesso ao módulo → 403', async () => {
     expect((await api(await login('operador')).get('/analytics')).status).toBe(403);
   });
