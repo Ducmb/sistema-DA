@@ -1,0 +1,10 @@
+{
+  "name": "sistema-da",
+  "private": true,
+  "description": "Sistema DA — build para Vercel (front-end estático + API em /api)",
+  "engines": { "node": "22.x" },
+  "scripts": {
+    "vercel-install": "npm ci --prefix backend --omit=dev && npm ci --prefix react-app --include=dev",
+    "vercel-build": "npm run migrate --prefix backend && node backend/scripts/demo-seed.js && npm run build --prefix react-app"
+  }
+}

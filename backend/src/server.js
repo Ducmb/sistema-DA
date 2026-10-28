@@ -1,12 +1,8 @@
 require('dotenv').config({ quiet: true });
 
-const SECRET = process.env.JWT_SECRET || '';
-if (SECRET.length < 32 || /change|secret|example|password|exemplo|senha/i.test(SECRET)) {
-  console.error('FATAL: JWT_SECRET ausente ou fraco. Use ao menos 32 caracteres aleatórios (ex.: openssl rand -hex 32).');
-  process.exit(1);
-}
-if (!process.env.DATABASE_URL) {
-  console.error('FATAL: DATABASE_URL não definido.');
+const err = require('./env').envError();
+if (err) {
+  console.error('FATAL: ' + err);
   process.exit(1);
 }
 

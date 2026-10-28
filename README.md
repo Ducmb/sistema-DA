@@ -10,7 +10,7 @@ npm run migrate && npm run seed && npm run dev       # http://localhost:3000
 # 2) Front-end (outro terminal)
 cd react-app && npm install && npm run dev           # http://localhost:5173
 ```
-Revisão de segurança: `SEGURANCA.md`. Testes: `cd backend && npm test` (API, banco de teste real) e `cd react-app && npm test`. Detalhes de ambiente, segurança e e-mail/Drive em `backend/README.md`; contrato da API em `design/openapi.yaml` (gerado por `npm run openapi`).
+Ambiente de testes na Vercel: `VERCEL.md`. Revisão de segurança: `SEGURANCA.md`. Testes: `cd backend && npm test` (API, banco de teste real) e `cd react-app && npm test`. Detalhes de ambiente, segurança e e-mail/Drive em `backend/README.md`; contrato da API em `design/openapi.yaml` (gerado por `npm run openapi`).
 
 > **Leia primeiro `INTEGRACAO.md`** — passo a passo para colocar o sistema em produção com o Claude Code.
 > `CLAUDE.md` traz as regras que o Claude Code deve seguir. `HISTORICO.md` registra as decisões tomadas ao longo do protótipo.

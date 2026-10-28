@@ -11,6 +11,19 @@ const BADGE = { RME: ['RME · Saída', 'var(--crit-bg)', 'var(--crit)'], BRM: ['
 const PR_STYLE = { Alta: ['var(--crit-bg)', 'var(--crit-strong)'], 'Média': ['var(--warn-bg)', 'var(--warn)'], Baixa: ['var(--surface-3)', 'var(--text-2)'] };
 
 /** Aba Atualização de Estoque: leitura de RME/BRM, materiais, pendências e documentos computados. */
+/** Lotes de até 20 arquivos e ~4 MB (limite de corpo de requisição em hospedagens serverless). */
+const MAX_LOTE = 4 * 1024 * 1024;
+function lotes(files) {
+  const out = [];
+  let cur = [], size = 0;
+  files.forEach((f) => {
+    if (cur.length && (cur.length >= 20 || size + f.file.size > MAX_LOTE)) { out.push(cur); cur = []; size = 0; }
+    cur.push(f); size += f.file.size;
+  });
+  if (cur.length) out.push(cur);
+  return out;
+}
+
 export default function Estoque() {
   const toast = useToast();
   const st = useApi(() => Promise.all([api.get('/almoxarifado/estoque'), api.get('/almoxarifado/estoque/arquivos-computados')]).then(([a, b]) => ({ ...a, computados: b })), []);
@@ -48,10 +61,10 @@ export default function Estoque() {
         const results = { processados: [], ignorados: [], erros: [] };
         for (const t of ['RME', 'BRM']) {
           const novos = localFiles.filter((f) => f.tipo === t && !f.computado);
-          for (let i = 0; i < novos.length; i += 20) {
+          for (const lote of lotes(novos)) {
             const fd = new FormData();
             fd.append('tipo', t);
-            novos.slice(i, i + 20).forEach((f) => fd.append('files', f.file, f.name));
+            lote.forEach((f) => fd.append('files', f.file, f.name));
             const x = await api.post('/almoxarifado/estoque/upload', fd);
             ['processados', 'ignorados', 'erros'].forEach((k) => results[k].push(...x[k]));
           }
