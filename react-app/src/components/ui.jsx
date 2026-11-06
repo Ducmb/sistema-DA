@@ -1,4 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { LEVELS } from '../theme.js';
 
 /* ---------- Toast ("Salvo com sucesso") ---------- */
@@ -89,10 +90,16 @@ function useEsc(onClose) {
   }, [onClose]);
 }
 
+/**
+ * Modais e painéis são desenhados direto no <body> (portal): assim ficam sempre centralizados na janela,
+ * mesmo quando abertos de dentro de um bloco com animação ou rolagem (que mudaria a referência do position: fixed).
+ */
+const toBody = (node) => (typeof document !== 'undefined' ? createPortal(node, document.body) : node);
+
 export function Modal({ title, sub, onClose, children, footer, wide, labelledBy }) {
   useEsc(onClose);
   const id = labelledBy || 'modal-title';
-  return (
+  return toBody(
     <div className="modal-backdrop" onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div className={'modal' + (wide ? ' wide' : '')} role="dialog" aria-modal="true" aria-labelledby={id}>
         <div className="modal-head">
@@ -108,7 +115,7 @@ export function Modal({ title, sub, onClose, children, footer, wide, labelledBy 
 
 export function Drawer({ title, sub, onClose, children, footer }) {
   useEsc(onClose);
-  return (
+  return toBody(
     <div className="drawer-backdrop" onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <aside className="drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-title">
         <div className="modal-head">
