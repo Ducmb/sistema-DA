@@ -117,12 +117,13 @@ async function loadExpenses() {
     expenses: ex.map((e) => ({
       id: e.id, processo: e.processo, catmat: e.catmat || '', classe: e.classe || '', catser: e.catser || '', grupo: e.grupo || '', objeto: e.objeto,
       descricao: e.descricao || '', reserva: e.reserva == null ? null : +e.reserva, data: e.data, modalidade: e.modalidade || '', empenhado: +e.empenhado,
-      ficha: e.ficha || '', sub: e.sub || '', dataEmpenho: e.data_empenho, audesp: e.audesp, tcn: e.tcn, contratoId: e.contrato_id, contrato: e.contrato_num || ''
+      ficha: e.ficha || '', sub: e.sub || '', dataEmpenho: e.data_empenho, audesp: e.audesp, tcn: e.tcn, contratoId: e.contrato_id, contrato: e.contrato_num || '',
+      pdm: e.pdm || '', catalogoInfo: e.catalogo_info || null
     })),
     verbinha: vb.map((v) => ({ id: v.id, origem: v.origem, classe: v.classe || '', grupo: v.grupo || '', data: v.data, valor: +v.valor }))
   };
 }
-const isEng = (e) => /^54/.test(e.grupo || '');
+const isEng = (e) => !e.classe && /^54/.test(e.grupo || '');
 const expKey = (e) => (e.classe ? 'CATMAT classe ' + e.classe : e.grupo ? 'CATSER grupo ' + e.grupo : '');
 const legal = (cfg) => ({ compras: cfg('compras.limCompras'), engenharia: cfg('compras.limEng'), fonte: cfg('compras.fonteLimites'), atencao: cfg('compras.limAtencao') / 100 });
 
@@ -132,7 +133,7 @@ function accumulated(e, data, cfg, at) {
   const L = legal(cfg), lim = isEng(e) ? L.engenharia : L.compras;
   const when = at || e.dataEmpenho || e.data, y = year(when);
   const s = data.expenses.filter((x) => expKey(x) === k && (x.dataEmpenho || x.data) <= when && year(x.dataEmpenho || x.data) === y).reduce((a, x) => a + x.empenhado, 0);
-  const v = data.verbinha.filter((x) => (e.classe && x.classe === e.classe) || (e.grupo && x.grupo === e.grupo)).filter((x) => x.data <= when && year(x.data) === y).reduce((a, x) => a + x.valor, 0);
+  const v = data.verbinha.filter((x) => (e.classe && x.classe === e.classe) || (!e.classe && e.grupo && x.grupo === e.grupo)).filter((x) => x.data <= when && year(x.data) === y).reduce((a, x) => a + x.valor, 0);
   return { chave: k, despesas: s, verbinha: v, total: s + v, limite: lim, pct: (s + v) / lim, eng: isEng(e) };
 }
 

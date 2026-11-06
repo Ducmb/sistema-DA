@@ -21,7 +21,7 @@ function schedule() {
   const opt = { timezone: 'America/Sao_Paulo' };
   tasks.push(cron.schedule('30 3 * * *', () => purgeAudit().catch((e) => console.error('[jobs] limpeza:', e.message)), opt));
   // Catálogo compras.gov.br (CATMAT/CATSER) — diário às 03h
-  tasks.push(cron.schedule('0 3 * * *', () => catalogo.sync().catch((e) => console.error('[jobs] catálogo:', e.message)), opt));
+  tasks.push(cron.schedule('0 3 * * *', () => catalogo.syncAgendado().catch((e) => console.error('[jobs] catálogo:', e.message)), opt));
   // Pastas de RME/BRM no Google Drive — intervalo de Configurações › Almoxarifado
   let lastDrive = 0, running = false;
   tasks.push(cron.schedule('* * * * *', async () => {

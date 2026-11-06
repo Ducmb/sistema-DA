@@ -734,6 +734,44 @@ paths:
           $ref: '#/components/responses/SemPermissao'
         '404':
           $ref: '#/components/responses/Erro'
+  /api/config/comprasgov:
+    get:
+      tags:
+        - Configurações
+      summary: Status da integração com a API Compras.gov (endpoints, tempos, contagens, cache)
+      description: 'Acesso: perfil Administrativo (403 sem permissão).'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/config/comprasgov/testar:
+    post:
+      tags:
+        - Configurações
+      summary: Testa a conexão com cada endpoint da API Compras.gov (auditado)
+      description: 'Acesso: perfil Administrativo (403 sem permissão).'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
   /api/config/access:
     get:
       tags:
@@ -1737,6 +1775,8 @@ paths:
                   type: string
                 grupo:
                   type: string
+                pdm:
+                  type: string
                 modalidade:
                   type: string
                 empenhado:
@@ -1798,6 +1838,8 @@ paths:
                 catser:
                   type: string
                 grupo:
+                  type: string
+                pdm:
                   type: string
                 modalidade:
                   type: string
@@ -1914,6 +1956,38 @@ paths:
               required:
                 - itemId
                 - valor
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/compras/catalogo/consulta:
+    get:
+      tags:
+        - Compras & Licitações
+      summary: Item CATMAT/CATSER pelo código (cache local ou API de Dados Abertos do Compras.gov) — autocomplete do cadastro da despesa
+      description: >-
+        Acesso: módulo `compras` (403 sem permissão). item com grupo, classe, PDM (material) ou seção/divisão/grupo/classe (serviço) e
+        descrição; origem api|cache|cache-vencido; 404 se o código não existe.
+      parameters:
+        - name: tipo
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: codigo
+          in: query
+          required: false
+          schema:
+            type: string
       responses:
         '200':
           description: Sucesso

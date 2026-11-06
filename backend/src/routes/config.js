@@ -8,6 +8,7 @@ const audit = require('../services/audit');
 const config = require('../services/config');
 const { SCHEMA, FIELDS, coerce, show } = require('../services/configSchema');
 const { roleMatrix, ROLES, MODULES, MODULE_KEYS, ADMIN_ONLY } = require('../services/access');
+const catalogo = require('../services/catalogo');
 const { ah, parse, badRequest } = require('../lib/http');
 
 const router = express.Router();
@@ -46,6 +47,14 @@ router.post('/reset/:tab', ah(async (req, res) => {
   config.invalidate();
   await audit.log(req, { action: 'Configurações restauradas', module: 'configuracoes', detail: t.label, level: 'warning' });
   res.json(await payload());
+}));
+
+// API Compras.gov: status e teste de conexão (consulta cada endpoint e registra os tempos)
+router.get('/comprasgov', ah(async (req, res) => res.json(await catalogo.status())));
+router.post('/comprasgov/testar', ah(async (req, res) => {
+  const r = await catalogo.sync(req.user.id);
+  await audit.log(req, { action: 'Teste da API Compras.gov', module: 'configuracoes', detail: r.status, level: r.modo === 'api' ? 'info' : 'warning' });
+  res.json({ ...(await catalogo.status()), erros: r.erros });
 }));
 
 // Matriz perfis × módulos

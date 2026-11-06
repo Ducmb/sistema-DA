@@ -26,6 +26,10 @@ const SCHEMA = [
     { title: 'Notas fiscais e TCN', fields: [N('compras.nfAtraso', 'NF não recebida vira crítica após', 5, 'dias úteis', 1, 30, 'Amarela no dia previsto'), N('compras.tcnPrazo', 'Prazo do TCN após o empenho', 5, 'dias úteis', 1, 30)] },
     { title: 'Controle de processos', fields: [N('compras.sla', 'Etapa parada vira atrasada após', 5, 'dias úteis', 1, 30), T('compras.refazerJust', 'Exigir justificativa em "Refazer"', true), T('compras.sugerirAgente', 'Sugerir agente com menor carga', true), T('compras.chefiaConfirma', 'Atribuição precisa de confirmação da chefia', true)] }
   ] },
+  { key: 'comprasgov', label: 'API Compras.gov', icon: '🔌', groups: [
+    { title: 'Conexão com a API de Dados Abertos', fields: [T('comprasgov.ativo', 'Consultar a API do Compras.gov', true, 'Desligado, o sistema usa apenas os itens já guardados no cache local'), X('comprasgov.baseUrl', 'Endereço da API', 'https://dadosabertos.compras.gov.br', 'Somente HTTPS em domínio .gov.br — documentação em /swagger-ui/index.html'), N('comprasgov.timeout', 'Tempo-limite de cada consulta', 15, 's', 3, 60)] },
+    { title: 'Cache e sincronização', fields: [N('comprasgov.cacheDias', 'Validade dos itens consultados no cache', 30, 'dias', 1, 365, 'Depois disso, o item é consultado de novo na API'), T('comprasgov.syncDiario', 'Verificar os endpoints diariamente às 03h', true)] }
+  ] },
   { key: 'almoxarifado', label: 'Almoxarifado', icon: '📦', groups: [
     { title: 'Escala de contagem', fields: [N('almox.itensSessao', 'Itens por sessão', 3, 'itens', 1, 50), N('almox.sessoesSemana', 'Sessões por semana', 2, 'sessões', 1, 5), S('almox.metodo', 'Método de amostragem padrão', 'alta', ['alta', 'media', 'baixa', 'balanceado'])] },
     { title: 'Qualidade da contagem', fields: [N('almox.tolerancia', 'Tolerância de divergência', 5, '%', 0, 100), N('almox.recontagem', 'Recontagem por amostra', 10, '%', 0, 100)] },
@@ -87,6 +91,13 @@ function coerce(field, v) {
   const s = String(v == null ? '' : v).trim();
   if (s.length > 200) return { ok: false, msg: 'Texto muito longo (máx. 200 caracteres).' };
   if (field.key === 'notif.resumoHora' && !/^([01]\d|2[0-3]):[0-5]\d$/.test(s)) return { ok: false, msg: 'Use o formato HH:MM.' };
+  if (field.key === 'comprasgov.baseUrl') {
+    let u;
+    try { u = new URL(s); } catch (e) { return { ok: false, msg: 'Endereço inválido.' }; }
+    // Só HTTPS em domínio governamental: evita apontar o servidor para endereços internos (SSRF)
+    if (u.protocol !== 'https:' || !/(^|\.)gov\.br$/i.test(u.hostname) || u.port || u.username || u.password || u.search || u.hash) return { ok: false, msg: 'Use um endereço HTTPS em domínio .gov.br, sem porta, usuário ou parâmetros.' };
+    return { ok: true, value: (u.origin + u.pathname).replace(/\/+$/, '') };
+  }
   if (field.key === 'geral.emailRemetente' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s)) return { ok: false, msg: 'E-mail inválido.' };
   return { ok: true, value: s };
 }

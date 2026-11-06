@@ -28,6 +28,7 @@ O servidor **não inicia** sem `JWT_SECRET` forte (≥ 32 caracteres, sem palavr
 | `SMTP_*` | E-mail institucional. Sem SMTP fora de produção, as mensagens saem no console |
 | `GOOGLE_APPLICATION_CREDENTIALS`, `DRIVE_FOLDER_ID_RME`, `DRIVE_FOLDER_ID_BRM` | Leitura automática das pastas de RME/BRM no Google Drive (conta de serviço somente leitura). Sem elas, use o envio de PDFs pela tela |
 | `UPLOAD_DIR` | Pasta dos PDFs de Legislações (nomes aleatórios, servidos só a usuários autenticados) |
+| `NODE_USE_ENV_PROXY` | Só em servidores que acessam a internet por proxy (`HTTPS_PROXY`): `1` faz o Node usar o proxy nas consultas à API do Compras.gov |
 
 ## Credenciais de exemplo (seed)
 `admin/123456` (Administrativo) · `operador/senha123` (Almoxarifado, chefia) · `compras`, `almoxarifado`, `patrimonio`, `gerencia`, `visualizador` com senha `teste2026`. Agentes de contratação: `marina.duarte`, `paulo.reis`, `silvia.prado`, `otavio.lemos` (`teste2026`).
@@ -76,3 +77,10 @@ Ao criar ou mudar uma rota, documente-a em `scripts/openapi-docs.js` e rode o co
 ```bash
 npm test     # recria o banco de TEST_DATABASE_URL, migra, semeia e roda todas as suítes
 ```
+
+## Integração com o Compras.gov (CATMAT/CATSER)
+A API de Dados Abertos (https://dadosabertos.compras.gov.br, sem chave de acesso) é consultada **só pelo servidor**:
+- **Configurações › API Compras.gov:** liga/desliga a consulta, endereço (somente HTTPS em domínio `.gov.br`), tempo-limite, validade do cache, verificação diária às 03h, teste de conexão com o tempo de cada endpoint e consulta de teste por código.
+- **Cadastro da despesa (Compras › Limites Legais):** ao digitar o CATMAT ou o CATSER, `GET /api/compras/catalogo/consulta` devolve a hierarquia do item e o formulário preenche Classe (material), Grupo (serviço), PDM e Descrição. O item fica em cache (`catalogo_itens`); se a API cair, o cache é usado mesmo vencido.
+- O limite de dispensa acumula pela **Classe** (materiais) e pelo **Grupo** CATSER (serviços); o grupo do material é só informativo e fica gravado na hierarquia da despesa (`catalogo_info`).
+

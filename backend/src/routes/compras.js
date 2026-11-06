@@ -224,20 +224,32 @@ const despesaSchema = z.object({
   classe: z.string().trim().max(10).optional().default(''),
   catser: z.string().trim().max(20).optional().default(''),
   grupo: z.string().trim().max(10).optional().default(''),
+  pdm: z.string().trim().max(10).optional().default(''),
   modalidade: z.string().trim().max(40).optional().default('Dispensa'),
   empenhado: z.coerce.number().positive('Informe processo, objeto, valor e a Classe ou o Grupo.'),
   dataEmpenho: z.string().regex(ISO, 'Informe a data do empenho.'),
   ficha: z.string().trim().max(10).optional().default(''),
   sub: z.string().trim().max(10).optional().default('')
-}).refine((b) => b.classe || b.grupo, { message: 'Informe processo, objeto, valor e a Classe ou o Grupo.', path: ['classe'] });
+}).refine((b) => b.classe || b.grupo, { message: 'Informe processo, objeto, valor e a Classe ou o Grupo.', path: ['classe'] })
+  .refine((b) => !(b.catmat && b.catser), { message: 'Informe o código CATMAT (material) ou CATSER (serviço), não os dois.', path: ['catser'] });
+
+/** Hierarquia do catálogo (do cache local, preenchido pela consulta do formulário) gravada com a despesa. */
+async function catalogoInfo(b) {
+  const [cat, cod] = b.catmat ? ['CATMAT', b.catmat] : b.catser ? ['CATSER', b.catser] : [];
+  if (!cat || !/^\d{1,9}$/.test(cod)) return null;
+  const { item } = await catalogo.consultar(cat, cod, { online: false });
+  if (!item) return null;
+  const { atualizadoEm, fonte, ...info } = item;
+  return JSON.stringify(info);
+}
 
 router.post('/despesas', ah(async (req, res) => {
   const b = parse(despesaSchema, req.body);
   const tcn = /dispensa/i.test(b.modalidade) ? '' : 'NA';
   const r = await db.query(
-    `INSERT INTO despesas (processo, objeto, descricao, catmat, classe, catser, grupo, modalidade, empenhado, reserva, data, data_empenho, ficha, sub, tcn)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$9,$10,$10,$11,$12,$13) RETURNING id`,
-    [b.processo, b.objeto, b.descricao || null, b.catmat || null, b.classe || null, b.catser || null, b.grupo || null, b.modalidade, b.empenhado, b.dataEmpenho, b.ficha || null, b.sub || null, tcn]);
+    `INSERT INTO despesas (processo, objeto, descricao, catmat, classe, catser, grupo, modalidade, empenhado, reserva, data, data_empenho, ficha, sub, tcn, pdm, catalogo_info)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$9,$10,$10,$11,$12,$13,$14,$15) RETURNING id`,
+    [b.processo, b.objeto, b.descricao || null, b.catmat || null, b.classe || null, b.catser || null, b.grupo || null, b.modalidade, b.empenhado, b.dataEmpenho, b.ficha || null, b.sub || null, tcn, b.pdm || null, await catalogoInfo(b)]);
   await audit.log(req, { action: 'Despesa incluída', module: 'compras', detail: b.processo + ' · ' + b.objeto });
   res.status(201).json({ id: r.rows[0].id });
 }));
@@ -246,8 +258,8 @@ router.put('/despesas/:id', ah(async (req, res) => {
   const id = idParam(req.params.id);
   const b = parse(despesaSchema, req.body);
   const r = await db.query(
-    `UPDATE despesas SET processo=$1, objeto=$2, descricao=$3, catmat=$4, classe=$5, catser=$6, grupo=$7, modalidade=$8, empenhado=$9, data_empenho=$10, ficha=$11, sub=$12 WHERE id=$13 RETURNING id`,
-    [b.processo, b.objeto, b.descricao || null, b.catmat || null, b.classe || null, b.catser || null, b.grupo || null, b.modalidade, b.empenhado, b.dataEmpenho, b.ficha || null, b.sub || null, id]);
+    `UPDATE despesas SET processo=$1, objeto=$2, descricao=$3, catmat=$4, classe=$5, catser=$6, grupo=$7, modalidade=$8, empenhado=$9, data_empenho=$10, ficha=$11, sub=$12, pdm=$14, catalogo_info=$15 WHERE id=$13 RETURNING id`,
+    [b.processo, b.objeto, b.descricao || null, b.catmat || null, b.classe || null, b.catser || null, b.grupo || null, b.modalidade, b.empenhado, b.dataEmpenho, b.ficha || null, b.sub || null, id, b.pdm || null, await catalogoInfo(b)]);
   if (!r.rows.length) throw notFound('Despesa não encontrada.');
   await audit.log(req, { action: 'Despesa editada', module: 'compras', detail: b.processo + ' · ' + b.objeto });
   res.json({ id });
@@ -289,6 +301,16 @@ router.post('/limites/simular', ah(async (req, res) => {
   const saldo = a.limite - a.total;
   const ok = b.valor <= saldo;
   res.json({ ok, chave: a.chave, acumulado: a.total, limite: a.limite, saldo, saldoApos: saldo - b.valor, eng: a.eng });
+}));
+
+/** Autocomplete do cadastro da despesa: item CATMAT/CATSER pelo código (cache local ou API de Dados Abertos). */
+router.get('/catalogo/consulta', ah(async (req, res) => {
+  const tipo = String(req.query.tipo || '').toUpperCase(), codigo = String(req.query.codigo || '').trim();
+  if (!['CATMAT', 'CATSER'].includes(tipo)) throw badRequest('Informe o catálogo: CATMAT ou CATSER.');
+  if (!/^\d{1,9}$/.test(codigo)) throw badRequest('O código deve ter só números (até 9 dígitos).');
+  const r = await catalogo.consultar(tipo, codigo);
+  if (!r.item && !r.aviso) throw notFound(`Código ${tipo} ${codigo} não encontrado no catálogo do Compras.gov.`);
+  res.json(r);
 }));
 
 router.post('/catalogo/sync', ah(async (req, res) => {

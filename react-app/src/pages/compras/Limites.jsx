@@ -1,16 +1,21 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Async, Badge, SkeletonCards, SkeletonRows, useToast } from '../../components/ui.jsx';
 import FormModal from '../../components/FormModal.jsx';
 import { api } from '../../lib/api.js';
-import { useApi } from '../../lib/hooks.js';
+import { useApi, useDebounced } from '../../lib/hooks.js';
+import CatalogoItem from '../../components/CatalogoItem.jsx';
 import { useExercicio } from '../../lib/cadastros.jsx';
 import { brl, fmtDate, fmtDateTime, num } from '../../lib/format.js';
 
 const pctF = (p) => (p * 100).toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + '%';
 const parseBRL = (s) => Number(String(s).replace(/[^\d,]/g, '').replace(',', '.')) || 0;
 const DESP_FIELDS = [
-  { key: 'processo', label: 'Processo' }, { key: 'objeto', label: 'Objeto' }, { key: 'descricao', label: 'Descrição' }, { key: 'catmat', label: 'CATMAT' },
-  { key: 'classe', label: 'Classe' }, { key: 'catser', label: 'CATSER' }, { key: 'grupo', label: 'Grupo' }, { key: 'modalidade', label: 'Modalidade', type: 'select', options: ['Dispensa', 'Inexigibilidade', 'Licitação', 'Pregão Eletrônico', 'Adesão a ARP'] },
+  { key: 'processo', label: 'Processo' }, { key: 'objeto', label: 'Objeto' },
+  { key: 'catmat', label: 'CATMAT (material)', placeholder: 'Código do item', hint: 'Preenche Classe, PDM e Descrição' },
+  { key: 'catser', label: 'CATSER (serviço)', placeholder: 'Código do serviço', hint: 'Preenche Grupo e Descrição' },
+  { key: 'classe', label: 'Classe (material)' }, { key: 'grupo', label: 'Grupo (serviço)' }, { key: 'pdm', label: 'PDM' },
+  { key: 'descricao', label: 'Descrição', full: true },
+  { key: 'modalidade', label: 'Modalidade', type: 'select', options: ['Dispensa', 'Inexigibilidade', 'Licitação', 'Pregão Eletrônico', 'Adesão a ARP'] },
   { key: 'empenhado', label: 'Valor empenhado (R$)', type: 'number' }, { key: 'dataEmpenho', label: 'Data do empenho', type: 'date' }, { key: 'ficha', label: 'Ficha' }, { key: 'sub', label: 'Sub' }
 ];
 const COLS = '90px minmax(240px, 2fr) 150px 100px 110px 90px 80px 130px 130px 150px 160px';
@@ -106,6 +111,59 @@ export default function Limites() {
   );
 }
 
+/**
+ * Autocomplete do cadastro da despesa: ao digitar o CATMAT ou o CATSER, consulta o catálogo (cache local ou
+ * API de Dados Abertos do Compras.gov, sempre pelo servidor) e preenche Classe/Grupo/PDM/Descrição.
+ */
+function CatalogoLookup({ form, set }) {
+  const tipo = form.catmat && form.catser ? 'ambos' : form.catmat ? 'CATMAT' : form.catser ? 'CATSER' : null;
+  const codigo = String(tipo === 'CATMAT' ? form.catmat : tipo === 'CATSER' ? form.catser : '').trim();
+  const alvo = useDebounced(tipo && tipo !== 'ambos' && /^\d{1,9}$/.test(codigo) ? tipo + ':' + codigo : '', 500);
+  const [st, setSt] = useState({ loading: false, res: null, err: '' });
+  // Na edição, o código já gravado não dispara preenchimento (a Classe/Grupo gravados definem o acumulado)
+  const ultimo = useRef(form.id && (form.catmat || form.catser) ? (form.catmat ? 'CATMAT:' + form.catmat : 'CATSER:' + form.catser) : '');
+  const autoDesc = useRef(form.catalogoInfo ? form.catalogoInfo.descricao : null);
+  useEffect(() => {
+    if (!alvo) { setSt({ loading: false, res: null, err: '' }); return undefined; }
+    const ctl = new AbortController();
+    const [t, c] = alvo.split(':');
+    setSt((x) => ({ ...x, loading: true, err: '' }));
+    api.get(`/compras/catalogo/consulta?tipo=${t}&codigo=${c}`, { signal: ctl.signal }).then((r) => {
+      setSt({ loading: false, res: r, err: r.item ? '' : r.aviso || '' });
+      if (!r.item || ultimo.current === alvo) return; // não sobrescreve o que o usuário ajustou ao reabrir
+      ultimo.current = alvo;
+      const it = r.item;
+      if (t === 'CATMAT') { set('classe', it.classe ? it.classe.cod : ''); set('pdm', it.pdm ? it.pdm.cod : ''); set('grupo', ''); }
+      else { set('grupo', it.grupo ? it.grupo.cod : ''); set('classe', ''); set('pdm', ''); }
+      // Descrição: preenche se vazia ou se ainda era a do item anterior
+      if (!String(form.descricao || '').trim() || form.descricao === autoDesc.current) { set('descricao', it.descricao.slice(0, 300)); autoDesc.current = it.descricao.slice(0, 300); }
+    }).catch((e) => { if (e.name !== 'AbortError') setSt({ loading: false, res: null, err: e.message }); });
+    return () => ctl.abort();
+  }, [alvo]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  if (tipo === 'ambos') return <p role="alert" style={{ fontSize: 12.5, color: 'var(--warn-title)', background: 'var(--warn-bg)', padding: '8px 12px', borderRadius: 6 }}>Informe o código CATMAT (material) ou CATSER (serviço), não os dois.</p>;
+  if (!tipo) return null;
+  if (codigo && !/^\d{1,9}$/.test(codigo)) return <p className="field-error">O código deve ter só números.</p>;
+  return (
+    <div aria-live="polite" className="stack" style={{ gap: 6 }}>
+      {st.loading && <p className="muted" style={{ fontSize: 12 }}>Consultando o catálogo do Compras.gov…</p>}
+      {!st.loading && st.err && <p role="alert" style={{ fontSize: 12.5, color: 'var(--crit-strong)' }}>{st.err}</p>}
+      {st.res && st.res.item && <CatalogoItem item={st.res.item} origem={st.res.origem} />}
+      {st.res && st.res.item && st.res.aviso && <p className="hint" style={{ color: 'var(--warn)' }}>{st.res.aviso}</p>}
+      {st.res && st.res.item && (() => {
+        const it = st.res.item, cat = tipo === 'CATMAT' ? (it.classe && it.classe.cod) : (it.grupo && it.grupo.cod), atual = tipo === 'CATMAT' ? form.classe : form.grupo;
+        if (!cat || String(atual || '') === cat) return null;
+        return (
+          <p role="status" style={{ fontSize: 12.5, color: 'var(--warn-title)', background: 'var(--warn-bg)', padding: '8px 12px', borderRadius: 6 }}>
+            {tipo === 'CATMAT' ? 'Classe' : 'Grupo'} no catálogo: <strong>{cat}</strong> (no formulário: {atual || '—'}).{' '}
+            <button type="button" className="link-btn" style={{ fontSize: 12.5, minHeight: 0 }} onClick={() => { if (tipo === 'CATMAT') { set('classe', cat); set('pdm', it.pdm ? it.pdm.cod : ''); } else set('grupo', cat); }}>Usar o do catálogo</button>
+          </p>
+        );
+      })()}
+    </div>
+  );
+}
+
 function Despesas({ toast }) {
   const [ano] = useExercicio();
   const st = useApi(() => api.get('/compras/despesas?ano=' + ano), [ano]);
@@ -117,7 +175,7 @@ function Despesas({ toast }) {
   const patch = async (e, body) => { try { await api.patch('/compras/despesas/' + e.id, body); st.refresh(); } catch (er) { toast(er.message, 'error'); } };
   const save = async (f) => {
     const body = { ...f, empenhado: +f.empenhado };
-    ['id', 'acumulado', 'audesp', 'tcn', 'contratoId', 'contrato', 'reserva', 'data'].forEach((k) => delete body[k]);
+    ['id', 'acumulado', 'audesp', 'tcn', 'contratoId', 'contrato', 'reserva', 'data', 'catalogoInfo'].forEach((k) => delete body[k]);
     if (f.id) await api.put('/compras/despesas/' + f.id, body); else await api.post('/compras/despesas', body);
     setForm(null); toast(f.id ? 'Despesa atualizada' : 'Despesa incluída'); st.refresh();
   };
@@ -209,7 +267,12 @@ function Despesas({ toast }) {
           </section>
           {form && (
             <FormModal wide cols="170px" title={form.id ? 'Despesa — processo ' + form.processo : 'Incluir despesa'} submitLabel={form.id ? 'Salvar alterações' : 'Incluir'} fields={DESP_FIELDS} initial={form} onClose={() => setForm(null)} onSubmit={save}>
-              <p style={{ fontSize: 12, color: 'var(--text-2)' }}>Informe a Classe (CATMAT) para materiais ou o Grupo (CATSER) para serviços. O acumulado é recalculado automaticamente.</p>
+              {(f, set) => (
+                <>
+                  <p style={{ fontSize: 12, color: 'var(--text-2)' }}>Digite o código CATMAT (materiais) ou CATSER (serviços): Classe, Grupo, PDM e Descrição são preenchidos a partir do catálogo do Compras.gov. O limite acumula pela Classe (materiais) ou pelo Grupo (serviços).</p>
+                  <CatalogoLookup form={f} set={set} />
+                </>
+              )}
             </FormModal>
           )}
         </>

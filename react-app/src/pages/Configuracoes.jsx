@@ -3,6 +3,7 @@ import { PageHeader } from '../components/Layout.jsx';
 import { Async, Badge, SkeletonCards, Switch, useToast } from '../components/ui.jsx';
 import { api, qs } from '../lib/api.js';
 import { useApi, useQueryState } from '../lib/hooks.js';
+import ComprasGovConfig from './ComprasGovConfig.jsx';
 import { norm } from '../lib/nav.js';
 
 const OPT_LABEL = { alta: 'Foco em alta prioridade', media: 'Foco em média prioridade', baixa: 'Foco em baixa prioridade', balanceado: 'Aleatório balanceado' };
@@ -12,6 +13,7 @@ export default function Configuracoes() {
   const toast = useToast();
   const [tab, setTab] = useQueryState('tab', 'geral');
   const [q, setQ] = useState('');
+  const [cgVersao, setCgVersao] = useState(0);
   const cfg = useApi(() => api.get('/config'), []);
   const nq = norm(q.trim());
 
@@ -48,9 +50,10 @@ export default function Configuracoes() {
         </div>
         {isAccess ? <AccessMatrix toast={toast} /> : isCc ? <CostCenters toast={toast} /> : (
           <Async state={cfg} skeleton={<SkeletonCards n={3} h={220} />}>
-            {(d) => <ParamGroups data={d} tab={tab} q={nq} onSaved={(nd) => { cfg.setData(nd); toast('Configuração salva'); }} toast={toast} />}
+            {(d) => <ParamGroups data={d} tab={tab} q={nq} onSaved={(nd) => { cfg.setData(nd); setCgVersao((v) => v + 1); toast('Configuração salva'); }} toast={toast} />}
           </Async>
         )}
+        {!nq && tab === 'comprasgov' && <ComprasGovConfig toast={toast} versao={cgVersao} />}
       </main>
     </>
   );
