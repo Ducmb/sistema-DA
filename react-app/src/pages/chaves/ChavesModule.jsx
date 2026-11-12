@@ -100,6 +100,7 @@ function Responsavel({ label }) {
 }
 
 function RetiradaModal({ onClose, onDone }) {
+  const { user } = useAuth();
   const chaves = useApi(() => api.get('/chaves'), []);
   const [f, setF] = useState({ chaveId: '', solicitante: '', solicitanteDoc: '', observacao: '' });
   const set = (k, v) => setF((x) => ({ ...x, [k]: v }));
@@ -127,13 +128,15 @@ function RetiradaModal({ onClose, onDone }) {
           <Responsavel label="Responsável pela Entrega" />
         </div>
         <Field label="Observação (opcional)" htmlFor="ch-obs"><input id="ch-obs" className="input" value={f.observacao} maxLength={400} onChange={(e) => set('observacao', e.target.value)} /></Field>
-        <ColetaAssinatura dados={dados} pronto={pronto} confirmarLabel="Assinar e registrar retirada" onConcluir={concluir} />
+        <ColetaAssinatura dados={dados} pronto={pronto} confirmarLabel="Assinar e registrar retirada"
+          resumo={{ tipo: 'retirada', local: chave ? chave.local : '', chave: chave ? chave.codigo : '', solicitante: dados.solicitante, solicitanteDoc: dados.solicitanteDoc, responsavel: user ? user.name : '' }} onConcluir={concluir} />
       </div>
     </Modal>
   );
 }
 
 function DevolucaoModal({ emp, onClose, onDone }) {
+  const { user } = useAuth();
   const [devolvidoPor, setDev] = useState(emp.solicitante);
   const [obs, setObs] = useState('');
   const dados = { tipo: 'devolucao', emprestimoId: emp.id, devolvidoPor: devolvidoPor.trim() };
@@ -151,7 +154,8 @@ function DevolucaoModal({ emp, onClose, onDone }) {
           <Responsavel label="Responsável pelo Recebimento" />
         </div>
         <Field label="Observação (opcional)" htmlFor="ch-dobs"><input id="ch-dobs" className="input" value={obs} maxLength={400} onChange={(e) => setObs(e.target.value)} /></Field>
-        <ColetaAssinatura dados={dados} pronto={dados.devolvidoPor.length >= 3} confirmarLabel="Assinar e registrar devolução" onConcluir={concluir} />
+        <ColetaAssinatura dados={dados} pronto={dados.devolvidoPor.length >= 3}
+          resumo={{ tipo: 'devolucao', local: emp.local, chave: emp.chaveCodigo, devolvidoPor: dados.devolvidoPor, responsavel: user ? user.name : '' }} confirmarLabel="Assinar e registrar devolução" onConcluir={concluir} />
       </div>
     </Modal>
   );
@@ -195,7 +199,7 @@ function Bloco({ data, pessoa, assinatura, resp }) {
           {a ? <img src={a.imagem} alt={'Assinatura de ' + pessoa} /> : <span className="muted-3">—</span>}
         </div>
         {pessoa && <small>{pessoa}</small>}
-        {a && <small className="termo-meta">Assinado em {fmtDateTime(a.assinadaEm)} · {a.dispositivo === 'tablet' ? 'estação tablet' : 'nesta tela/mesa digitalizadora'} · IP {a.ip || '—'} · Código {a.codigo}</small>}
+        {a && <small className="termo-meta">Assinado em {fmtDateTime(a.assinadaEm)} · {a.dispositivo === 'tablet' ? 'no tablet' : 'na tela do computador'} · IP {a.ip || '—'} · Código {a.codigo}</small>}
       </div>
       <p><span>{resp[0]}:</span> <span className="termo-valor">{resp[1] || ''}</span></p>
     </div>

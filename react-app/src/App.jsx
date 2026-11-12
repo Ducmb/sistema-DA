@@ -49,6 +49,7 @@ const ROUTES = [
   ['/protocolo', 'protocolo'], ['/mocoes', 'mocoes'], ['/legislacoes', 'legislacoes'], ['/analytics', 'analytics'], ['/notificacoes', 'notificacoes'], ['/chaves', 'chaves']
 ];
 const EstacaoTablet = lazy(() => import('./pages/chaves/EstacaoTablet.jsx'));
+const JanelaTablet = lazy(() => import('./pages/chaves/JanelaTablet.jsx'));
 
 function Home() {
   const { user, ready, can } = useAuth();
@@ -67,6 +68,8 @@ export default function App() {
         const P = pages[mod];
         return <Route key={path} path={path} element={<Guard mod={mod}><P /></Guard>} />;
       })}
+      {/* Janela aberta automaticamente na tela do tablet conectado: sem login nem API (só conversa com a tela do computador) */}
+      <Route path="/chaves/assinar" element={<Suspense fallback={null}><JanelaTablet /></Suspense>} />
       <Route path="/chaves/tablet" element={<Guard mod="chaves" bare><EstacaoTablet /></Guard>} />
       <Route path="/dashboard" element={<Navigate to="/painel" replace />} />
       <Route path="/rh" element={<Navigate to="/pessoal" replace />} />

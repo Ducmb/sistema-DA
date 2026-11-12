@@ -57,9 +57,11 @@ router.patch('/:id/ativa', ah(async (req, res) => {
 }));
 
 // ---------- Assinaturas ----------
+/** Onde o traço foi feito quando a imagem vem do computador: quadro da tela ou janela aberta na tela do tablet conectado. */
+const DISP = z.enum(['tela', 'tablet'], { message: 'Dispositivo inválido.' }).optional().default('tela');
 const pedidoSchema = z.discriminatedUnion('tipo', [
-  z.object({ tipo: z.literal('retirada'), chaveId: z.number().int().positive(), solicitante: z.string().trim().min(3, 'Informe o nome do solicitante.').max(160), solicitanteDoc: z.string().trim().max(40).optional().default(''), imagem: z.string().optional() }),
-  z.object({ tipo: z.literal('devolucao'), emprestimoId: z.number().int().positive(), devolvidoPor: z.string().trim().min(3, 'Informe quem está devolvendo a chave.').max(160), imagem: z.string().optional() })
+  z.object({ tipo: z.literal('retirada'), chaveId: z.number().int().positive(), solicitante: z.string().trim().min(3, 'Informe o nome do solicitante.').max(160), solicitanteDoc: z.string().trim().max(40).optional().default(''), imagem: z.string().optional(), dispositivo: DISP }),
+  z.object({ tipo: z.literal('devolucao'), emprestimoId: z.number().int().positive(), devolvidoPor: z.string().trim().min(3, 'Informe quem está devolvendo a chave.').max(160), imagem: z.string().optional(), dispositivo: DISP })
 ], { message: 'Tipo de assinatura inválido.' });
 
 /** Resumo do que será assinado — montado no servidor a partir do banco (o navegador não define o conteúdo). */
@@ -85,8 +87,9 @@ function assinarAgora(resumo, imagem) {
 }
 
 /**
- * Cria o pedido de assinatura. Com `imagem`: assinatura feita na tela do computador (mesa digitalizadora/tablet USB).
- * Sem `imagem`: fica pendente e aparece na estação tablet logada com o mesmo usuário.
+ * Cria o pedido de assinatura. Com `imagem`: assinatura feita no computador — no quadro da tela (`dispositivo: tela`)
+ * ou na janela aberta automaticamente na tela do tablet conectado (`dispositivo: tablet`).
+ * Sem `imagem`: fica pendente e aparece na estação tablet via rede logada com o mesmo usuário.
  */
 router.post('/assinaturas', ah(async (req, res) => {
   const b = parse(pedidoSchema, req.body);
@@ -99,8 +102,8 @@ router.post('/assinaturas', ah(async (req, res) => {
     const { quando, hash } = assinarAgora(resumo, b.imagem);
     await db.query(
       `INSERT INTO chaves_assinaturas (id, criada_por, tipo, resumo, status, dispositivo, imagem, hash, assinada_em, ip, user_agent, expira_em)
-       VALUES ($1,$2,$3,$4,'assinada','tela',$5,$6,$7,$8,$9, NOW() + make_interval(mins => $10))`,
-      [id, req.user.id, b.tipo, JSON.stringify(resumo), b.imagem, hash, quando, req.ip, ua, USO_APOS_ASSINAR_MIN]);
+       VALUES ($1,$2,$3,$4,'assinada',$11,$5,$6,$7,$8,$9, NOW() + make_interval(mins => $10))`,
+      [id, req.user.id, b.tipo, JSON.stringify(resumo), b.imagem, hash, quando, req.ip, ua, USO_APOS_ASSINAR_MIN, b.dispositivo]);
   } else {
     await db.query(
       `INSERT INTO chaves_assinaturas (id, criada_por, tipo, resumo, expira_em) VALUES ($1,$2,$3,$4, NOW() + make_interval(mins => $5))`,

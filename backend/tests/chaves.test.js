@@ -39,6 +39,10 @@ describe('Controle de Chaves', () => {
     expect(a.status).toBe(201);
     expect(a.body).toMatchObject({ status: 'assinada', dispositivo: 'tela', resumo: { local: 'Sala de Sessões', chave: 'CH-001', solicitante: 'Fulano de Tal', responsavel: 'Ana Beatriz Silva' } });
     expect(a.body.codigo).toMatch(/^[0-9A-F]{16}$/);
+    // tablet conectado: a janela na tela do tablet devolve o traço ao computador, que envia com dispositivo 'tablet'
+    const t = await api(op).post('/chaves/assinaturas').send({ tipo: 'retirada', chaveId: chave.id, solicitante: 'Fulano de Tal', imagem: png(), dispositivo: 'tablet' });
+    expect(t.body).toMatchObject({ status: 'assinada', dispositivo: 'tablet' });
+    expect((await api(op).post('/chaves/assinaturas').send({ tipo: 'retirada', chaveId: chave.id, solicitante: 'Fulano de Tal', imagem: png(), dispositivo: 'celular' })).status).toBe(400);
     // assinatura de outra pessoa não serve
     expect((await api(op).post('/chaves/emprestimos').send({ chaveId: chave.id, solicitante: 'Outra Pessoa', solicitanteDoc: 'MAT-123', assinaturaId: a.body.id })).body.error).toMatch(/não corresponde/);
     const r = await api(op).post('/chaves/emprestimos').send({ chaveId: chave.id, solicitante: 'Fulano de Tal', solicitanteDoc: 'MAT-123', assinaturaId: a.body.id });

@@ -3792,8 +3792,8 @@ paths:
       tags:
         - Sistema
       summary: >-
-        Pedido de assinatura do solicitante. Com imagem (PNG data URL) = assinada nesta tela/mesa digitalizadora; sem imagem = enviada à
-        estação tablet do mesmo usuário
+        Assinatura do solicitante. Com imagem (PNG data URL) = já assinada no computador: dispositivo tela (quadro do formulário) ou tablet
+        (janela aberta automaticamente na tela do tablet conectado); sem imagem = pedido para a estação tablet via rede do mesmo usuário
       description: >-
         Acesso: módulo `chaves` (403 sem permissão). id, status (pendente|assinada), resumo assinado (montado no servidor), expiraEm, código
         de verificação.
@@ -3817,6 +3817,8 @@ paths:
                 devolvidoPor:
                   type: string
                 imagem:
+                  type: string
+                dispositivo:
                   type: string
               required:
                 - tipo
