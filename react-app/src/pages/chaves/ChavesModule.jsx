@@ -6,7 +6,7 @@ import { api, qs } from '../../lib/api.js';
 import { useAuth } from '../../lib/auth.jsx';
 import { useApi, useDebounced, useQueryState } from '../../lib/hooks.js';
 import { fmtDateTime } from '../../lib/format.js';
-import ColetaAssinatura from './Assinatura.jsx';
+import ColetaAssinatura from '../../components/ColetaAssinatura.jsx';
 import Tablets from './Tablets.jsx';
 
 const TABS = [{ key: 'emprestimos', label: 'Entregas e devoluções' }, { key: 'chaves', label: 'Chaves cadastradas' }, { key: 'tablets', label: '📱 Tablets' }];

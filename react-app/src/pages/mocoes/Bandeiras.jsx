@@ -4,6 +4,7 @@ import { api } from '../../lib/api.js';
 import { useApi } from '../../lib/hooks.js';
 import { fmtDate, maskDoc, maskPhone, todayIso } from '../../lib/format.js';
 import { errStyle } from './MocoesModule.jsx';
+import { DevolucaoBandModal, RetiradaBandModal, TermoBandModal } from './BandeirasAssinatura.jsx';
 
 const ST = {
   aguardando: ['Aguardando retirada', 'var(--info-bg)', 'var(--info-strong)'], naoRetirado: ['Retirada não realizada', 'var(--warn-bg)', 'var(--warn-title)'],
@@ -19,9 +20,11 @@ export default function Bandeiras({ meta }) {
   const [q, setQ] = useState('');
   const [filter, setFilter] = useState('todos');
   const [form, setForm] = useState(null);
+  const [assinar, setAssinar] = useState(null); // { tipo: 'retirada'|'devolucao', r }
+  const [termo, setTermo] = useState(null);
   const itens = meta ? meta.itens : [];
   const hoje = todayIso();
-  const retirar = async (r) => { try { await api.post(`/mocoes/bandeiras/${r.id}/retirada`); toast('Retirada registrada — ' + r.entidade); st.reload(); } catch (e) { toast(e.message, 'error'); } };
+  const feito = (m) => { setAssinar(null); toast(m); st.reload(); };
   return (
     <div className="stack" style={{ gap: 16 }}>
       <div className="row between">
@@ -74,8 +77,9 @@ export default function Bandeiras({ meta }) {
                           <td><span className="badge" style={{ borderRadius: 999, background: S[1], color: S[2], whiteSpace: 'nowrap' }}>{S[0]}</span></td>
                           <td>
                             <div className="row" style={{ gap: 6, justifyContent: 'flex-end', flexWrap: 'nowrap' }}>
-                              {(r.situacao === 'aguardando' || r.situacao === 'naoRetirado') && <button type="button" className="btn btn-secondary btn-sm" style={{ color: 'var(--accent)', borderColor: 'var(--primary)', whiteSpace: 'nowrap' }} onClick={() => retirar(r)}>Registrar retirada</button>}
-                              {(r.situacao === 'emprestado' || r.situacao === 'atrasado') && <button type="button" className="btn btn-secondary btn-sm" style={{ color: 'var(--accent)', borderColor: 'var(--primary)', whiteSpace: 'nowrap' }} onClick={() => setForm({ ...r, documento: maskDoc(r.documento), devolucao: r.devolucao && r.devolucao <= hoje ? r.devolucao : hoje, conformidade: 'Sim' })}>Registrar devolução</button>}
+                              {(r.situacao === 'aguardando' || r.situacao === 'naoRetirado') && <button type="button" className="btn btn-secondary btn-sm" style={{ color: 'var(--accent)', borderColor: 'var(--primary)', whiteSpace: 'nowrap' }} onClick={() => setAssinar({ tipo: 'retirada', r })}>Registrar retirada</button>}
+                              {(r.situacao === 'emprestado' || r.situacao === 'atrasado') && <button type="button" className="btn btn-secondary btn-sm" style={{ color: 'var(--accent)', borderColor: 'var(--primary)', whiteSpace: 'nowrap' }} onClick={() => setAssinar({ tipo: 'devolucao', r })}>Registrar devolução</button>}
+                              {r.retirado && <button type="button" className="btn btn-secondary btn-sm" title={r.assinado ? 'Termo com as assinaturas' : 'Registro anterior à assinatura eletrônica'} onClick={() => setTermo(r.id)}>Termo</button>}
                               <button type="button" className="btn btn-secondary btn-sm" aria-label={'Editar registro de ' + r.entidade} onClick={() => setForm({ ...r, documento: maskDoc(r.documento) })}>Editar</button>
                             </div>
                           </td>
@@ -90,6 +94,9 @@ export default function Bandeiras({ meta }) {
           );
         }}
       </Async>
+      {assinar && assinar.tipo === 'retirada' && <RetiradaBandModal r={assinar.r} itens={itens} onClose={() => setAssinar(null)} onDone={feito} />}
+      {assinar && assinar.tipo === 'devolucao' && <DevolucaoBandModal r={assinar.r} itens={itens} onClose={() => setAssinar(null)} onDone={feito} />}
+      {termo && <TermoBandModal id={termo} onClose={() => setTermo(null)} />}
       {form && <BandForm itens={itens} initial={form} onClose={() => setForm(null)} onSaved={(m) => { setForm(null); toast(m); st.reload(); }} />}
     </div>
   );
@@ -99,7 +106,6 @@ function BandForm({ itens, initial, onClose, onSaved }) {
   const [f, setF] = useState(initial);
   const [err, setErr] = useState('');
   const [confirm, setConfirm] = useState(false);
-  const hoje = todayIso();
   const set = (k, mask) => (e) => { const v = mask ? mask(e.target.value) : e.target.value; setF({ ...f, [k]: v }); setErr(''); };
   const save = async (e) => {
     e.preventDefault();
@@ -148,13 +154,13 @@ function BandForm({ itens, initial, onClose, onSaved }) {
           <div>
             {section('Retirada e devolução')}
             <div className="grid" style={{ '--min': '180px', gap: 12 }}>
-              <div className="field"><label htmlFor="b-retq">Foi retirado?</label><select id="b-retq" className="select" value={f.retirado ? 'Sim' : 'Não'} onChange={(e) => { const s = e.target.value === 'Sim'; setF({ ...f, retirado: s, retirada: s ? f.retirada || hoje : f.retirada, conformidade: s ? f.conformidade : '' }); setErr(''); }}><option>Não</option><option>Sim</option></select></div>
-              <div className="field"><label htmlFor="b-ret">{f.retirado ? 'Data da retirada' : 'Retirada agendada para'}</label><input id="b-ret" type="date" className="input" value={f.retirada} onChange={set('retirada')} /></div>
-              <div className="field"><label htmlFor="b-dev">Data da devolução</label><input id="b-dev" type="date" className="input" value={f.devolucao} onChange={set('devolucao')} /></div>
-              <div className="field"><label htmlFor="b-conf">Devolvido em conformidade</label><select id="b-conf" className="select" value={f.conformidade} disabled={!f.retirado} onChange={set('conformidade')}><option value="">Ainda não devolvido</option><option>Sim</option><option>Não</option></select></div>
-              {f.conformidade === 'Não' && <div className="field" style={{ gridColumn: '1 / -1' }}><label htmlFor="b-obs">O que não está em conformidade?</label><input id="b-obs" className="input" value={f.obs} onChange={set('obs')} placeholder="Ex.: mastro danificado, bandeira de SP não devolvida" /></div>}
+              <div className="field"><label htmlFor="b-retq">Situação</label><input id="b-retq" className="input" readOnly aria-readonly="true"
+                value={!f.retirado ? 'Ainda não retirado' : !f.conformidade ? 'Retirado' + (f.retiradoPor ? ' por ' + f.retiradoPor : '') : f.conformidade === 'Sim' ? 'Devolvido em conformidade' : 'Devolvido com pendência'} /></div>
+              <div className="field"><label htmlFor="b-ret">{f.retirado ? 'Data da retirada' : 'Retirada agendada para'}</label><input id="b-ret" type="date" className="input" value={f.retirada} disabled={f.retirado} onChange={set('retirada')} /></div>
+              <div className="field"><label htmlFor="b-dev">{f.conformidade ? 'Data da devolução' : 'Devolução prevista'}</label><input id="b-dev" type="date" className="input" value={f.devolucao} disabled={!!f.conformidade} onChange={set('devolucao')} /></div>
+              {f.conformidade === 'Não' && <div className="field" style={{ gridColumn: '1 / -1' }}><label htmlFor="b-obs">Pendência registrada na devolução</label><input id="b-obs" className="input" value={f.obs} readOnly aria-readonly="true" /></div>}
             </div>
-            <p className="hint" style={{ marginTop: 8 }}>Enquanto "Foi retirado?" estiver como Não, a data da retirada é o agendamento. Antes da devolução, a data de devolução é a prevista e indica atraso.</p>
+            <p className="hint" style={{ marginTop: 8 }}>A retirada e a devolução são registradas pelos botões da lista, com a assinatura eletrônica de quem retira e de quem devolve. Aqui você agenda a retirada e define a devolução prevista (que indica atraso).</p>
           </div>
           {err && <p role="alert" style={errStyle}>{err}</p>}
         </form>

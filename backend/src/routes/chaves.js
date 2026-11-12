@@ -4,18 +4,15 @@
  * pedido automaticamente — o tablet não faz login; usa um token de dispositivo (ver routes/tablet.js).
  */
 const express = require('express');
-const crypto = require('crypto');
 const { z } = require('zod');
 const db = require('../db');
 const audit = require('../services/audit');
 const config = require('../services/config');
 const K = require('../services/chaves');
-const { ah, parse, idParam, notFound, badRequest, conflict, forbidden } = require('../lib/http');
+const A = require('../services/assinaturas');
+const { ah, parse, idParam, notFound, badRequest, conflict } = require('../lib/http');
 
 const router = express.Router();
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
-const uuidParam = (v) => { if (!UUID.test(String(v))) throw badRequest('Identificador inválido.'); return String(v); };
-const USO_APOS_ASSINAR_MIN = 30;
 
 // ---------- Cadastro de chaves ----------
 router.get('/', ah(async (req, res) => {
@@ -81,11 +78,6 @@ async function resumoDe(b, user) {
   return { tipo: 'devolucao', emprestimoId: e.id, chave: e.chave_codigo, local: e.local, solicitante: e.solicitante, devolvidoPor: b.devolvidoPor, data: agora, responsavel: user.name };
 }
 
-function assinarAgora(resumo, imagem) {
-  const quando = new Date().toISOString();
-  return { quando, hash: K.hashOf(resumo, imagem, quando) };
-}
-
 /**
  * Cria o pedido de assinatura. Com `imagem`: assinatura feita no quadro da tela do computador.
  * Com `tabletId` (sem imagem): fica pendente e aparece automaticamente no tablet pareado escolhido.
@@ -93,62 +85,18 @@ function assinarAgora(resumo, imagem) {
 router.post('/assinaturas', ah(async (req, res) => {
   const b = parse(pedidoSchema, req.body);
   const resumo = await resumoDe(b, req.user);
-  const id = crypto.randomUUID();
-  const ua = (req.get('User-Agent') || '').slice(0, 300);
-  if (b.imagem !== undefined) {
-    const err = K.imagemInvalida(b.imagem);
-    if (err) throw badRequest(err);
-    const { quando, hash } = assinarAgora(resumo, b.imagem);
-    await db.query(
-      `INSERT INTO chaves_assinaturas (id, criada_por, tipo, resumo, status, dispositivo, imagem, hash, assinada_em, ip, user_agent, expira_em)
-       VALUES ($1,$2,$3,$4,'assinada',$11,$5,$6,$7,$8,$9, NOW() + make_interval(mins => $10))`,
-      [id, req.user.id, b.tipo, JSON.stringify(resumo), b.imagem, hash, quando, req.ip, ua, USO_APOS_ASSINAR_MIN, b.dispositivo]);
-  } else {
-    if (!b.tabletId) throw badRequest('Escolha o tablet que vai coletar a assinatura.');
-    const { rows: t } = await db.query('SELECT id FROM chaves_tablets WHERE id = $1 AND ativo AND token_hash IS NOT NULL', [b.tabletId]);
-    if (!t.length) throw badRequest('Tablet não encontrado ou não pareado.');
-    // Um pedido por vez em cada tablet: o novo substitui o anterior
-    await db.query("UPDATE chaves_assinaturas SET status = 'cancelada' WHERE tablet_id = $1 AND status = 'pendente'", [b.tabletId]);
-    await db.query(
-      `INSERT INTO chaves_assinaturas (id, criada_por, tipo, resumo, tablet_id, expira_em) VALUES ($1,$2,$3,$4,$5, NOW() + make_interval(mins => $6))`,
-      [id, req.user.id, b.tipo, JSON.stringify(resumo), b.tabletId, await config.get('chaves.assinaturaMin')]);
-  }
-  const { rows } = await db.query('SELECT * FROM chaves_assinaturas WHERE id = $1', [id]);
-  res.status(201).json(K.assinaturaOf(rows[0]));
+  res.status(201).json(await A.criar(req, b.tipo, resumo, { imagem: b.imagem, tabletId: b.tabletId }));
 }));
 
-async function minha(req) {
-  const id = uuidParam(req.params.id);
-  const { rows } = await db.query('SELECT * FROM chaves_assinaturas WHERE id = $1', [id]);
-  if (!rows.length) throw notFound('Pedido de assinatura não encontrado.');
-  if (rows[0].criada_por !== req.user.id) throw forbidden('Este pedido de assinatura é de outro usuário.');
-  return rows[0];
-}
-
+const TIPOS = ['retirada', 'devolucao'];
 /** Situação do pedido (o computador consulta até o tablet concluir). */
-router.get('/assinaturas/:id', ah(async (req, res) => {
-  const a = await minha(req);
-  res.json(K.assinaturaOf(a.status === 'pendente' && new Date(a.expira_em) < new Date() ? { ...a, status: 'expirada' } : a, true));
-}));
+router.get('/assinaturas/:id', ah(async (req, res) => res.json(A.situacao(await A.minha(req, req.params.id, TIPOS)))));
 
 router.delete('/assinaturas/:id', ah(async (req, res) => {
-  const a = await minha(req);
-  if (a.status === 'pendente') await db.query("UPDATE chaves_assinaturas SET status = 'cancelada' WHERE id = $1", [a.id]);
+  await A.cancelar(await A.minha(req, req.params.id, TIPOS));
   res.json({ ok: true });
 }));
-
-/** Reserva a assinatura para um registro: do próprio usuário, assinada, do tipo certo, não usada e dentro do prazo. */
-async function consumir(c, assinaturaId, userId, tipo, confere) {
-  const { rows } = await c.query('SELECT * FROM chaves_assinaturas WHERE id = $1 FOR UPDATE', [uuidParam(assinaturaId)]);
-  const a = rows[0];
-  if (!a || a.criada_por !== userId || a.tipo !== tipo) throw badRequest('Assinatura inválida para este registro.');
-  if (a.status !== 'assinada') throw badRequest('O solicitante ainda não assinou.');
-  if (a.usada) throw conflict('Esta assinatura já foi usada.');
-  if (new Date(a.expira_em) < new Date()) throw badRequest('A assinatura expirou. Colete a assinatura novamente.');
-  if (!confere(a.resumo)) throw badRequest('A assinatura não corresponde aos dados informados. Colete a assinatura novamente.');
-  await c.query('UPDATE chaves_assinaturas SET usada = TRUE WHERE id = $1', [a.id]);
-  return a;
-}
+const consumir = A.consumir;
 
 // ---------- Tablets pareados ----------
 const T = require('../services/tablets');

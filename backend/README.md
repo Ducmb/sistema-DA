@@ -93,3 +93,11 @@ Tela **Controle de Chaves** (`/chaves`), no modelo do termo "Entrega e Recebimen
 - **Nesta tela:** o solicitante assina no quadro do próprio formulário (mesa digitalizadora ou tela sensível ao toque).
 - Assinatura eletrônica simples (Lei 14.063/2020, art. 4º, I): o resumo assinado é montado pelo servidor; o PNG é validado (tipo, tamanho, dimensões); o código de verificação é o SHA-256 de resumo + traço + data/hora; cada assinatura só pode ser usada uma vez e precisa conferir com os dados do registro. Ver o termo é leitura de dado pessoal (auditada).
 - **Configurações › Controle de Chaves:** prazo de devolução (horas), alerta de chaves não devolvidas (Painel/Notificações) e validade do pedido enviado ao tablet (`chaves.assinaturaMin`).
+
+### Saída de bandeiras (Moções & Homenagens › Bandeiras)
+
+Mesma lógica de assinatura do Controle de Chaves (`services/assinaturas.js`), com os **mesmos tablets pareados**:
+- **Registrar retirada:** informe quem retira (e documento, opcional); a pessoa assina no tablet ou na tela vendo entidade, itens e devolução prevista. A data da retirada é a da assinatura.
+- **Registrar devolução:** informe quem devolve e a conferência (em conformidade ou com pendência descrita); quem devolve assina vendo a conferência. O recebimento fica com o usuário logado.
+- **Termo:** retirada e devolução com as assinaturas, código de verificação, IP e dispositivo (imprimível; leitura auditada).
+- O formulário de edição não marca retirada nem devolução — só agenda a retirada e define a devolução prevista; o que foi assinado não é alterado. Registros antigos (sem assinatura) continuam válidos e recebem a devolução assinada normalmente.

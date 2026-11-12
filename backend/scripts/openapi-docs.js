@@ -180,7 +180,13 @@ module.exports = {
   'GET /api/mocoes/bandeiras': { s: 'Empréstimos de bandeiras (leitura registrada — LGPD)', m: 'mocoes' },
   'POST /api/mocoes/bandeiras': { c: 201, s: 'Registra solicitação de empréstimo', m: 'mocoes', b: 'entidade*:s, documento:s, telefone:s, solicitacao*:d, protocolo:s, itens*:a, retirado*:b, retirada:d, devolucao:d, conformidade:s, obs:s' },
   'PUT /api/mocoes/bandeiras/{id}': { s: 'Edita empréstimo (retirada, devolução, conformidade)', m: 'mocoes', b: 'entidade*:s, documento:s, telefone:s, solicitacao*:d, protocolo:s, itens*:a, retirado*:b, retirada:d, devolucao:d, conformidade:s, obs:s' },
-  'POST /api/mocoes/bandeiras/{id}/retirada': { s: 'Registra a retirada', m: 'mocoes' },
+  'GET /api/mocoes/bandeiras/tablets': { s: 'Tablets pareados disponíveis para coletar a assinatura (pareamento em Controle de Chaves › Tablets)', m: 'mocoes' },
+  'POST /api/mocoes/bandeiras/assinaturas': { c: 201, s: 'Assinatura de quem retira/devolve bandeiras. Com imagem = assinada no quadro da tela; com tabletId = enviada automaticamente ao tablet pareado. Conteúdo montado no servidor (entidade, itens, conferência)', m: 'mocoes', b: 'tipo*:s, emprestimoId*:i, retiradoPor:s, retiradoDoc:s, devolvidoPor:s, conformidade:s, obs:s, imagem:s, tabletId:i' },
+  'GET /api/mocoes/bandeiras/assinaturas/{id}': { s: 'Situação do pedido de assinatura (somente quem criou)', m: 'mocoes' },
+  'DELETE /api/mocoes/bandeiras/assinaturas/{id}': { s: 'Cancela pedido de assinatura pendente', m: 'mocoes' },
+  'POST /api/mocoes/bandeiras/{id}/retirada': { s: 'Registra a retirada com a assinatura de quem retira (uso único, confere com os dados assinados)', m: 'mocoes', b: 'retiradoPor*:s, retiradoDoc:s, assinaturaId*:s' },
+  'POST /api/mocoes/bandeiras/{id}/devolucao': { s: 'Registra a devolução e a conferência com a assinatura de quem devolve; recebido pelo usuário logado', m: 'mocoes', b: 'devolvidoPor*:s, conformidade*:s, obs:s, assinaturaId*:s' },
+  'GET /api/mocoes/bandeiras/{id}/termo': { s: 'Termo de retirada e devolução com as assinaturas (leitura registrada — LGPD)', m: 'mocoes' },
   'DELETE /api/mocoes/bandeiras/{id}': { s: 'Exclui o registro', m: 'mocoes' },
 
   // ---------- Legislações ----------

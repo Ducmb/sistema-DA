@@ -33,7 +33,7 @@ describe('API de notificações', () => {
   test('caixa de entrada só com módulos do usuário e gravidades configuradas', async () => {
     const r = (await api(op).get('/notifications')).body;
     expect(r.inbox.length).toBeGreaterThan(0);
-    expect(r.inbox.every((n) => ['almoxarifado', 'mocoes', 'patrimonio', 'protocolo', 'rh', 'compras'].includes(n.module))).toBe(true);
+    expect(r.inbox.every((n) => ['almoxarifado', 'mocoes', 'patrimonio', 'protocolo', 'rh', 'compras', 'chaves'].includes(n.module))).toBe(true);
     expect(r.inbox.some((n) => n.module === 'compras')).toBe(false);
     expect(r.inbox.some((n) => n.level === 'info')).toBe(false);
     const s = (await api(op).get('/notifications/summary')).body;

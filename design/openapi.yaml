@@ -4739,11 +4739,221 @@ paths:
           $ref: '#/components/responses/SemPermissao'
         '404':
           $ref: '#/components/responses/Erro'
+  /api/mocoes/bandeiras/tablets:
+    get:
+      tags:
+        - Moções & Homenagens
+      summary: Tablets pareados disponíveis para coletar a assinatura (pareamento em Controle de Chaves › Tablets)
+      description: 'Acesso: módulo `mocoes` (403 sem permissão).'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/mocoes/bandeiras/assinaturas:
+    post:
+      tags:
+        - Moções & Homenagens
+      summary: >-
+        Assinatura de quem retira/devolve bandeiras. Com imagem = assinada no quadro da tela; com tabletId = enviada automaticamente ao
+        tablet pareado. Conteúdo montado no servidor (entidade, itens, conferência)
+      description: 'Acesso: módulo `mocoes` (403 sem permissão).'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tipo:
+                  type: string
+                emprestimoId:
+                  type: integer
+                retiradoPor:
+                  type: string
+                retiradoDoc:
+                  type: string
+                devolvidoPor:
+                  type: string
+                conformidade:
+                  type: string
+                obs:
+                  type: string
+                imagem:
+                  type: string
+                tabletId:
+                  type: integer
+              required:
+                - tipo
+                - emprestimoId
+      responses:
+        '201':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/mocoes/bandeiras/assinaturas/{id}:
+    get:
+      tags:
+        - Moções & Homenagens
+      summary: Situação do pedido de assinatura (somente quem criou)
+      description: 'Acesso: módulo `mocoes` (403 sem permissão).'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+        '404':
+          $ref: '#/components/responses/Erro'
+    delete:
+      tags:
+        - Moções & Homenagens
+      summary: Cancela pedido de assinatura pendente
+      description: 'Acesso: módulo `mocoes` (403 sem permissão).'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+        '404':
+          $ref: '#/components/responses/Erro'
   /api/mocoes/bandeiras/{id}/retirada:
     post:
       tags:
         - Moções & Homenagens
-      summary: Registra a retirada
+      summary: Registra a retirada com a assinatura de quem retira (uso único, confere com os dados assinados)
+      description: 'Acesso: módulo `mocoes` (403 sem permissão).'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                retiradoPor:
+                  type: string
+                retiradoDoc:
+                  type: string
+                assinaturaId:
+                  type: string
+              required:
+                - retiradoPor
+                - assinaturaId
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+        '404':
+          $ref: '#/components/responses/Erro'
+  /api/mocoes/bandeiras/{id}/devolucao:
+    post:
+      tags:
+        - Moções & Homenagens
+      summary: Registra a devolução e a conferência com a assinatura de quem devolve; recebido pelo usuário logado
+      description: 'Acesso: módulo `mocoes` (403 sem permissão).'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                devolvidoPor:
+                  type: string
+                conformidade:
+                  type: string
+                obs:
+                  type: string
+                assinaturaId:
+                  type: string
+              required:
+                - devolvidoPor
+                - conformidade
+                - assinaturaId
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+        '404':
+          $ref: '#/components/responses/Erro'
+  /api/mocoes/bandeiras/{id}/termo:
+    get:
+      tags:
+        - Moções & Homenagens
+      summary: Termo de retirada e devolução com as assinaturas (leitura registrada — LGPD)
       description: 'Acesso: módulo `mocoes` (403 sem permissão).'
       parameters:
         - name: id

@@ -10,6 +10,7 @@ const db = require('../db');
 const audit = require('../services/audit');
 const K = require('../services/chaves');
 const T = require('../services/tablets');
+const A = require('../services/assinaturas');
 const { ah, parse, badRequest, conflict, notFound } = require('../lib/http');
 
 const router = express.Router();
@@ -48,7 +49,7 @@ const tabletAuth = ah(async (req, res, next) => {
 router.get('/pedido', tabletAuth, ah(async (req, res) => {
   const { rows } = await db.query(
     "SELECT * FROM chaves_assinaturas WHERE tablet_id = $1 AND status = 'pendente' AND expira_em > NOW() ORDER BY created_at DESC LIMIT 1", [req.tablet.id]);
-  res.json({ tablet: { nome: req.tablet.nome }, pedido: rows[0] ? K.assinaturaOf(rows[0]) : null });
+  res.json({ tablet: { nome: req.tablet.nome }, pedido: rows[0] ? { ...K.assinaturaOf(rows[0]), exibicao: A.exibicao(rows[0].tipo, rows[0].resumo) } : null });
 }));
 
 /** Grava o traço: vinculado ao conteúdo por SHA-256 com data/hora, IP e dispositivo. */

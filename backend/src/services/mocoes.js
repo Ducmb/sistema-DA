@@ -28,6 +28,9 @@ function bandeiraStatus(r, hoje = today()) {
   return r.devolucao && r.devolucao < hoje ? 'atrasado' : 'emprestado';
 }
 
+/** Data (coluna DATE já vem como AAAA-MM-DD) ou null. */
+const iso = (v) => (v ? String(v).slice(0, 10) : null);
+
 const entregaPendente = (h) => /ENCOMENDAD/i.test(h.status);
 const entregue = (h) => /^ENTREGUE/i.test(h.status);
 
@@ -42,7 +45,8 @@ async function bandeiras(client = db) {
   const { rows } = await client.query('SELECT * FROM bandeiras_emprestimos ORDER BY solicitacao DESC, id DESC');
   const hoje = today();
   return rows.map((r) => ({ id: r.id, solicitacao: r.solicitacao, entidade: r.entidade, documento: r.documento, telefone: r.telefone, protocolo: r.protocolo, itens: r.itens,
-    retirado: r.retirado, retirada: r.retirada || '', devolucao: r.devolucao || '', conformidade: r.conformidade, obs: r.obs, situacao: bandeiraStatus({ ...r, retirada: r.retirada || '', devolucao: r.devolucao || '' }, hoje) }));
+    retirado: r.retirado, retirada: r.retirada || '', devolucao: r.devolucao || '', conformidade: r.conformidade, obs: r.obs,
+    retiradoPor: r.retirado_por || '', devolvidoPor: r.devolvido_por || '', assinado: !!(r.assinatura_retirada || r.assinatura_devolucao), situacao: bandeiraStatus({ ...r, retirada: r.retirada || '', devolucao: r.devolucao || '' }, hoje) }));
 }
 
 async function calendarEvents() {
@@ -89,4 +93,4 @@ async function alerts() {
   return out;
 }
 
-module.exports = { TIPOS, STATUS, ENTREGA_STATUS, ITENS, legislatura, legislaturas, bandeiraStatus, entregas, bandeiras, calendarEvents, pendingItems, alerts };
+module.exports = { iso, TIPOS, STATUS, ENTREGA_STATUS, ITENS, legislatura, legislaturas, bandeiraStatus, entregas, bandeiras, calendarEvents, pendingItems, alerts };

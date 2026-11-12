@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import SignaturePad from '../../components/SignaturePad.jsx';
-import { fmtDateTime } from '../../lib/format.js';
+import { fmtDate, fmtDateTime } from '../../lib/format.js';
 
 /**
  * Tablet de assinatura (Android/iPad) do Controle de Chaves.
@@ -45,7 +45,7 @@ function useTelaAcesa() {
 export default function EstacaoTablet() {
   const [token, setToken] = useState(() => ler(TOKEN_KEY));
   const [nome, setNome] = useState(() => ler(NOME_KEY));
-  useEffect(() => { document.title = 'Tablet de assinatura — Controle de Chaves'; }, []);
+  useEffect(() => { document.title = 'Tablet de assinatura — Chaves e Bandeiras'; }, []);
   useTelaAcesa();
 
   const pareado = (t, n) => { gravar(TOKEN_KEY, t); gravar(NOME_KEY, n); setToken(t); setNome(n); };
@@ -145,14 +145,14 @@ function Estacao({ token, nome, onDesparear, onNome }) {
   };
   const sair = () => { if (window.confirm('Desconectar este tablet? Será preciso pareá-lo de novo pelo computador.')) onDesparear(); };
 
-  const r = pedido && pedido.resumo;
+  const x = pedido && pedido.exibicao; // título, campos e declaração montados pelo servidor
   return (
     <div className="tablet-station">
       <header className="row between tablet-top">
         <div className="row" style={{ gap: 10 }}>
           <span aria-hidden="true" style={{ fontSize: 22 }}>🔑</span>
           <div>
-            <p style={{ fontWeight: 800 }}>Entrega e Recebimento de Chaves</p>
+            <p style={{ fontWeight: 800 }}>Assinatura eletrônica — Chaves e Bandeiras</p>
             <p className="muted" style={{ fontSize: 12 }}>{nome || 'Tablet de assinatura'} · {conexao ? <span style={{ color: 'var(--success, #1a7f37)' }}>● conectado</span> : <span style={{ color: 'var(--crit-strong)' }}>● sem conexão</span>}</p>
           </div>
         </div>
@@ -175,15 +175,14 @@ function Estacao({ token, nome, onDesparear, onNome }) {
         </div>
       ) : (
         <main className="tablet-doc">
-          <h1>{r.tipo === 'devolucao' ? 'Devolução de chave' : 'Retirada de chave'}</h1>
+          <h1>{x.titulo}</h1>
           <dl className="tablet-resumo">
-            <div><dt>Local</dt><dd>{r.local} ({r.chave})</dd></div>
-            <div><dt>{r.tipo === 'devolucao' ? 'Quem devolve' : 'Solicitante'}</dt><dd>{r.tipo === 'devolucao' ? r.devolvidoPor : r.solicitante}{r.solicitanteDoc ? ' · ' + r.solicitanteDoc : ''}</dd></div>
-            <div><dt>{r.tipo === 'devolucao' ? 'Data da Devolução' : 'Data da Retirada'}</dt><dd>{fmtDateTime(r.data)}</dd></div>
-            <div><dt>{r.tipo === 'devolucao' ? 'Responsável pelo Recebimento' : 'Responsável pela Entrega'}</dt><dd>{r.responsavel}</dd></div>
+            {x.campos.map(([rotulo, valor, tipo]) => (
+              <div key={rotulo}><dt>{rotulo}</dt><dd>{tipo === 'datahora' ? fmtDateTime(valor) : tipo === 'data' && /^\d{4}-\d{2}-\d{2}$/.test(valor) ? fmtDate(valor) : valor}</dd></div>
+            ))}
           </dl>
-          <p style={{ fontSize: 13 }}>{r.tipo === 'devolucao' ? 'Declaro que devolvi a chave acima nesta data.' : 'Declaro que recebi a chave acima e me responsabilizo por sua guarda até a devolução.'}</p>
-          <SignaturePad ref={pad} height={260} label="Assinatura - Solicitante" onChange={setTemTraco} disabled={fase === 'enviando'} />
+          <p style={{ fontSize: 13 }}>{x.declaracao}</p>
+          <SignaturePad ref={pad} height={260} label={'Assinatura — ' + x.titulo} onChange={setTemTraco} disabled={fase === 'enviando'} />
           {err && <p role="alert" style={{ color: 'var(--crit-strong)', fontWeight: 600 }}>{err}</p>}
           <div className="row between">
             <button type="button" className="btn btn-secondary" onClick={() => pad.current && pad.current.clear()} disabled={fase === 'enviando'}>Limpar</button>

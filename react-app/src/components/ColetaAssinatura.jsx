@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
-import SignaturePad from '../../components/SignaturePad.jsx';
-import { Segmented } from '../../components/ui.jsx';
-import { api } from '../../lib/api.js';
-import { useApi } from '../../lib/hooks.js';
+import SignaturePad from './SignaturePad.jsx';
+import { Segmented } from './ui.jsx';
+import { api } from '../lib/api.js';
+import { useApi } from '../lib/hooks.js';
 
 const MODO_KEY = 'DA_chaves_modo';
 const TABLET_KEY = 'DA_chaves_tablet';
@@ -10,15 +10,16 @@ const ler = (k, d) => { try { return localStorage.getItem(k) || d; } catch (e) {
 const gravar = (k, v) => { try { localStorage.setItem(k, v); } catch (e) { /* sem storage */ } };
 
 /**
- * Coleta a assinatura do solicitante e conclui o registro.
+ * Coleta a assinatura eletrônica de quem retira/devolve e conclui o registro (Controle de Chaves e bandeiras).
+ * base: prefixo da API do módulo ('/chaves' ou '/mocoes/bandeiras') — usa {base}/tablets e {base}/assinaturas.
  * - "Tablet" (padrão): o pedido vai sozinho para o tablet pareado escolhido (Android/iPad que fica com a
  *   tela de assinatura aberta); o registro é concluído aqui assim que o solicitante confirma.
  * - "Nesta tela": quadro de assinatura no próprio formulário (mesa digitalizadora ou tela sensível ao toque).
  * dados: corpo do pedido (tipo + campos); pronto: formulário válido; onConcluir(assinaturaId) grava o registro.
  */
-export default function ColetaAssinatura({ dados, pronto, confirmarLabel, onConcluir, onParear }) {
+export default function ColetaAssinatura({ base = '/chaves', titulo = 'Assinatura - Solicitante', dados, pronto, confirmarLabel, onConcluir, onParear }) {
   const [modo, setModo] = useState(() => (ler(MODO_KEY, 'tablet') === 'tela' ? 'tela' : 'tablet'));
-  const tablets = useApi(() => api.get('/chaves/tablets'), []);
+  const tablets = useApi(() => api.get(base + '/tablets'), []);
   const pareados = (tablets.data || []).filter((t) => t.pareado);
   const [tabletId, setTabletId] = useState(() => ler(TABLET_KEY, ''));
   const tablet = pareados.find((t) => String(t.id) === String(tabletId)) || pareados[0];
@@ -43,16 +44,16 @@ export default function ColetaAssinatura({ dados, pronto, confirmarLabel, onConc
     if (pad.current.isEmpty()) { setErr('O solicitante precisa assinar no quadro.'); return; }
     setBusy(true); setErr('');
     try {
-      const a = await api.post('/chaves/assinaturas', { ...dados, imagem: pad.current.toDataURL() });
+      const a = await api.post(base + '/assinaturas', { ...dados, imagem: pad.current.toDataURL() });
       await concluir(a.id);
     } catch (e) { setErr(e.message); } finally { setBusy(false); }
   };
 
   const enviarTablet = async () => {
     setBusy(true); setErr('');
-    try { setPedido(await api.post('/chaves/assinaturas', { ...dados, tabletId: tablet.id })); } catch (e) { setErr(e.message); } finally { setBusy(false); }
+    try { setPedido(await api.post(base + '/assinaturas', { ...dados, tabletId: tablet.id })); } catch (e) { setErr(e.message); } finally { setBusy(false); }
   };
-  const cancelarTablet = () => { if (pedido) api.del('/chaves/assinaturas/' + pedido.id).catch(() => {}); setPedido(null); };
+  const cancelarTablet = () => { if (pedido) api.del(base + '/assinaturas/' + pedido.id).catch(() => {}); setPedido(null); };
 
   // Aguarda o tablet: consulta o pedido e conclui o registro assim que estiver assinado
   useEffect(() => {
@@ -61,7 +62,7 @@ export default function ColetaAssinatura({ dados, pronto, confirmarLabel, onConc
     const tick = async () => {
       setRestante(Math.max(0, Math.round((new Date(pedido.expiraEm) - Date.now()) / 1000)));
       try {
-        const a = await api.get('/chaves/assinaturas/' + pedido.id, { background: true });
+        const a = await api.get(base + '/assinaturas/' + pedido.id, { background: true });
         if (!vivo) return;
         if (a.status === 'assinada') concluir(a.id).catch((e) => { setErr(e.message); setPedido(null); });
         else if (a.status !== 'pendente') { setErr(a.status === 'expirada' ? 'O pedido expirou sem assinatura. Envie novamente.' : 'O pedido foi cancelado.'); setPedido(null); }
@@ -73,13 +74,13 @@ export default function ColetaAssinatura({ dados, pronto, confirmarLabel, onConc
   }, [pedido]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Fechar o formulário com pedido em aberto cancela o pedido (o tablet volta a aguardar)
-  useEffect(() => () => { if (pedido && !concluindo.current) api.del('/chaves/assinaturas/' + pedido.id).catch(() => {}); }, [pedido]);
+  useEffect(() => () => { if (pedido && !concluindo.current) api.del(base + '/assinaturas/' + pedido.id).catch(() => {}); }, [pedido]);
 
   const mmss = (s) => String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
   return (
     <section className="stack" style={{ gap: 12, padding: 16, border: '1px solid var(--border)', borderRadius: 10, background: 'var(--surface-2)' }}>
       <div className="row between">
-        <h4 style={{ fontSize: 13.5, fontWeight: 700 }}>Assinatura - Solicitante</h4>
+        <h4 style={{ fontSize: 13.5, fontWeight: 700 }}>{titulo}</h4>
         <Segmented label="Onde assinar" value={modo} onChange={trocarModo} options={[{ value: 'tablet', label: '📱 No tablet' }, { value: 'tela', label: '✍ Nesta tela' }]} />
       </div>
       {modo === 'tela' && (
@@ -102,7 +103,7 @@ export default function ColetaAssinatura({ dados, pronto, confirmarLabel, onConc
       ) : tablets.loading ? <p className="muted" style={{ fontSize: 12.5 }}>Carregando tablets…</p> : !pareados.length ? (
         <div className="stack" style={{ gap: 8 }}>
           <p style={{ fontSize: 12.5 }}>Nenhum tablet pareado ainda. Pareie o tablet uma única vez (QR code) e depois os pedidos de assinatura aparecem nele automaticamente.</p>
-          <div className="row" style={{ justifyContent: 'flex-end' }}>{onParear && <button type="button" className="btn btn-secondary btn-sm" onClick={onParear}>Parear um tablet</button>}</div>
+          <div className="row" style={{ justifyContent: 'flex-end' }}>{onParear ? <button type="button" className="btn btn-secondary btn-sm" onClick={onParear}>Parear um tablet</button> : <span className="hint">O pareamento é feito em Controle de Chaves › Tablets.</span>}</div>
         </div>
       ) : (
         <div className="row between" style={{ gap: 10 }}>

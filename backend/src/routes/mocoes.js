@@ -7,6 +7,7 @@ const db = require('../db');
 const audit = require('../services/audit');
 const config = require('../services/config');
 const M = require('../services/mocoes');
+const A = require('../services/assinaturas');
 const { ah, parse, idParam, notFound, badRequest, conflict } = require('../lib/http');
 const { today } = require('../lib/dates');
 
@@ -193,8 +194,10 @@ function checkBand(b) {
 const bandVals = (b) => [b.solicitacao, b.entidade, b.documento, b.telefone, b.protocolo, [...new Set(b.itens)], b.retirado, b.retirada, b.devolucao, b.conformidade, b.obs];
 const bandDetail = (b) => b.entidade + ' · ' + (b.protocolo || 's/ protocolo');
 
+const SO_ASSINADO = 'A retirada e a devolução são registradas com a assinatura de quem retira/devolve (botões "Registrar retirada" e "Registrar devolução").';
 router.post('/bandeiras', ah(async (req, res) => {
   const b = checkBand(parse(bandSchema, req.body));
+  if (b.retirado || b.conformidade) throw badRequest(SO_ASSINADO);
   const { rows } = await db.query('INSERT INTO bandeiras_emprestimos (solicitacao, entidade, documento, telefone, protocolo, itens, retirado, retirada, devolucao, conformidade, obs, created_by) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING id', [...bandVals(b), req.user.id]);
   await audit.log(req, { action: 'Empréstimo de bandeiras registrado', module: 'mocoes', detail: bandDetail(b) });
   res.status(201).json({ id: rows[0].id });
@@ -203,21 +206,115 @@ router.post('/bandeiras', ah(async (req, res) => {
 router.put('/bandeiras/:id', ah(async (req, res) => {
   const id = idParam(req.params.id);
   const b = checkBand(parse(bandSchema, req.body));
+  // Retirada e devolução só mudam pelas rotas com assinatura; a edição mantém o que foi assinado
+  const { rows: cur } = await db.query('SELECT * FROM bandeiras_emprestimos WHERE id = $1', [id]);
+  if (!cur.length) throw notFound('Registro não encontrado.');
+  const c = cur[0];
+  if (b.retirado !== c.retirado || (!c.conformidade && b.conformidade)) throw badRequest(SO_ASSINADO);
+  if (c.retirado) b.retirada = M.iso(c.retirada);
+  if (c.conformidade) { b.conformidade = c.conformidade; b.obs = c.obs; b.devolucao = M.iso(c.devolucao); }
+  if (c.retirado && b.devolucao && b.devolucao < b.retirada) throw badRequest('A devolução não pode ser antes da retirada.');
   const { rowCount } = await db.query('UPDATE bandeiras_emprestimos SET solicitacao=$2, entidade=$3, documento=$4, telefone=$5, protocolo=$6, itens=$7, retirado=$8, retirada=$9, devolucao=$10, conformidade=$11, obs=$12, updated_at=NOW() WHERE id=$1', [id, ...bandVals(b)]);
   if (!rowCount) throw notFound('Registro não encontrado.');
   await audit.log(req, { action: 'Empréstimo de bandeiras editado', module: 'mocoes', detail: bandDetail(b) });
   res.json({ ok: true });
 }));
 
-/** Atalho "Registrar retirada": marca como retirado hoje (ou na data agendada, se já passou). */
+// ---------- Saída de bandeiras com assinatura eletrônica (mesmos tablets do Controle de Chaves) ----------
+const TIPOS_ASS = ['bandeira_retirada', 'bandeira_devolucao'];
+const nomeAss = (msg) => z.string().trim().min(3, msg).max(160);
+const pedidoBand = z.discriminatedUnion('tipo', [
+  z.object({ tipo: z.literal('bandeira_retirada'), emprestimoId: z.number().int().positive(), retiradoPor: nomeAss('Informe o nome de quem retira.'), retiradoDoc: z.string().trim().max(40).optional().default(''), imagem: z.string().optional(), tabletId: z.number().int().positive().optional() }),
+  z.object({ tipo: z.literal('bandeira_devolucao'), emprestimoId: z.number().int().positive(), devolvidoPor: nomeAss('Informe o nome de quem devolve.'), conformidade: z.enum(['Sim', 'Não'], { message: 'Informe se os itens voltaram em conformidade.' }), obs: z.string().trim().max(400).optional().default(''), imagem: z.string().optional(), tabletId: z.number().int().positive().optional() })
+], { message: 'Tipo de assinatura inválido.' });
+
+const nomesItens = (keys) => M.ITENS.filter(([k]) => keys.includes(k)).map(([, label]) => label);
+
+/** Conteúdo assinado — montado no servidor a partir do registro. */
+async function resumoBand(b, user) {
+  const { rows } = await db.query('SELECT * FROM bandeiras_emprestimos WHERE id = $1', [b.emprestimoId]);
+  const r = rows[0];
+  if (!r) throw notFound('Registro não encontrado.');
+  const base = { tipo: b.tipo, emprestimoId: r.id, entidade: r.entidade, protocolo: r.protocolo, itens: nomesItens(r.itens), data: new Date().toISOString(), responsavel: user.name };
+  if (b.tipo === 'bandeira_retirada') {
+    if (r.retirado) throw conflict('A retirada já foi registrada.');
+    return { ...base, retiradoPor: b.retiradoPor, retiradoDoc: b.retiradoDoc, devolucaoPrevista: M.iso(r.devolucao) || '' };
+  }
+  if (!r.retirado) throw conflict('Os itens ainda não foram retirados.');
+  if (r.conformidade) throw conflict('A devolução já foi registrada.');
+  if (b.conformidade === 'Não' && !b.obs) throw badRequest('Descreva o que não está em conformidade.');
+  return { ...base, devolvidoPor: b.devolvidoPor, conformidade: b.conformidade, obs: b.conformidade === 'Não' ? b.obs : '' };
+}
+
+router.get('/bandeiras/tablets', ah(async (req, res) => res.json(await A.tabletsPareados())));
+
+router.post('/bandeiras/assinaturas', ah(async (req, res) => {
+  const b = parse(pedidoBand, req.body);
+  res.status(201).json(await A.criar(req, b.tipo, await resumoBand(b, req.user), { imagem: b.imagem, tabletId: b.tabletId }));
+}));
+router.get('/bandeiras/assinaturas/:id', ah(async (req, res) => res.json(A.situacao(await A.minha(req, req.params.id, TIPOS_ASS)))));
+router.delete('/bandeiras/assinaturas/:id', ah(async (req, res) => {
+  await A.cancelar(await A.minha(req, req.params.id, TIPOS_ASS));
+  res.json({ ok: true });
+}));
+
+/** Registra a retirada com a assinatura de quem retira (a data é a da assinatura). */
 router.post('/bandeiras/:id/retirada', ah(async (req, res) => {
   const id = idParam(req.params.id);
-  const { rows } = await db.query(
-    `UPDATE bandeiras_emprestimos SET retirado = TRUE, retirada = CASE WHEN retirada IS NOT NULL AND retirada <= $2::date THEN retirada ELSE $2::date END, updated_at = NOW()
-     WHERE id = $1 AND NOT retirado RETURNING entidade, protocolo`, [id, today()]);
-  if (!rows.length) throw conflict('Retirada já registrada ou registro inexistente.');
-  await audit.log(req, { action: 'Retirada registrada', module: 'mocoes', detail: bandDetail(rows[0]) });
+  const b = parse(z.object({ retiradoPor: nomeAss('Informe o nome de quem retira.'), retiradoDoc: z.string().trim().max(40).optional().default(''), assinaturaId: z.string({ message: 'Colete a assinatura de quem retira.' }) }), req.body);
+  const r = await db.tx(async (c) => {
+    const { rows } = await c.query('SELECT * FROM bandeiras_emprestimos WHERE id = $1 FOR UPDATE', [id]);
+    if (!rows.length) throw notFound('Registro não encontrado.');
+    if (rows[0].retirado) throw conflict('Retirada já registrada.');
+    const a = await A.consumir(c, b.assinaturaId, req.user.id, 'bandeira_retirada', (x) => x.emprestimoId === id && x.retiradoPor === b.retiradoPor && (x.retiradoDoc || '') === b.retiradoDoc);
+    await c.query(
+      `UPDATE bandeiras_emprestimos SET retirado = TRUE, retirada = $2::date, retirada_em = $3, retirado_por = $4, retirado_doc = $5, entregue_por = $6, assinatura_retirada = $7, updated_at = NOW() WHERE id = $1`,
+      [id, today(), a.assinada_em, b.retiradoPor, b.retiradoDoc, req.user.id, a.id]);
+    return rows[0];
+  });
+  await audit.log(req, { action: 'Retirada de bandeiras registrada', module: 'mocoes', detail: bandDetail(r) + ' · ' + b.retiradoPor + ' (assinatura eletrônica)' });
   res.json({ ok: true });
+}));
+
+/** Registra a devolução e a conferência com a assinatura de quem devolve. */
+router.post('/bandeiras/:id/devolucao', ah(async (req, res) => {
+  const id = idParam(req.params.id);
+  const b = parse(z.object({ devolvidoPor: nomeAss('Informe o nome de quem devolve.'), conformidade: z.enum(['Sim', 'Não']), obs: z.string().trim().max(400).optional().default(''), assinaturaId: z.string({ message: 'Colete a assinatura de quem devolve.' }) }), req.body);
+  const obs = b.conformidade === 'Não' ? b.obs : '';
+  const r = await db.tx(async (c) => {
+    const { rows } = await c.query('SELECT * FROM bandeiras_emprestimos WHERE id = $1 FOR UPDATE', [id]);
+    if (!rows.length) throw notFound('Registro não encontrado.');
+    if (!rows[0].retirado) throw conflict('Os itens ainda não foram retirados.');
+    if (rows[0].conformidade) throw conflict('Devolução já registrada.');
+    const a = await A.consumir(c, b.assinaturaId, req.user.id, 'bandeira_devolucao', (x) => x.emprestimoId === id && x.devolvidoPor === b.devolvidoPor && x.conformidade === b.conformidade && (x.obs || '') === obs);
+    await c.query(
+      `UPDATE bandeiras_emprestimos SET conformidade = $2, obs = $3, devolucao = $4::date, devolucao_em = $5, devolvido_por = $6, recebido_por = $7, assinatura_devolucao = $8, updated_at = NOW() WHERE id = $1`,
+      [id, b.conformidade, obs, today(), a.assinada_em, b.devolvidoPor, req.user.id, a.id]);
+    return rows[0];
+  });
+  await audit.log(req, { action: 'Devolução de bandeiras registrada', module: 'mocoes', detail: bandDetail(r) + ' · ' + b.devolvidoPor + (b.conformidade === 'Não' ? ' · com pendência' : '') + ' (assinatura eletrônica)', level: b.conformidade === 'Não' ? 'warning' : 'info' });
+  res.json({ ok: true });
+}));
+
+/** Termo de retirada e devolução com as assinaturas — leitura de dado pessoal (auditada). */
+router.get('/bandeiras/:id/termo', ah(async (req, res) => {
+  const id = idParam(req.params.id);
+  const { rows } = await db.query(
+    `SELECT b.*, ue.name AS entregue_nome, ur.name AS recebido_nome FROM bandeiras_emprestimos b
+     LEFT JOIN users ue ON ue.id = b.entregue_por LEFT JOIN users ur ON ur.id = b.recebido_por WHERE b.id = $1`, [id]);
+  if (!rows.length) throw notFound('Registro não encontrado.');
+  const r = rows[0];
+  const ids = [r.assinatura_retirada, r.assinatura_devolucao].filter(Boolean);
+  const ass = ids.length ? (await db.query('SELECT * FROM chaves_assinaturas WHERE id = ANY($1)', [ids])).rows : [];
+  const K = require('../services/chaves');
+  const by = (aid) => (aid ? K.assinaturaOf(ass.find((a) => a.id === aid), true) : null);
+  await audit.logPersonalRead(req, `Termo de bandeiras · ${r.entidade} (assinaturas)`);
+  res.json({
+    id: r.id, entidade: r.entidade, documento: r.documento, telefone: r.telefone, protocolo: r.protocolo, itens: nomesItens(r.itens),
+    retirado: r.retirado, retirada: M.iso(r.retirada), retiradaEm: r.retirada_em, retiradoPor: r.retirado_por || '', retiradoDoc: r.retirado_doc || '', entreguePor: r.entregue_nome || '',
+    devolucao: M.iso(r.devolucao), devolucaoEm: r.devolucao_em, devolvidoPor: r.devolvido_por || '', recebidoPor: r.recebido_nome || '', conformidade: r.conformidade, obs: r.obs,
+    assinaturaRetirada: by(r.assinatura_retirada), assinaturaDevolucao: by(r.assinatura_devolucao)
+  });
 }));
 
 router.delete('/bandeiras/:id', ah(async (req, res) => {
