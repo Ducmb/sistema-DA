@@ -26,7 +26,7 @@ const pages = {
 };
 
 /** Guarda de rota: exige sessão e acesso ao módulo (o servidor também valida — 403). */
-function Guard({ mod, children, bare }) {
+function Guard({ mod, children }) {
   const { user, ready, endReason, can } = useAuth();
   const loc = useLocation();
   if (!ready) return <div style={{ padding: 60 }}><Loader /></div>;
@@ -35,7 +35,6 @@ function Guard({ mod, children, bare }) {
     const h = homePath(can);
     return <Navigate to={(h === loc.pathname ? '/perfil' : h) + '?negado=' + mod} replace />;
   }
-  if (bare) return <Suspense fallback={<div style={{ padding: 60 }}><Loader /></div>}>{children}</Suspense>;
   return (
     <Layout>
       <Suspense fallback={<div style={{ padding: 60 }}><Loader /></div>}>{children}</Suspense>
@@ -49,7 +48,6 @@ const ROUTES = [
   ['/protocolo', 'protocolo'], ['/mocoes', 'mocoes'], ['/legislacoes', 'legislacoes'], ['/analytics', 'analytics'], ['/notificacoes', 'notificacoes'], ['/chaves', 'chaves']
 ];
 const EstacaoTablet = lazy(() => import('./pages/chaves/EstacaoTablet.jsx'));
-const JanelaTablet = lazy(() => import('./pages/chaves/JanelaTablet.jsx'));
 
 function Home() {
   const { user, ready, can } = useAuth();
@@ -68,9 +66,8 @@ export default function App() {
         const P = pages[mod];
         return <Route key={path} path={path} element={<Guard mod={mod}><P /></Guard>} />;
       })}
-      {/* Janela aberta automaticamente na tela do tablet conectado: sem login nem API (só conversa com a tela do computador) */}
-      <Route path="/chaves/assinar" element={<Suspense fallback={null}><JanelaTablet /></Suspense>} />
-      <Route path="/chaves/tablet" element={<Guard mod="chaves" bare><EstacaoTablet /></Guard>} />
+      {/* Tablet pareado: sem login de usuário — autentica por token de dispositivo (ver routes/tablet.js) */}
+      <Route path="/chaves/tablet" element={<Suspense fallback={null}><EstacaoTablet /></Suspense>} />
       <Route path="/dashboard" element={<Navigate to="/painel" replace />} />
       <Route path="/rh" element={<Navigate to="/pessoal" replace />} />
       <Route path="/usuarios" element={<Navigate to="/pessoal?tab=usuarios" replace />} />

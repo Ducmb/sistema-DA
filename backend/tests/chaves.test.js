@@ -1,5 +1,10 @@
 const zlib = require('zlib');
-const { db, login, api } = require('./helpers');
+const { db, login, api, app, request } = require('./helpers');
+
+const tab = (token) => {
+  const wrap = (m) => (url) => { const r = request(app)[m]('/api/tablet' + url); return token ? r.set('Authorization', 'Tablet ' + token) : r; };
+  return { get: wrap('get'), post: wrap('post') };
+};
 const K = require('../src/services/chaves');
 
 afterAll(() => db.pool.end());
@@ -39,10 +44,7 @@ describe('Controle de Chaves', () => {
     expect(a.status).toBe(201);
     expect(a.body).toMatchObject({ status: 'assinada', dispositivo: 'tela', resumo: { local: 'Sala de Sessões', chave: 'CH-001', solicitante: 'Fulano de Tal', responsavel: 'Ana Beatriz Silva' } });
     expect(a.body.codigo).toMatch(/^[0-9A-F]{16}$/);
-    // tablet conectado: a janela na tela do tablet devolve o traço ao computador, que envia com dispositivo 'tablet'
-    const t = await api(op).post('/chaves/assinaturas').send({ tipo: 'retirada', chaveId: chave.id, solicitante: 'Fulano de Tal', imagem: png(), dispositivo: 'tablet' });
-    expect(t.body).toMatchObject({ status: 'assinada', dispositivo: 'tablet' });
-    expect((await api(op).post('/chaves/assinaturas').send({ tipo: 'retirada', chaveId: chave.id, solicitante: 'Fulano de Tal', imagem: png(), dispositivo: 'celular' })).status).toBe(400);
+    expect((await api(op).post('/chaves/assinaturas').send({ tipo: 'retirada', chaveId: chave.id, solicitante: 'Fulano de Tal', imagem: png(), dispositivo: 'tablet' })).status).toBe(400);
     // assinatura de outra pessoa não serve
     expect((await api(op).post('/chaves/emprestimos').send({ chaveId: chave.id, solicitante: 'Outra Pessoa', solicitanteDoc: 'MAT-123', assinaturaId: a.body.id })).body.error).toMatch(/não corresponde/);
     const r = await api(op).post('/chaves/emprestimos').send({ chaveId: chave.id, solicitante: 'Fulano de Tal', solicitanteDoc: 'MAT-123', assinaturaId: a.body.id });
@@ -55,19 +57,44 @@ describe('Controle de Chaves', () => {
     expect(lista.kpis.abertos).toBe(1);
   });
 
-  test('devolução assinada na estação tablet do mesmo usuário', async () => {
+  let tabletToken, tabletId;
+  test('pareamento do tablet: código de uso único troca por token; sem token → 401', async () => {
+    const t = await api(op).post('/chaves/tablets').send({ nome: 'Tablet da Portaria' });
+    expect(t.status).toBe(201);
+    expect(t.body).toMatchObject({ nome: 'Tablet da Portaria', pareado: false });
+    expect(t.body.codigo).toMatch(/^[A-Z2-9]{4}-[A-Z2-9]{4}$/);
+    tabletId = t.body.id;
+    expect((await tab().get('/pedido')).status).toBe(401);
+    expect((await tab('tab_' + 'x'.repeat(43)).get('/pedido')).status).toBe(401);
+    expect((await tab().post('/parear').send({ codigo: 'AAAA-AAAA' })).body.error).toMatch(/inválido/);
+    const p = await tab().post('/parear').send({ codigo: t.body.codigo.toLowerCase().replace('-', ' ') });
+    expect(p.status).toBe(200);
+    expect(p.body).toMatchObject({ nome: 'Tablet da Portaria' });
+    tabletToken = p.body.token;
+    expect((await tab().post('/parear').send({ codigo: t.body.codigo })).status).toBe(400); // uso único
+    const { rows } = await db.query('SELECT token_hash FROM chaves_tablets WHERE id = $1', [tabletId]);
+    expect(rows[0].token_hash).not.toContain(tabletToken); // guardado só como hash
+    expect((await api(op).get('/chaves/tablets')).body.find((x) => x.id === tabletId)).toMatchObject({ pareado: true, online: true });
+    expect((await tab(tabletToken).get('/pedido')).body).toEqual({ tablet: { nome: 'Tablet da Portaria' }, pedido: null });
+    // o token do tablet não abre o resto do sistema
+    expect((await request(app).get('/api/chaves').set('Authorization', 'Tablet ' + tabletToken)).status).toBe(401);
+    const log = await db.query("SELECT 1 FROM audit_logs WHERE action = 'Tablet de assinatura pareado'");
+    expect(log.rows.length).toBe(1);
+  });
+
+  test('devolução assinada no tablet pareado, que recebe o pedido automaticamente', async () => {
     const emp = (await api(op).get('/chaves/emprestimos')).body.items[0];
-    const pedido = await api(op).post('/chaves/assinaturas').send({ tipo: 'devolucao', emprestimoId: emp.id, devolvidoPor: 'Fulano de Tal' });
+    expect((await api(op).post('/chaves/assinaturas').send({ tipo: 'devolucao', emprestimoId: emp.id, devolvidoPor: 'Fulano de Tal' })).body.error).toMatch(/Escolha o tablet/);
+    const pedido = await api(op).post('/chaves/assinaturas').send({ tipo: 'devolucao', emprestimoId: emp.id, devolvidoPor: 'Fulano de Tal', tabletId });
     expect(pedido.body.status).toBe('pendente');
-    // o tablet de outro usuário não vê nem assina o pedido
-    expect((await api(pat).get('/chaves/assinaturas/pendente')).body.pedido).toBeNull();
-    expect((await api(pat).post(`/chaves/assinaturas/${pedido.body.id}/assinar`).send({ imagem: png() })).status).toBe(403);
-    // o tablet do mesmo usuário recebe o pedido com o resumo e assina
-    const tab = (await api(op).get('/chaves/assinaturas/pendente')).body.pedido;
-    expect(tab).toMatchObject({ id: pedido.body.id, tipo: 'devolucao', resumo: { local: 'Sala de Sessões', devolvidoPor: 'Fulano de Tal' } });
+    // o tablet recebe o pedido com o resumo
+    const recebido = (await tab(tabletToken).get('/pedido')).body.pedido;
+    expect(recebido).toMatchObject({ id: pedido.body.id, tipo: 'devolucao', resumo: { local: 'Sala de Sessões', devolvidoPor: 'Fulano de Tal' } });
+    // outro usuário não consulta o pedido
+    expect((await api(pat).get('/chaves/assinaturas/' + pedido.body.id)).status).toBe(403);
     expect((await api(op).post('/chaves/emprestimos/' + emp.id + '/devolucao').send({ devolvidoPor: 'Fulano de Tal', assinaturaId: pedido.body.id })).body.error).toMatch(/ainda não assinou/);
-    expect((await api(op).post(`/chaves/assinaturas/${pedido.body.id}/assinar`).send({ imagem: png() })).status).toBe(200);
-    expect((await api(op).post(`/chaves/assinaturas/${pedido.body.id}/assinar`).send({ imagem: png() })).status).toBe(409);
+    expect((await tab(tabletToken).post(`/pedido/${pedido.body.id}/assinar`).send({ imagem: png() })).status).toBe(200);
+    expect((await tab(tabletToken).post(`/pedido/${pedido.body.id}/assinar`).send({ imagem: png() })).status).toBe(409);
     expect((await api(op).get('/chaves/assinaturas/' + pedido.body.id)).body).toMatchObject({ status: 'assinada', dispositivo: 'tablet' });
     const d = await api(op).post('/chaves/emprestimos/' + emp.id + '/devolucao').send({ devolvidoPor: 'Fulano de Tal', assinaturaId: pedido.body.id });
     expect(d.status).toBe(200);
@@ -84,9 +111,10 @@ describe('Controle de Chaves', () => {
 
   test('pedido de assinatura expirado é recusado; alerta de chave não devolvida', async () => {
     const c2 = (await api(op).get('/chaves')).body.find((c) => c.codigo === 'CH-002');
-    const p = await api(op).post('/chaves/assinaturas').send({ tipo: 'retirada', chaveId: c2.id, solicitante: 'Ciclano Silva' });
+    const p = await api(op).post('/chaves/assinaturas').send({ tipo: 'retirada', chaveId: c2.id, solicitante: 'Ciclano Silva', tabletId });
     await db.query("UPDATE chaves_assinaturas SET expira_em = NOW() - INTERVAL '1 minute' WHERE id = $1", [p.body.id]);
-    expect((await api(op).post(`/chaves/assinaturas/${p.body.id}/assinar`).send({ imagem: png() })).body.error).toMatch(/expirou/);
+    expect((await tab(tabletToken).get('/pedido')).body.pedido).toBeNull();
+    expect((await tab(tabletToken).post(`/pedido/${p.body.id}/assinar`).send({ imagem: png() })).body.error).toMatch(/expirou/);
     const a = await api(op).post('/chaves/assinaturas').send({ tipo: 'retirada', chaveId: c2.id, solicitante: 'Ciclano Silva', imagem: png() });
     const r = await api(op).post('/chaves/emprestimos').send({ chaveId: c2.id, solicitante: 'Ciclano Silva', assinaturaId: a.body.id });
     await db.query("UPDATE chaves_emprestimos SET retirada_em = NOW() - INTERVAL '30 hours' WHERE id = $1", [r.body.id]);
@@ -94,5 +122,16 @@ describe('Controle de Chaves', () => {
     expect(al.find((x) => x.id === 'chave-atraso-' + r.body.id)).toMatchObject({ level: 'warning', module: 'chaves' });
     expect((await api(op).get('/chaves/emprestimos?situacao=atrasadas')).body.items).toHaveLength(1);
     expect((await api(op).patch(`/chaves/${c2.id}/ativa`).send({ ativa: false })).status).toBe(409);
+  });
+
+  test('novo código desconecta o aparelho; remover o tablet revoga o token', async () => {
+    const n = await api(op).post(`/chaves/tablets/${tabletId}/codigo`);
+    expect(n.body.codigo).toMatch(/^[A-Z2-9]{4}-[A-Z2-9]{4}$/);
+    expect((await tab(tabletToken).get('/pedido')).status).toBe(401);
+    const novo = (await tab().post('/parear').send({ codigo: n.body.codigo })).body.token;
+    expect((await tab(novo).get('/pedido')).status).toBe(200);
+    expect((await api(op).delete('/chaves/tablets/' + tabletId)).status).toBe(200);
+    expect((await tab(novo).get('/pedido')).status).toBe(401);
+    expect((await api(op).get('/chaves/tablets')).body.find((x) => x.id === tabletId)).toBeUndefined();
   });
 });

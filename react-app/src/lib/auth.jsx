@@ -52,8 +52,7 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     if (!user) return undefined;
     const touch = () => { lastAct.current = Date.now(); };
-    // 'da:atividade': telas de uso contínuo sem toque (ex.: estação tablet de assinatura aguardando pedidos)
-    const evs = ['click', 'keydown', 'pointermove', 'scroll', 'touchstart', 'da:atividade'];
+    const evs = ['click', 'keydown', 'pointermove', 'scroll', 'touchstart'];
     evs.forEach((ev) => window.addEventListener(ev, touch, { passive: true }));
     const idleMs = (user.settings && user.settings.sessaoMin ? user.settings.sessaoMin : 30) * 60000;
     let lastPing = Date.now();

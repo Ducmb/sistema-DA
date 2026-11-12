@@ -246,6 +246,83 @@ paths:
           $ref: '#/components/responses/NaoAutenticado'
         '403':
           $ref: '#/components/responses/SemPermissao'
+  /api/tablet/parear:
+    post:
+      tags:
+        - Sistema
+      summary: 'Tablet: troca o código de pareamento pelo token de dispositivo (limite de tentativas)'
+      description: '{ token, nome } — enviar depois em "Authorization: Tablet <token>"'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                codigo:
+                  type: string
+              required:
+                - codigo
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+      security: []
+  /api/tablet/pedido:
+    get:
+      tags:
+        - Sistema
+      summary: 'Tablet (token de dispositivo): pedido de assinatura aguardando neste tablet'
+      description: '{ tablet: { nome }, pedido }; 401 se o tablet não estiver pareado'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+      security: []
+  /api/tablet/pedido/{id}/assinar:
+    post:
+      tags:
+        - Sistema
+      summary: 'Tablet (token de dispositivo): grava a assinatura do pedido (SHA-256 do conteúdo + traço + data/hora)'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                imagem:
+                  type: string
+              required:
+                - imagem
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '404':
+          $ref: '#/components/responses/Erro'
+      security: []
   /api/profile/:
     get:
       tags:
@@ -3792,8 +3869,8 @@ paths:
       tags:
         - Sistema
       summary: >-
-        Assinatura do solicitante. Com imagem (PNG data URL) = já assinada no computador: dispositivo tela (quadro do formulário) ou tablet
-        (janela aberta automaticamente na tela do tablet conectado); sem imagem = pedido para a estação tablet via rede do mesmo usuário
+        Assinatura do solicitante. Com imagem (PNG data URL) = já assinada no quadro da tela do computador; com tabletId = pedido enviado
+        automaticamente ao tablet pareado
       description: >-
         Acesso: módulo `chaves` (403 sem permissão). id, status (pendente|assinada), resumo assinado (montado no servidor), expiraEm, código
         de verificação.
@@ -3818,31 +3895,12 @@ paths:
                   type: string
                 imagem:
                   type: string
-                dispositivo:
-                  type: string
+                tabletId:
+                  type: integer
               required:
                 - tipo
       responses:
         '201':
-          description: Sucesso
-          content:
-            application/json:
-              schema:
-                type: object
-        '400':
-          $ref: '#/components/responses/Erro'
-        '401':
-          $ref: '#/components/responses/NaoAutenticado'
-        '403':
-          $ref: '#/components/responses/SemPermissao'
-  /api/chaves/assinaturas/pendente:
-    get:
-      tags:
-        - Sistema
-      summary: 'Estação tablet: pedido pendente mais recente do usuário'
-      description: 'Acesso: módulo `chaves` (403 sem permissão). { pedido } ou { pedido: null }'
-      responses:
-        '200':
           description: Sucesso
           content:
             application/json:
@@ -3907,18 +3965,30 @@ paths:
           $ref: '#/components/responses/SemPermissao'
         '404':
           $ref: '#/components/responses/Erro'
-  /api/chaves/assinaturas/{id}/assinar:
+  /api/chaves/tablets:
+    get:
+      tags:
+        - Sistema
+      summary: Tablets pareados (online quando consultaram nos últimos 15 s)
+      description: 'Acesso: módulo `chaves` (403 sem permissão).'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
     post:
       tags:
         - Sistema
-      summary: 'Estação tablet: grava o traço da assinatura (SHA-256 do conteúdo + traço + data/hora)'
-      description: 'Acesso: módulo `chaves` (403 sem permissão).'
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
+      summary: Cadastra tablet e gera código de pareamento (uso único, 15 min; auditado)
+      description: 'Acesso: módulo `chaves` (403 sem permissão). tablet + codigo (XXXX-XXXX)'
       requestBody:
         required: true
         content:
@@ -3926,10 +3996,62 @@ paths:
             schema:
               type: object
               properties:
-                imagem:
+                nome:
                   type: string
               required:
-                - imagem
+                - nome
+      responses:
+        '201':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/chaves/tablets/{id}/codigo:
+    post:
+      tags:
+        - Sistema
+      summary: Novo código de pareamento — desconecta o aparelho atual (auditado)
+      description: 'Acesso: módulo `chaves` (403 sem permissão).'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+        '404':
+          $ref: '#/components/responses/Erro'
+  /api/chaves/tablets/{id}:
+    delete:
+      tags:
+        - Sistema
+      summary: Remove o tablet e revoga o token do aparelho (auditado)
+      description: 'Acesso: módulo `chaves` (403 sem permissão).'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
       responses:
         '200':
           description: Sucesso

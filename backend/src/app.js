@@ -19,6 +19,8 @@ app.get('/health', (req, res) => res.json({ status: 'ok', timestamp: new Date().
 
 const api = express.Router();
 api.use('/auth', require('./routes/auth'));
+// Tablet pareado do Controle de Chaves: autentica por token de dispositivo (não por sessão de usuário)
+api.use('/tablet', require('./routes/tablet'));
 
 // Daqui em diante tudo exige sessão válida
 api.use(authenticate);

@@ -63,7 +63,7 @@ const SCHEMA = [
   ] },
   { key: 'chaves', label: 'Controle de Chaves', icon: '🔑', groups: [
     { title: 'Devolução', fields: [N('chaves.prazoHoras', 'Prazo para devolver a chave', 24, 'horas', 1, 720, 'Depois disso o empréstimo aparece como atrasado'), T('chaves.alertaAtraso', 'Alertar chaves não devolvidas no prazo', true)] },
-    { title: 'Assinatura no tablet', fields: [N('chaves.assinaturaMin', 'Validade do pedido de assinatura enviado ao tablet', 10, 'min', 2, 60)] }
+    { title: 'Assinatura no tablet', fields: [N('chaves.assinaturaMin', 'Validade do pedido de assinatura enviado ao tablet pareado', 10, 'min', 2, 60)] }
   ] },
   { key: 'analytics', label: 'Analytics', icon: '📈', groups: [
     { title: 'Relatórios', fields: [S('analytics.periodo', 'Período padrão', '30', ['7', '30', '90', '365']), S('analytics.formato', 'Formato de exportação', 'CSV', ['CSV', 'PDF'])] }

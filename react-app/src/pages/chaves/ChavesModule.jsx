@@ -7,8 +7,9 @@ import { useAuth } from '../../lib/auth.jsx';
 import { useApi, useDebounced, useQueryState } from '../../lib/hooks.js';
 import { fmtDateTime } from '../../lib/format.js';
 import ColetaAssinatura from './Assinatura.jsx';
+import Tablets from './Tablets.jsx';
 
-const TABS = [{ key: 'emprestimos', label: 'Entregas e devoluções' }, { key: 'chaves', label: 'Chaves cadastradas' }];
+const TABS = [{ key: 'emprestimos', label: 'Entregas e devoluções' }, { key: 'chaves', label: 'Chaves cadastradas' }, { key: 'tablets', label: '📱 Tablets' }];
 const SIT_LEVEL = { 'Em uso': 'info', Atrasada: 'critical', Devolvida: 'success' };
 const dataBr = (ts) => (ts ? new Date(ts).toLocaleDateString('pt-BR') : '__/__/____');
 
@@ -18,20 +19,20 @@ export default function ChavesModule() {
   const t = TABS.some((x) => x.key === tab) ? tab : 'emprestimos';
   return (
     <>
-      <PageHeader section="Controle de Chaves" title="Controle de Chaves" desc="Entrega e recebimento de chaves com assinatura eletrônica do solicitante.">
-        <a className="btn btn-secondary" href="/chaves/tablet" target="_blank" rel="noopener" title="Abra esta página no tablet de assinatura, com o seu usuário">📱 Estação tablet</a>
-      </PageHeader>
+      <PageHeader section="Controle de Chaves" title="Controle de Chaves" desc="Entrega e recebimento de chaves com assinatura eletrônica do solicitante." />
       <main className="page">
         <Tabs tabs={TABS} value={t} onChange={setTab} label="Seções do controle de chaves" />
         <div className="fade-up" key={t}>
-          {t === 'emprestimos' ? <Emprestimos /> : <Chaves />}
+          {t === 'emprestimos' && <Emprestimos onParear={() => setTab('tablets')} />}
+          {t === 'chaves' && <Chaves />}
+          {t === 'tablets' && <Tablets />}
         </div>
       </main>
     </>
   );
 }
 
-function Emprestimos() {
+function Emprestimos({ onParear }) {
   const toast = useToast();
   const [sit, setSit] = useState('abertos');
   const [q, setQ] = useState('');
@@ -83,8 +84,8 @@ function Emprestimos() {
           </div>
         )}
       </Async>
-      {retirada && <RetiradaModal onClose={() => setRetirada(false)} onDone={() => done('Retirada registrada com a assinatura do solicitante.')} />}
-      {devolucao && <DevolucaoModal emp={devolucao} onClose={() => setDevolucao(null)} onDone={() => done('Devolução registrada com a assinatura.')} />}
+      {retirada && <RetiradaModal onParear={onParear} onClose={() => setRetirada(false)} onDone={() => done('Retirada registrada com a assinatura do solicitante.')} />}
+      {devolucao && <DevolucaoModal onParear={onParear} emp={devolucao} onClose={() => setDevolucao(null)} onDone={() => done('Devolução registrada com a assinatura.')} />}
       {termo && <TermoModal id={termo} onClose={() => setTermo('')} />}
     </div>
   );
@@ -99,8 +100,7 @@ function Responsavel({ label }) {
   );
 }
 
-function RetiradaModal({ onClose, onDone }) {
-  const { user } = useAuth();
+function RetiradaModal({ onClose, onDone, onParear }) {
   const chaves = useApi(() => api.get('/chaves'), []);
   const [f, setF] = useState({ chaveId: '', solicitante: '', solicitanteDoc: '', observacao: '' });
   const set = (k, v) => setF((x) => ({ ...x, [k]: v }));
@@ -128,15 +128,13 @@ function RetiradaModal({ onClose, onDone }) {
           <Responsavel label="Responsável pela Entrega" />
         </div>
         <Field label="Observação (opcional)" htmlFor="ch-obs"><input id="ch-obs" className="input" value={f.observacao} maxLength={400} onChange={(e) => set('observacao', e.target.value)} /></Field>
-        <ColetaAssinatura dados={dados} pronto={pronto} confirmarLabel="Assinar e registrar retirada"
-          resumo={{ tipo: 'retirada', local: chave ? chave.local : '', chave: chave ? chave.codigo : '', solicitante: dados.solicitante, solicitanteDoc: dados.solicitanteDoc, responsavel: user ? user.name : '' }} onConcluir={concluir} />
+        <ColetaAssinatura onParear={() => { onClose(); onParear(); }} dados={dados} pronto={pronto} confirmarLabel="Assinar e registrar retirada" onConcluir={concluir} />
       </div>
     </Modal>
   );
 }
 
-function DevolucaoModal({ emp, onClose, onDone }) {
-  const { user } = useAuth();
+function DevolucaoModal({ emp, onClose, onDone, onParear }) {
   const [devolvidoPor, setDev] = useState(emp.solicitante);
   const [obs, setObs] = useState('');
   const dados = { tipo: 'devolucao', emprestimoId: emp.id, devolvidoPor: devolvidoPor.trim() };
@@ -154,8 +152,8 @@ function DevolucaoModal({ emp, onClose, onDone }) {
           <Responsavel label="Responsável pelo Recebimento" />
         </div>
         <Field label="Observação (opcional)" htmlFor="ch-dobs"><input id="ch-dobs" className="input" value={obs} maxLength={400} onChange={(e) => setObs(e.target.value)} /></Field>
-        <ColetaAssinatura dados={dados} pronto={dados.devolvidoPor.length >= 3}
-          resumo={{ tipo: 'devolucao', local: emp.local, chave: emp.chaveCodigo, devolvidoPor: dados.devolvidoPor, responsavel: user ? user.name : '' }} confirmarLabel="Assinar e registrar devolução" onConcluir={concluir} />
+        <ColetaAssinatura onParear={() => { onClose(); onParear(); }} dados={dados} pronto={dados.devolvidoPor.length >= 3}
+          confirmarLabel="Assinar e registrar devolução" onConcluir={concluir} />
       </div>
     </Modal>
   );

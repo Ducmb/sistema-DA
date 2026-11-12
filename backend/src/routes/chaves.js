@@ -1,7 +1,7 @@
 /**
  * Controle de Chaves (módulo chaves): cadastro de chaves, retirada e devolução com assinatura eletrônica
- * do solicitante. A assinatura é feita na tela do computador (mesa digitalizadora ou tablet de assinatura
- * ligado ao computador) ou numa estação tablet logada com o mesmo usuário, que recebe o pedido.
+ * do solicitante. A assinatura é feita na tela do computador ou num tablet pareado (Android/iPad), que recebe o
+ * pedido automaticamente — o tablet não faz login; usa um token de dispositivo (ver routes/tablet.js).
  */
 const express = require('express');
 const crypto = require('crypto');
@@ -57,11 +57,11 @@ router.patch('/:id/ativa', ah(async (req, res) => {
 }));
 
 // ---------- Assinaturas ----------
-/** Onde o traço foi feito quando a imagem vem do computador: quadro da tela ou janela aberta na tela do tablet conectado. */
-const DISP = z.enum(['tela', 'tablet'], { message: 'Dispositivo inválido.' }).optional().default('tela');
+/** Onde o traço foi feito quando a imagem vem do computador (quadro da tela/mesa digitalizadora). */
+const DISP = z.enum(['tela'], { message: 'Dispositivo inválido.' }).optional().default('tela');
 const pedidoSchema = z.discriminatedUnion('tipo', [
-  z.object({ tipo: z.literal('retirada'), chaveId: z.number().int().positive(), solicitante: z.string().trim().min(3, 'Informe o nome do solicitante.').max(160), solicitanteDoc: z.string().trim().max(40).optional().default(''), imagem: z.string().optional(), dispositivo: DISP }),
-  z.object({ tipo: z.literal('devolucao'), emprestimoId: z.number().int().positive(), devolvidoPor: z.string().trim().min(3, 'Informe quem está devolvendo a chave.').max(160), imagem: z.string().optional(), dispositivo: DISP })
+  z.object({ tipo: z.literal('retirada'), chaveId: z.number().int().positive(), solicitante: z.string().trim().min(3, 'Informe o nome do solicitante.').max(160), solicitanteDoc: z.string().trim().max(40).optional().default(''), imagem: z.string().optional(), dispositivo: DISP, tabletId: z.number().int().positive().optional() }),
+  z.object({ tipo: z.literal('devolucao'), emprestimoId: z.number().int().positive(), devolvidoPor: z.string().trim().min(3, 'Informe quem está devolvendo a chave.').max(160), imagem: z.string().optional(), dispositivo: DISP, tabletId: z.number().int().positive().optional() })
 ], { message: 'Tipo de assinatura inválido.' });
 
 /** Resumo do que será assinado — montado no servidor a partir do banco (o navegador não define o conteúdo). */
@@ -87,9 +87,8 @@ function assinarAgora(resumo, imagem) {
 }
 
 /**
- * Cria o pedido de assinatura. Com `imagem`: assinatura feita no computador — no quadro da tela (`dispositivo: tela`)
- * ou na janela aberta automaticamente na tela do tablet conectado (`dispositivo: tablet`).
- * Sem `imagem`: fica pendente e aparece na estação tablet via rede logada com o mesmo usuário.
+ * Cria o pedido de assinatura. Com `imagem`: assinatura feita no quadro da tela do computador.
+ * Com `tabletId` (sem imagem): fica pendente e aparece automaticamente no tablet pareado escolhido.
  */
 router.post('/assinaturas', ah(async (req, res) => {
   const b = parse(pedidoSchema, req.body);
@@ -105,20 +104,17 @@ router.post('/assinaturas', ah(async (req, res) => {
        VALUES ($1,$2,$3,$4,'assinada',$11,$5,$6,$7,$8,$9, NOW() + make_interval(mins => $10))`,
       [id, req.user.id, b.tipo, JSON.stringify(resumo), b.imagem, hash, quando, req.ip, ua, USO_APOS_ASSINAR_MIN, b.dispositivo]);
   } else {
+    if (!b.tabletId) throw badRequest('Escolha o tablet que vai coletar a assinatura.');
+    const { rows: t } = await db.query('SELECT id FROM chaves_tablets WHERE id = $1 AND ativo AND token_hash IS NOT NULL', [b.tabletId]);
+    if (!t.length) throw badRequest('Tablet não encontrado ou não pareado.');
+    // Um pedido por vez em cada tablet: o novo substitui o anterior
+    await db.query("UPDATE chaves_assinaturas SET status = 'cancelada' WHERE tablet_id = $1 AND status = 'pendente'", [b.tabletId]);
     await db.query(
-      `INSERT INTO chaves_assinaturas (id, criada_por, tipo, resumo, expira_em) VALUES ($1,$2,$3,$4, NOW() + make_interval(mins => $5))`,
-      [id, req.user.id, b.tipo, JSON.stringify(resumo), await config.get('chaves.assinaturaMin')]);
-    // Só um pedido pendente por vez para o tablet deste usuário
-    await db.query("UPDATE chaves_assinaturas SET status = 'cancelada' WHERE criada_por = $1 AND status = 'pendente' AND id <> $2", [req.user.id, id]);
+      `INSERT INTO chaves_assinaturas (id, criada_por, tipo, resumo, tablet_id, expira_em) VALUES ($1,$2,$3,$4,$5, NOW() + make_interval(mins => $6))`,
+      [id, req.user.id, b.tipo, JSON.stringify(resumo), b.tabletId, await config.get('chaves.assinaturaMin')]);
   }
   const { rows } = await db.query('SELECT * FROM chaves_assinaturas WHERE id = $1', [id]);
   res.status(201).json(K.assinaturaOf(rows[0]));
-}));
-
-/** Estação tablet: pedido pendente do usuário logado (o mais recente, dentro da validade). */
-router.get('/assinaturas/pendente', ah(async (req, res) => {
-  const { rows } = await db.query("SELECT * FROM chaves_assinaturas WHERE criada_por = $1 AND status = 'pendente' AND expira_em > NOW() ORDER BY created_at DESC LIMIT 1", [req.user.id]);
-  res.json({ pedido: rows[0] ? K.assinaturaOf(rows[0]) : null });
 }));
 
 async function minha(req) {
@@ -133,22 +129,6 @@ async function minha(req) {
 router.get('/assinaturas/:id', ah(async (req, res) => {
   const a = await minha(req);
   res.json(K.assinaturaOf(a.status === 'pendente' && new Date(a.expira_em) < new Date() ? { ...a, status: 'expirada' } : a, true));
-}));
-
-/** Assinatura feita na estação tablet. */
-router.post('/assinaturas/:id/assinar', ah(async (req, res) => {
-  const a = await minha(req);
-  const { imagem } = parse(z.object({ imagem: z.string() }), req.body);
-  if (a.status !== 'pendente') throw conflict('Este pedido não está mais aguardando assinatura.');
-  if (new Date(a.expira_em) < new Date()) throw conflict('O pedido de assinatura expirou. Peça um novo no computador.');
-  const err = K.imagemInvalida(imagem);
-  if (err) throw badRequest(err);
-  const { quando, hash } = assinarAgora(a.resumo, imagem);
-  const { rowCount } = await db.query(
-    `UPDATE chaves_assinaturas SET status='assinada', dispositivo='tablet', imagem=$2, hash=$3, assinada_em=$4, ip=$5, user_agent=$6, expira_em = NOW() + make_interval(mins => $7)
-     WHERE id = $1 AND status = 'pendente'`, [a.id, imagem, hash, quando, req.ip, (req.get('User-Agent') || '').slice(0, 300), USO_APOS_ASSINAR_MIN]);
-  if (!rowCount) throw conflict('Este pedido não está mais aguardando assinatura.');
-  res.json({ ok: true });
 }));
 
 router.delete('/assinaturas/:id', ah(async (req, res) => {
@@ -169,6 +149,46 @@ async function consumir(c, assinaturaId, userId, tipo, confere) {
   await c.query('UPDATE chaves_assinaturas SET usada = TRUE WHERE id = $1', [a.id]);
   return a;
 }
+
+// ---------- Tablets pareados ----------
+const T = require('../services/tablets');
+
+router.get('/tablets', ah(async (req, res) => {
+  const { rows } = await db.query('SELECT * FROM chaves_tablets WHERE ativo ORDER BY nome, id');
+  res.json(rows.map(T.tabletOf));
+}));
+
+router.post('/tablets', ah(async (req, res) => {
+  const { nome } = parse(z.object({ nome: z.string().trim().min(2, 'Dê um nome ao tablet (ex.: Tablet da Portaria).').max(80) }), req.body);
+  const codigo = T.novoCodigo();
+  const { rows } = await db.query(
+    "INSERT INTO chaves_tablets (nome, codigo_hash, codigo_expira, criado_por) VALUES ($1,$2, NOW() + make_interval(mins => $3), $4) RETURNING *",
+    [nome, T.sha(T.normCodigo(codigo)), T.CODIGO_MIN, req.user.id]);
+  await audit.log(req, { action: 'Tablet de assinatura cadastrado', module: 'chaves', detail: nome + ' (código de pareamento gerado)' });
+  res.status(201).json({ ...T.tabletOf(rows[0]), codigo });
+}));
+
+/** Novo código de pareamento: desconecta o aparelho atual (o token antigo deixa de valer). */
+router.post('/tablets/:id/codigo', ah(async (req, res) => {
+  const id = idParam(req.params.id);
+  const codigo = T.novoCodigo();
+  const { rows } = await db.query(
+    `UPDATE chaves_tablets SET token_hash = NULL, pareado_em = NULL, codigo_hash = $2, codigo_expira = NOW() + make_interval(mins => $3)
+     WHERE id = $1 AND ativo RETURNING *`, [id, T.sha(T.normCodigo(codigo)), T.CODIGO_MIN]);
+  if (!rows.length) throw notFound('Tablet não encontrado.');
+  await db.query("UPDATE chaves_assinaturas SET status = 'cancelada' WHERE tablet_id = $1 AND status = 'pendente'", [id]);
+  await audit.log(req, { action: 'Tablet de assinatura: novo pareamento', module: 'chaves', detail: rows[0].nome });
+  res.json({ ...T.tabletOf(rows[0]), codigo });
+}));
+
+router.delete('/tablets/:id', ah(async (req, res) => {
+  const id = idParam(req.params.id);
+  const { rows } = await db.query('UPDATE chaves_tablets SET ativo = FALSE, token_hash = NULL, codigo_hash = NULL WHERE id = $1 AND ativo RETURNING nome', [id]);
+  if (!rows.length) throw notFound('Tablet não encontrado.');
+  await db.query("UPDATE chaves_assinaturas SET status = 'cancelada' WHERE tablet_id = $1 AND status = 'pendente'", [id]);
+  await audit.log(req, { action: 'Tablet de assinatura removido', module: 'chaves', detail: rows[0].nome, level: 'warning' });
+  res.json({ ok: true });
+}));
 
 // ---------- Empréstimos ----------
 router.get('/emprestimos', ah(async (req, res) => {
