@@ -12,7 +12,9 @@ const SOURCES = [
   { key: 'rh', label: 'Gestão de Pessoal', color: '#B45309', href: '/pessoal', cfg: 'prot.calPessoal', events: async () => (await require('../routes/pessoal').feed()).events, alerts: async () => (await require('../routes/pessoal').feed()).alerts },
   { key: 'mocoes', label: 'Moções & Homenagens', color: '#7C3AED', href: '/mocoes', cfg: 'prot.calMocoes', events: () => optional('./mocoes', 'calendarEvents'), alerts: () => optional('./mocoes', 'alerts'), pending: () => optional('./mocoes', 'pendingItems') },
   { key: 'almoxarifado', label: 'Almoxarifado', color: '#0F766E', href: '/almoxarifado', cfg: 'prot.calAlmox', events: () => require('./estoque').calendarEvents(), alerts: () => require('./estoque').alerts() },
-  { key: 'patrimonio', label: 'Patrimônio', color: '#6B7280', href: '/patrimonio', events: () => require('./patrimonio').calendarEvents(), alerts: () => require('./patrimonio').alerts() }
+  { key: 'patrimonio', label: 'Patrimônio', color: '#6B7280', href: '/patrimonio', events: () => require('./patrimonio').calendarEvents(), alerts: () => require('./patrimonio').alerts() },
+  // Sem eventos de calendário: só alertas de devolução atrasada
+  { key: 'chaves', label: 'Controle de Chaves', color: '#9A6700', href: '/chaves', alerts: () => require('./chaves').alerts() }
 ];
 
 /** Módulo ainda não implantado devolve lista vazia. */
@@ -27,7 +29,7 @@ const visible = (modules) => SOURCES.filter((s) => modules.includes(s.key));
 /** Eventos do calendário por módulo visível ao usuário. */
 async function calendar(modules) {
   const cfg = await config.snapshot();
-  const srcs = visible(modules);
+  const srcs = visible(modules).filter((s) => s.events);
   const lists = await Promise.all(srcs.map((s) => s.events()));
   const events = [];
   srcs.forEach((s, i) => lists[i].forEach((e) => { if (e.start) events.push({ ...e, end: e.end || e.start, module: s.key, moduleLabel: s.label, color: s.color, href: e.href || s.href }); }));

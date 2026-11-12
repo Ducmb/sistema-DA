@@ -5,6 +5,7 @@ export const SCREENS = [
   { path: '/painel', module: 'dashboard', icon: '▦', label: 'Painel de Controle', group: 'main', keywords: 'painel dashboard indicadores alertas prazos fluxo' },
   { path: '/almoxarifado', module: 'almoxarifado', icon: '📦', label: 'Almoxarifado', group: 'main', keywords: 'almoxarifado estoque amostragem materiais contagem inventario rme brm' },
   { path: '/compras', module: 'compras', icon: '🛒', label: 'Compras & Licitações', group: 'main', keywords: 'compras licitacoes requisicoes fornecedores pregao contratos despesas dotacao' },
+  { path: '/chaves', module: 'chaves', icon: '🔑', label: 'Controle de Chaves', group: 'main', keywords: 'chaves chave retirada devolucao emprestimo portaria assinatura tablet termo' },
   { path: '/mocoes', module: 'mocoes', icon: '🎗', label: 'Moções & Homenagens', group: 'main', keywords: 'mocoes homenagens galeria vereador portaria arranjos placas bandeiras' },
   { path: '/patrimonio', module: 'patrimonio', icon: '🏛', label: 'Patrimônio', group: 'main', keywords: 'patrimonio bens tombamento transferencias ativos termos' },
   { path: '/analytics', module: 'analytics', icon: '📈', label: 'Analytics & Relatórios', group: 'comp', keywords: 'analytics relatorios metricas indicadores consolidado' },

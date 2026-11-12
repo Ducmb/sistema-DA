@@ -3653,6 +3653,435 @@ paths:
           $ref: '#/components/responses/NaoAutenticado'
         '403':
           $ref: '#/components/responses/SemPermissao'
+  /api/chaves/:
+    get:
+      tags:
+        - Sistema
+      summary: Chaves cadastradas com o empréstimo em aberto (se houver)
+      description: 'Acesso: módulo `chaves` (403 sem permissão).'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+    post:
+      tags:
+        - Sistema
+      summary: Cadastra chave (auditado)
+      description: 'Acesso: módulo `chaves` (403 sem permissão).'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                codigo:
+                  type: string
+                local:
+                  type: string
+                descricao:
+                  type: string
+              required:
+                - codigo
+                - local
+      responses:
+        '201':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/chaves/{id}:
+    put:
+      tags:
+        - Sistema
+      summary: Edita chave (auditado)
+      description: 'Acesso: módulo `chaves` (403 sem permissão).'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                codigo:
+                  type: string
+                local:
+                  type: string
+                descricao:
+                  type: string
+              required:
+                - codigo
+                - local
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+        '404':
+          $ref: '#/components/responses/Erro'
+  /api/chaves/{id}/ativa:
+    patch:
+      tags:
+        - Sistema
+      summary: Ativa/desativa chave; 409 se estiver emprestada
+      description: 'Acesso: módulo `chaves` (403 sem permissão).'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ativa:
+                  type: boolean
+              required:
+                - ativa
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+        '404':
+          $ref: '#/components/responses/Erro'
+  /api/chaves/assinaturas:
+    post:
+      tags:
+        - Sistema
+      summary: >-
+        Pedido de assinatura do solicitante. Com imagem (PNG data URL) = assinada nesta tela/mesa digitalizadora; sem imagem = enviada à
+        estação tablet do mesmo usuário
+      description: >-
+        Acesso: módulo `chaves` (403 sem permissão). id, status (pendente|assinada), resumo assinado (montado no servidor), expiraEm, código
+        de verificação.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tipo:
+                  type: string
+                chaveId:
+                  type: integer
+                solicitante:
+                  type: string
+                solicitanteDoc:
+                  type: string
+                emprestimoId:
+                  type: integer
+                devolvidoPor:
+                  type: string
+                imagem:
+                  type: string
+              required:
+                - tipo
+      responses:
+        '201':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/chaves/assinaturas/pendente:
+    get:
+      tags:
+        - Sistema
+      summary: 'Estação tablet: pedido pendente mais recente do usuário'
+      description: 'Acesso: módulo `chaves` (403 sem permissão). { pedido } ou { pedido: null }'
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/chaves/assinaturas/{id}:
+    get:
+      tags:
+        - Sistema
+      summary: 'Situação do pedido (somente quem criou): pendente|assinada|cancelada|expirada'
+      description: 'Acesso: módulo `chaves` (403 sem permissão).'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+        '404':
+          $ref: '#/components/responses/Erro'
+    delete:
+      tags:
+        - Sistema
+      summary: Cancela pedido de assinatura pendente
+      description: 'Acesso: módulo `chaves` (403 sem permissão).'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+        '404':
+          $ref: '#/components/responses/Erro'
+  /api/chaves/assinaturas/{id}/assinar:
+    post:
+      tags:
+        - Sistema
+      summary: 'Estação tablet: grava o traço da assinatura (SHA-256 do conteúdo + traço + data/hora)'
+      description: 'Acesso: módulo `chaves` (403 sem permissão).'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                imagem:
+                  type: string
+              required:
+                - imagem
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+        '404':
+          $ref: '#/components/responses/Erro'
+  /api/chaves/emprestimos:
+    get:
+      tags:
+        - Sistema
+      summary: Retiradas e devoluções com prazo e atraso
+      description: 'Acesso: módulo `chaves` (403 sem permissão). { items, kpis: { abertos, devolvidas_mes, atrasadas }, prazoHoras }'
+      parameters:
+        - name: situacao
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: q
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+    post:
+      tags:
+        - Sistema
+      summary: Registra a retirada com a assinatura do solicitante (uso único, confere com os dados assinados)
+      description: 'Acesso: módulo `chaves` (403 sem permissão).'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                chaveId:
+                  type: integer
+                solicitante:
+                  type: string
+                solicitanteDoc:
+                  type: string
+                assinaturaId:
+                  type: string
+                observacao:
+                  type: string
+              required:
+                - chaveId
+                - solicitante
+                - assinaturaId
+      responses:
+        '201':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+  /api/chaves/emprestimos/{id}:
+    get:
+      tags:
+        - Sistema
+      summary: Termo de entrega e recebimento com as assinaturas (leitura registrada — LGPD)
+      description: 'Acesso: módulo `chaves` (403 sem permissão).'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+        '404':
+          $ref: '#/components/responses/Erro'
+  /api/chaves/emprestimos/{id}/devolucao:
+    post:
+      tags:
+        - Sistema
+      summary: Registra a devolução com a assinatura de quem devolve; recebido pelo usuário logado
+      description: 'Acesso: módulo `chaves` (403 sem permissão).'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                devolvidoPor:
+                  type: string
+                assinaturaId:
+                  type: string
+                observacao:
+                  type: string
+              required:
+                - devolvidoPor
+                - assinaturaId
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/Erro'
+        '401':
+          $ref: '#/components/responses/NaoAutenticado'
+        '403':
+          $ref: '#/components/responses/SemPermissao'
+        '404':
+          $ref: '#/components/responses/Erro'
   /api/mocoes/meta:
     get:
       tags:

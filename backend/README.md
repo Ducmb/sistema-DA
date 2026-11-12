@@ -84,3 +84,12 @@ A API de Dados Abertos (https://dadosabertos.compras.gov.br, sem chave de acesso
 - **Cadastro da despesa (Compras › Limites Legais):** ao digitar o CATMAT ou o CATSER, `GET /api/compras/catalogo/consulta` devolve a hierarquia do item e o formulário preenche Classe (material), Grupo (serviço), PDM e Descrição. O item fica em cache (`catalogo_itens`); se a API cair, o cache é usado mesmo vencido.
 - O limite de dispensa acumula pela **Classe** (materiais) e pelo **Grupo** CATSER (serviços); o grupo do material é só informativo e fica gravado na hierarquia da despesa (`catalogo_info`).
 
+
+## Controle de Chaves (assinatura eletrônica)
+
+Tela **Controle de Chaves** (`/chaves`), no modelo do termo "Entrega e Recebimento de Chaves": retirada e devolução com a assinatura do solicitante, termo imprimível (com as assinaturas, data/hora, IP e código de verificação) e cadastro de chaves. Acesso padrão: Administrativo, Almoxarifado e Patrimônio.
+
+- **Nesta tela / mesa digitalizadora:** o solicitante assina no quadro da própria tela — caneta de mesa digitalizadora ou tablet de assinatura ligado ao computador (USB), ou toque.
+- **No tablet:** abra `/chaves/tablet` no tablet (botão "Estação tablet") com o **mesmo usuário** do responsável. O computador envia o pedido, o tablet mostra o resumo do documento e coleta a assinatura; o registro é concluído no computador automaticamente. O pedido expira em `chaves.assinaturaMin` minutos.
+- Assinatura eletrônica simples (Lei 14.063/2020, art. 4º, I): o resumo assinado é montado pelo servidor; o PNG é validado (tipo, tamanho, dimensões); o código de verificação é o SHA-256 de resumo + traço + data/hora; cada assinatura só pode ser usada uma vez e precisa conferir com os dados do registro. Ver o termo é leitura de dado pessoal (auditada).
+- **Configurações › Controle de Chaves:** prazo de devolução (horas), alerta de chaves não devolvidas (Painel/Notificações) e validade do pedido enviado ao tablet.

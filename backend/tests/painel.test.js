@@ -20,7 +20,7 @@ describe('Painel de Controle', () => {
     const r = await api(await login('operador')).get('/painel');
     expect(r.body.sections).toMatchObject({ audit: true, agents: false, legislative: false });
     expect(r.body.agentes).toBeUndefined();
-    expect(r.body.alertas.every((a) => ['almoxarifado', 'mocoes'].includes(a.module))).toBe(true);
+    expect(r.body.alertas.every((a) => ['almoxarifado', 'mocoes', 'chaves'].includes(a.module))).toBe(true);
     expect(r.body.capacidade.map((c) => c.label)).not.toContain('Compras & Licitações');
   });
 

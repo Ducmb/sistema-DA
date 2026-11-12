@@ -13,20 +13,20 @@ const { ROLES } = require('./configSchema');
 const MODULES = [
   ['dashboard', 'Painel de Controle'], ['perfil', 'Meus Dados (Perfil)'], ['notificacoes', 'Notificações'], ['legislacoes', 'Legislações'],
   ['almoxarifado', 'Almoxarifado'], ['analytics', 'Analytics & Relatórios'], ['compras', 'Compras & Licitações'], ['rh', 'Gestão de Pessoal'],
-  ['mocoes', 'Moções & Homenagens'], ['patrimonio', 'Patrimônio'], ['protocolo', 'Protocolo'], ['auditoria', 'Log e Auditoria'], ['configuracoes', 'Configurações do Sistema']
+  ['mocoes', 'Moções & Homenagens'], ['patrimonio', 'Patrimônio'], ['protocolo', 'Protocolo'], ['chaves', 'Controle de Chaves'], ['auditoria', 'Log e Auditoria'], ['configuracoes', 'Configurações do Sistema']
 ];
 const MODULE_KEYS = MODULES.map((m) => m[0]);
 const MODULE_LABEL = Object.fromEntries(MODULES);
 const ADMIN_ONLY = ['auditoria', 'configuracoes'];
 // Módulos com chave individual na tela de Usuários & Permissões
-const OVERRIDABLE = ['compras', 'protocolo', 'rh', 'almoxarifado', 'mocoes', 'patrimonio', 'analytics', 'legislacoes', 'notificacoes', 'dashboard'];
+const OVERRIDABLE = ['compras', 'protocolo', 'rh', 'almoxarifado', 'mocoes', 'patrimonio', 'chaves', 'analytics', 'legislacoes', 'notificacoes', 'dashboard'];
 
 const BASE = ['dashboard', 'perfil', 'notificacoes', 'legislacoes'];
 const DEFAULT_ACCESS = {
   Administrativo: MODULE_KEYS.slice(),
   Compras: BASE.concat(['mocoes', 'compras']),
-  Almoxarifado: BASE.concat(['mocoes', 'almoxarifado']),
-  'Patrimônio': BASE.concat(['patrimonio']),
+  Almoxarifado: BASE.concat(['mocoes', 'almoxarifado', 'chaves']),
+  'Patrimônio': BASE.concat(['patrimonio', 'chaves']),
   Gerenciamento: BASE.concat(['protocolo']),
   Visualizador: ['analytics', 'perfil']
 };
